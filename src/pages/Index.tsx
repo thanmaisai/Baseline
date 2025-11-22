@@ -1,6 +1,6 @@
 import { 
   ArrowRight, 
-  Terminal, 
+  Terminal,
   Download, 
   Github,
   Clock,
@@ -14,9 +14,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { TerminalWindow } from '@/components/TerminalWindow';
 import { DualLineChart } from '@/components/DataVisualization';
+import { PageHeader } from '@/components/PageHeader';
 import { useRef } from 'react';
 
 const Index = () => {
@@ -46,40 +46,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* Minimal Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-6">
-          <div className="flex justify-between items-center">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => navigate('/')}
-            >
-              <Terminal className="w-6 h-6" />
-              <span className="text-lg font-medium tracking-tight">Setup Genie</span>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex items-center gap-6"
-            >
-              <a 
-                href="https://github.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
-              >
-                GitHub
-              </a>
-              <ThemeToggle />
-            </motion.div>
-          </div>
-        </div>
-      </header>
+      <PageHeader showGithub={true} />
 
       {/* Hero Section - Editorial Style */}
       <section className="relative pt-32 pb-20 px-6 lg:px-12">
@@ -526,7 +493,7 @@ const Index = () => {
                 { label: 'Week 2', value: 5 },
               ]}
               label1="Manual Setup"
-              label2="Setup Genie"
+              label2="Baseline"
               color1="rgb(239, 68, 68)"
               color2="rgb(34, 197, 94)"
             />
@@ -606,7 +573,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
               <Terminal className="w-5 h-5" />
-              <span className="text-sm">Setup Genie</span>
+              <span className="text-sm">Baseline</span>
               <span className="text-muted-foreground/60">·</span>
               <span className="text-sm text-muted-foreground">Open Source</span>
             </div>

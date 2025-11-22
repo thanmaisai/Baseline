@@ -191,6 +191,16 @@
     @apply bg-primary/30 rounded-full hover:bg-primary/50 transition-colors;
   }
   
+  /* No scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
   /* Selection */
   ::selection {
     @apply bg-primary/20 text-foreground;

@@ -1,9 +1,12 @@
-import { Download, Terminal, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Download, Terminal, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { generateScanScript } from '@/utils/scanScriptGenerator';
 import { motion } from 'framer-motion';
+import { PageHeader } from '@/components/PageHeader';
+import { BackButton } from '@/components/BackButton';
+import { PageTitle } from '@/components/PageTitle';
 
 const ExportSetup = () => {
   const navigate = useNavigate();
@@ -22,44 +25,23 @@ const ExportSetup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/30 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[image:var(--gradient-mesh)] opacity-20" />
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <PageHeader showGithub={false} />
       
-      <div className="container mx-auto px-4 py-12 relative">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-32 pb-20 relative">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto"
         >
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="mb-6 group"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Home
-          </Button>
+          <BackButton to="/" label="Back to Home" />
 
-          <div className="text-center mb-12">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-              className="text-5xl font-bold mb-4 gradient-text"
-            >
-              Export Your Current Setup
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="text-xl text-muted-foreground"
-            >
-              Clone your Mac in 2 minutes and replicate it anywhere
-            </motion.p>
-          </div>
+          <PageTitle
+            subtitle="EXPORT SETUP"
+            title="Clone your Mac
+in 2 minutes."
+            description="Export your current setup and replicate it anywhere"
+          />
 
           <div className="space-y-6">
             {/* Step 1 */}
@@ -83,7 +65,7 @@ const ExportSetup = () => {
                     </p>
                     <Button 
                       onClick={handleDownloadScript} 
-                      className="bg-gradient-primary hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium shadow-lg"
                       size="lg"
                     >
                       <Download className="mr-2 h-5 w-5" />
@@ -100,7 +82,7 @@ const ExportSetup = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
             >
-              <Card className="group p-8 hover-lift border-2 bg-card/50 backdrop-blur-sm relative overflow-hidden">
+              <Card className="group p-8 hover-lift border border-border bg-card/50 backdrop-blur-sm relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="relative flex items-start gap-6">
                   <div className="flex-shrink-0">
@@ -138,7 +120,7 @@ const ExportSetup = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5, duration: 0.5 }}
             >
-              <Card className="group p-8 hover-lift border-2 bg-card/50 backdrop-blur-sm relative overflow-hidden">
+              <Card className="group p-8 hover-lift border border-border bg-card/50 backdrop-blur-sm relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="relative flex items-start gap-6">
                   <div className="flex-shrink-0">
@@ -155,7 +137,7 @@ const ExportSetup = () => {
                       variant="outline" 
                       onClick={() => navigate('/upload-scan')}
                       size="lg"
-                      className="border-2 hover:border-primary/50 hover:bg-secondary/50"
+                      className="border border-border hover:bg-accent"
                     >
                       <CheckCircle2 className="mr-2 h-5 w-5" />
                       Upload Scan Results
@@ -172,7 +154,7 @@ const ExportSetup = () => {
             transition={{ delay: 0.6, duration: 0.5 }}
             className="mt-12 text-center"
           >
-            <Card className="p-8 glass-card">
+            <Card className="p-8 bg-card/30 backdrop-blur border border-border">
               <p className="text-muted-foreground leading-relaxed">
                 🔒 <strong>100% Safe</strong> — The scanner only reads data, never modifies your system. Open-source and transparent.
               </p>
