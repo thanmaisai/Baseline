@@ -663,13 +663,10 @@ const Configurator = () => {
           initial={{ y: 100, opacity: 0 }}
           animate={{ 
             y: 0, 
-            opacity: 1,
-            marginLeft: sidebarCollapsed ? '72px' : '260px'
+            opacity: 1
           }}
           transition={{ 
-            y: { delay: 0.3 },
-            opacity: { delay: 0.3 },
-            marginLeft: { duration: 0.3, ease: 'easeInOut' }
+            delay: 0.3
           }}
           className="fixed bottom-8 left-0 right-0 z-50 px-8"
         >
@@ -726,7 +723,7 @@ const Configurator = () => {
             </div>
           </div>
         </motion.div>
-      </motion.main>
+      </main>
     </div>
   );
 };
