@@ -132,6 +132,27 @@ const Configurator = () => {
     handleNext();
   };
 
+  const selectAllInCategory = () => {
+    const categoryTools = tools.filter(t => t.category === currentCategory);
+    const toolsToAdd = categoryTools.filter(tool => !isToolSelected(tool));
+    
+    setSelection(prev => ({
+      ...prev,
+      tools: [...prev.tools, ...toolsToAdd],
+    }));
+    updateLog(`selected all ${currentCategory}`);
+    toast.success(`All tools in ${steps[currentStep].name} selected`);
+  };
+
+  const clearAllInCategory = () => {
+    setSelection(prev => ({
+      ...prev,
+      tools: prev.tools.filter(t => t.category !== currentCategory),
+    }));
+    updateLog(`cleared all ${currentCategory}`);
+    toast.success(`All tools in ${steps[currentStep].name} cleared`);
+  };
+
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -269,40 +290,81 @@ const Configurator = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="flex items-end justify-between mb-8 shrink-0"
+            className="mb-8"
           >
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-4">
-                {steps[currentStep].subtitle}
-              </p>
+            {/* Top Section: Category Label & Actions */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <motion.p
+                  layout
+                  className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium"
+                >
+                  {steps[currentStep].subtitle}
+                </motion.p>
+                {currentCategory !== 'review' && currentCategory !== 'templates' && filteredTools.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-px bg-border" />
+                    <span className="text-xs text-muted-foreground font-mono">
+                      {filteredTools.filter(t => isToolSelected(t)).length} of {filteredTools.length} selected
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {currentCategory !== 'review' && currentCategory !== 'templates' && filteredTools.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={selectAllInCategory}
+                    className="h-8 text-xs font-medium"
+                  >
+                    <Check className="h-3 w-3 mr-1.5" />
+                    Select All
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllInCategory}
+                    className="h-8 text-xs font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3 w-3 mr-1.5" />
+                    Clear All
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Title & Search Row */}
+            <div className="flex items-end justify-between gap-8">
               <motion.h1
                 layout
-                className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[0.9] tracking-tight"
+                className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[0.95] tracking-tight"
               >
                 {steps[currentStep].name}
               </motion.h1>
-            </div>
-            
-            {currentCategory !== 'review' && currentCategory !== 'templates' && (
-              <div className="relative group">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    updateLog(`searching for "${e.target.value}"`);
-                  }}
-                  placeholder="Filter tools..."
-                  className="bg-transparent border-b border-border py-2 pl-0 pr-16 text-foreground focus:outline-none focus:border-foreground transition-colors w-64 text-sm placeholder-muted-foreground font-mono"
-                />
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-                  <span className="font-mono bg-muted border border-border rounded px-2 py-0.5 text-[10px] text-muted-foreground">
-                    CMD+K
-                  </span>
+              
+              {currentCategory !== 'review' && currentCategory !== 'templates' && (
+                <div className="relative group min-w-[280px]">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      updateLog(`searching for "${e.target.value}"`);
+                    }}
+                    placeholder="Search tools..."
+                    className="w-full bg-muted/50 border border-border rounded-lg py-2.5 px-4 pr-20 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:bg-background transition-all"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                    <span className="font-mono bg-background border border-border rounded px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                      ⌘K
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </motion.div>
         </AnimatePresence>
 
@@ -314,26 +376,26 @@ const Configurator = () => {
             exit={{ opacity: 0, y: -20 }}
             className="mb-12"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {templates.map((template) => (
                 <motion.button
                   key={template.id}
                   onClick={() => applyTemplate(template.id)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="group relative p-6 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-accent transition-all text-left"
+                  className="group relative p-6 rounded-xl border-2 border-border hover:border-primary/50 bg-card hover:bg-accent transition-all text-left"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
                   <div className="relative">
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                    <h3 className="font-bold text-xl mb-2 group-hover:text-primary transition-colors">
                       {template.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                       {template.description}
                     </p>
                     {template.toolIds.length > 0 && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Check className="h-3 w-3" />
+                      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                        <Check className="h-3.5 w-3.5" />
                         <span>{template.toolIds.length} tools included</span>
                       </div>
                     )}
@@ -346,38 +408,46 @@ const Configurator = () => {
 
         {/* Grid or Review */}
         <AnimatePresence mode="wait">
-          {currentCategory !== 'review' ? (
-            <motion.form
+          {currentCategory !== 'review' && currentCategory !== 'templates' ? (
+            <motion.div
               key={currentStep}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto no-scrollbar"
+              className="relative"
             >
-              {filteredTools.map((tool, index) => (
-                <motion.div
-                  key={tool.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.03, duration: 0.3 }}
-                >
-                  <ToolCard
-                    tool={tool}
-                    selected={isToolSelected(tool)}
-                    onToggle={() => toggleTool(tool)}
-                  />
-                </motion.div>
-              ))}
-
-              {filteredTools.length === 0 && (
-                <div className="col-span-full text-center py-20">
-                  <p className="text-muted-foreground">
-                    No tools found matching "{searchQuery}"
+              {filteredTools.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pb-8">
+                  {filteredTools.map((tool, index) => (
+                    <motion.div
+                      key={tool.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.02, duration: 0.3 }}
+                    >
+                      <ToolCard
+                        tool={tool}
+                        selected={isToolSelected(tool)}
+                        onToggle={() => toggleTool(tool)}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                    <X className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-lg font-medium text-foreground mb-2">
+                    No tools found
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Try adjusting your search for "{searchQuery}"
                   </p>
                 </div>
               )}
-            </motion.form>
-          ) : (
+            </motion.div>
+          ) : currentCategory === 'review' ? (
             <motion.div
               key="review"
               initial={{ opacity: 0, scale: 0.98 }}
@@ -425,7 +495,7 @@ const Configurator = () => {
                 )}
               </div>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
 
         {/* Bottom Control Bar (Floating) */}
