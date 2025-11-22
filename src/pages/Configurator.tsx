@@ -519,13 +519,20 @@ const Configurator = () => {
                         });
                       }}
                     >
-                      <div className="relative overflow-hidden rounded-xl p-6 h-[160px] flex flex-col items-center justify-center gap-3 border-2 border-dashed border-border hover:border-primary/50 bg-muted/30 hover:bg-muted/50 transition-all duration-200">
-                        <div className="w-12 h-12 rounded-full bg-muted border border-border flex items-center justify-center group-hover:border-primary/50 transition-colors">
-                          <span className="text-2xl">➕</span>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm font-semibold text-foreground mb-1">Request a Tool</p>
-                          <p className="text-xs text-muted-foreground">Can't find what you need?</p>
+                      <div className="relative overflow-hidden rounded-xl h-[280px] flex flex-col border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 hover:bg-muted/30 transition-all duration-200">
+                        {/* Top border */}
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-muted to-muted/50" />
+                        
+                        <div className="relative z-10 p-6 flex-1 flex flex-col items-center justify-center text-center gap-4">
+                          <div className="w-16 h-16 rounded-2xl bg-muted/50 border-2 border-dashed border-border group-hover:border-primary/50 flex items-center justify-center transition-colors">
+                            <span className="text-3xl">➕</span>
+                          </div>
+                          <div>
+                            <p className="text-lg font-bold text-foreground mb-2">Request a Tool</p>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              Don't see what you need? Add<br />a custom Homebrew formula.
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </motion.div>

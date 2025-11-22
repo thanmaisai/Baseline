@@ -108,8 +108,8 @@ export const ToolCard = ({ tool, selected, onToggle }: ToolCardProps) => {
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onClick={onToggle}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       className="group relative cursor-pointer"
       style={{
         // @ts-ignore
@@ -119,79 +119,128 @@ export const ToolCard = ({ tool, selected, onToggle }: ToolCardProps) => {
     >
       {isPreloading ? (
         // Shimmer Loading Card
-        <div className="relative overflow-hidden rounded-xl p-6 h-[160px] flex flex-col justify-between bg-card border border-border">
+        <div className="relative overflow-hidden rounded-xl h-[280px] flex flex-col bg-card border border-border">
+          {/* Top border indicator */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-muted to-muted/50" />
+          
           {/* Shimmer overlay effect */}
           <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-primary/5 to-transparent" />
           
-          <div className="relative z-10 flex justify-between items-start gap-3">
-            <div className="w-12 h-12 bg-muted/60 rounded-xl flex-shrink-0 animate-pulse" />
-            <div className="w-6 h-6 bg-muted/40 rounded-full flex-shrink-0 animate-pulse" />
-          </div>
+          <div className="relative z-10 p-6 flex-1 flex flex-col">
+            {/* Icon and badge */}
+            <div className="flex items-start justify-between mb-6">
+              <div className="w-16 h-16 bg-muted/60 rounded-2xl flex-shrink-0 animate-pulse" />
+              <div className="px-3 py-1 bg-muted/40 rounded-full w-20 h-6 animate-pulse" />
+            </div>
 
-          <div className="relative z-10 space-y-2">
-            <div className="h-4 bg-muted/60 rounded w-2/3 animate-pulse" />
-            <div className="h-3 bg-muted/40 rounded w-full animate-pulse" />
-            <div className="h-3 bg-muted/40 rounded w-4/5 animate-pulse" />
+            {/* Title and description */}
+            <div className="flex-1 space-y-3">
+              <div className="h-6 bg-muted/60 rounded w-3/4 animate-pulse" />
+              <div className="h-4 bg-muted/40 rounded w-full animate-pulse" />
+            </div>
+
+            {/* Tags */}
+            <div className="flex gap-2 mt-4">
+              <div className="px-3 py-1 bg-muted/40 rounded w-16 h-7 animate-pulse" />
+              <div className="px-3 py-1 bg-muted/40 rounded w-20 h-7 animate-pulse" />
+            </div>
           </div>
         </div>
       ) : (
         // Loaded Card
         <div
-          className={`relative overflow-hidden rounded-xl p-6 h-[160px] flex flex-col justify-between transition-all duration-200 ${
+          className={`relative overflow-hidden rounded-xl h-[280px] flex flex-col transition-all duration-200 ${
             selected
               ? 'bg-card border-2 border-primary shadow-lg'
               : 'bg-card border border-border hover:border-primary/50 hover:shadow-md'
           }`}
         >
-        {/* Popular Badge - Clean & Minimal */}
-        {tool.popular && (
-          <div className="absolute top-3 right-3 z-20">
-            <div className="bg-primary/10 border border-primary/30 rounded-md px-2 py-1">
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-primary">
-                Popular
-              </span>
+          {/* Top colored border */}
+          <div className={`absolute top-0 left-0 right-0 h-1 ${
+            tool.popular 
+              ? 'bg-gradient-to-r from-orange-400 to-yellow-400' 
+              : selected
+              ? 'bg-gradient-to-r from-pink-400 to-purple-400'
+              : 'bg-gradient-to-r from-muted to-muted/50'
+          }`} />
+
+          {/* Badge in top-right */}
+          {(tool.popular || selected) && (
+            <div className="absolute top-4 right-4 z-20">
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
+                tool.popular
+                  ? 'bg-orange-50 text-orange-600 border border-orange-200'
+                  : 'bg-pink-50 text-pink-600 border border-pink-200'
+              }`}>
+                {tool.popular ? (
+                  <>
+                    <span className="text-orange-500">🔥</span>
+                    <span>Popular</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-pink-500">💗</span>
+                    <span>Selected</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Spotlight hover effect */}
+          <div
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+            style={{
+              background: 'radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), rgba(var(--primary-rgb), 0.06), transparent 50%)',
+            }}
+          />
+
+          <div className="relative z-10 p-6 flex-1 flex flex-col">
+            {/* Icon */}
+            <div className="mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center border border-border flex-shrink-0 overflow-hidden shadow-sm">
+                {currentIconUrl && iconLoaded ? (
+                  <img
+                    src={currentIconUrl}
+                    alt={tool.name}
+                    className="w-10 h-10 object-contain animate-in fade-in duration-300"
+                  />
+                ) : (
+                  <span className="text-3xl animate-in fade-in duration-300">{fallbackEmoji}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 flex flex-col">
+              <h3 className="font-bold text-foreground text-xl mb-2 line-clamp-1">
+                {tool.name}
+              </h3>
+              <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed flex-1">
+                {tool.description}
+              </p>
+            </div>
+
+            {/* Tags at bottom */}
+            <div className="flex flex-wrap gap-2 mt-4">
+              {tool.type && (
+                <span className="px-3 py-1 rounded-md text-xs font-semibold uppercase tracking-wider bg-muted/50 text-muted-foreground border border-border">
+                  {tool.type === 'brew-cask' ? 'CASK' : tool.type.toUpperCase()}
+                </span>
+              )}
+              {tool.version && (
+                <span className="px-3 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                  STABLE
+                </span>
+              )}
+              {tool.popular && (
+                <span className="px-3 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                  POPULAR
+                </span>
+              )}
             </div>
           </div>
-        )}
-
-        {/* Spotlight hover effect */}
-        <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-          style={{
-            background: 'radial-gradient(300px circle at var(--mouse-x) var(--mouse-y), rgba(var(--primary-rgb), 0.08), transparent 50%)',
-          }}
-        />
-
-        <div className="relative z-10 flex justify-between items-start gap-3">
-          <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center border border-border flex-shrink-0 overflow-hidden relative">
-            {currentIconUrl && iconLoaded ? (
-              <img
-                src={currentIconUrl}
-                alt={tool.name}
-                className="w-8 h-8 object-contain animate-in fade-in duration-300"
-              />
-            ) : (
-              <span className="text-2xl animate-in fade-in duration-300">{fallbackEmoji}</span>
-            )}
-          </div>
-          <div
-            className={`w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
-              selected ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
-            }`}
-          >
-            <Check className="w-3.5 h-3.5 stroke-[3]" />
-          </div>
         </div>
-
-        <div className="relative z-10">
-          <h3 className="font-bold text-foreground text-base mb-1.5 line-clamp-1">
-            {tool.name}
-          </h3>
-          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-            {tool.description}
-          </p>
-        </div>
-      </div>
       )}
     </motion.div>
   );
