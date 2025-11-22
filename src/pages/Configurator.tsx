@@ -14,11 +14,39 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
 const steps = [
+  { id: 'templates', name: 'Templates', subtitle: 'Choose Your Starting Point' },
   { id: 'applications', name: 'Applications', subtitle: 'GUI Tools & Editors' },
   { id: 'package-managers', name: 'Runtimes', subtitle: 'Version Managers' },
   { id: 'devops', name: 'Infrastructure', subtitle: 'Cloud & Container Tools' },
   { id: 'cli-tools', name: 'CLI Tools', subtitle: 'Terminal Utilities' },
   { id: 'review', name: 'Finalize', subtitle: 'Review your stack' },
+];
+
+const templates = [
+  {
+    id: 'frontend',
+    name: 'Frontend Developer',
+    description: 'Tools for modern web development',
+    toolIds: ['vscode', 'node', 'git', 'docker', 'chrome', 'postman', 'figma'],
+  },
+  {
+    id: 'backend',
+    name: 'Backend Developer',
+    description: 'Server-side development essentials',
+    toolIds: ['vscode', 'node', 'python', 'docker', 'git', 'postman', 'postgres', 'mongodb'],
+  },
+  {
+    id: 'fullstack',
+    name: 'Full Stack Developer',
+    description: 'Complete development environment',
+    toolIds: ['vscode', 'node', 'python', 'docker', 'git', 'postman', 'postgres', 'mongodb', 'chrome', 'figma'],
+  },
+  {
+    id: 'custom',
+    name: 'Custom Setup',
+    description: 'Start from scratch',
+    toolIds: [],
+  },
 ];
 
 const Configurator = () => {
@@ -29,7 +57,7 @@ const Configurator = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { selection, setSelection, clearSelection } = usePersistedSelection();
 
-  const currentCategory = steps[currentStep].id as ToolCategory | 'review';
+  const currentCategory = steps[currentStep].id as ToolCategory | 'review' | 'templates';
   
   // Keyboard shortcuts
   useEffect(() => {
@@ -57,7 +85,7 @@ const Configurator = () => {
   };
   
   const filteredTools = useMemo(() => {
-    if (currentCategory === 'review') return [];
+    if (currentCategory === 'review' || currentCategory === 'templates') return [];
     
     return tools
       .filter(t => t.category === currentCategory)
@@ -85,6 +113,23 @@ const Configurator = () => {
       }));
       updateLog(`added ${tool.name.toLowerCase()}`);
     }
+  };
+
+  const applyTemplate = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (!template) return;
+
+    const selectedTools = tools.filter(tool => template.toolIds.includes(tool.id));
+    setSelection(prev => ({
+      ...prev,
+      tools: selectedTools,
+    }));
+    updateLog(`applied ${template.name.toLowerCase()} template`);
+    toast.success(`${template.name} template applied!`, {
+      description: `${selectedTools.length} tools pre-selected`,
+    });
+    // Move to next step after selecting template
+    handleNext();
   };
 
   const handleNext = () => {
@@ -238,7 +283,7 @@ const Configurator = () => {
               </motion.h1>
             </div>
             
-            {currentCategory !== 'review' && (
+            {currentCategory !== 'review' && currentCategory !== 'templates' && (
               <div className="relative group">
                 <input
                   ref={searchInputRef}
@@ -260,6 +305,44 @@ const Configurator = () => {
             )}
           </motion.div>
         </AnimatePresence>
+
+        {/* Templates Section - Only on Step 0 */}
+        {currentCategory === 'templates' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mb-12"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {templates.map((template) => (
+                <motion.button
+                  key={template.id}
+                  onClick={() => applyTemplate(template.id)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="group relative p-6 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-accent transition-all text-left"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                  <div className="relative">
+                    <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                      {template.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {template.description}
+                    </p>
+                    {template.toolIds.length > 0 && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Check className="h-3 w-3" />
+                        <span>{template.toolIds.length} tools included</span>
+                      </div>
+                    )}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Grid or Review */}
         <AnimatePresence mode="wait">
