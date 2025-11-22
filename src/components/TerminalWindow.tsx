@@ -55,7 +55,7 @@ export const TerminalWindow = ({ lines, className = '', showCursor = true }: Ter
       case 'info':
         return 'text-blue-400';
       default:
-        return 'text-gray-300';
+        return 'text-muted-foreground';
     }
   };
 
@@ -77,16 +77,16 @@ export const TerminalWindow = ({ lines, className = '', showCursor = true }: Ter
   return (
     <div className={`relative ${className}`}>
       {/* Terminal Window */}
-      <div className="rounded-xl overflow-hidden shadow-2xl border border-gray-700/50 bg-gray-900/95 backdrop-blur-xl">
+      <div className="rounded-xl overflow-hidden shadow-2xl border border-border bg-card backdrop-blur-xl">
         {/* Terminal Header */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-gray-800/90 border-b border-gray-700/50">
+        <div className="flex items-center gap-2 px-4 py-3 bg-muted border-b border-border">
           <div className="flex gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors" />
             <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors" />
             <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors" />
           </div>
           <div className="flex-1 text-center">
-            <span className="text-sm text-gray-400 font-mono">bash — setup-macos.sh</span>
+            <span className="text-sm text-muted-foreground font-mono">bash — setup-macos.sh</span>
           </div>
         </div>
 
@@ -101,14 +101,14 @@ export const TerminalWindow = ({ lines, className = '', showCursor = true }: Ter
                 transition={{ duration: 0.3 }}
                 className={getLineColor(line.type)}
               >
-                <span className="text-gray-500">{getPrefix(line.type)}</span>
+                <span className="text-muted-foreground/60">{getPrefix(line.type)}</span>
                 {line.text}
               </motion.div>
             ))}
             
             {isTyping && (
               <div className={getLineColor(lines[visibleLines]?.type)}>
-                <span className="text-gray-500">{getPrefix(lines[visibleLines]?.type)}</span>
+                <span className="text-muted-foreground/60">{getPrefix(lines[visibleLines]?.type)}</span>
                 {currentLineText}
                 {showCursor && <span className="animate-pulse">▊</span>}
               </div>
@@ -116,8 +116,8 @@ export const TerminalWindow = ({ lines, className = '', showCursor = true }: Ter
 
             {/* Blinking cursor when idle */}
             {!isTyping && visibleLines >= lines.length && showCursor && (
-              <div className="text-gray-300">
-                <span className="text-gray-500">$ </span>
+              <div className="text-muted-foreground">
+                <span className="text-muted-foreground/60">$ </span>
                 <span className="animate-pulse">▊</span>
               </div>
             )}

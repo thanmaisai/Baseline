@@ -31,11 +31,11 @@ export const DualLineChart = ({
       <div className="flex gap-8 justify-center">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color1 }} />
-          <span className="text-sm text-gray-400 font-mono">{label1}</span>
+          <span className="text-sm text-muted-foreground font-mono">{label1}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color2 }} />
-          <span className="text-sm text-gray-400 font-mono">{label2}</span>
+          <span className="text-sm text-muted-foreground font-mono">{label2}</span>
         </div>
       </div>
 
@@ -43,7 +43,7 @@ export const DualLineChart = ({
         {/* Background Grid Lines - Dashed like the reference */}
         <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="border-t border-dashed border-white/10 w-full" />
+            <div key={i} className="border-t border-dashed border-border w-full" />
           ))}
         </div>
 
@@ -191,7 +191,7 @@ export const DualLineChart = ({
             initial={{ opacity: 0, y: 10 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
             transition={{ delay: 1.5 + (i * 0.1), duration: 0.5 }}
-            className="text-[10px] text-gray-500 font-mono uppercase tracking-widest"
+            className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest"
           >
             {item.label}
           </motion.div>
