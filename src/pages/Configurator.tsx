@@ -296,188 +296,150 @@ const Configurator = () => {
     return selection.tools.filter(t => t.category === category);
   };
 
+  const progressPercentage = Math.round((currentStep / (steps.length - 1)) * 100);
+
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Ambient Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-[radial-gradient(circle,rgba(99,102,241,0.03)_0%,transparent_70%)] pointer-events-none" />
+    <div className="min-h-screen bg-background">
+      {/* Page Header */}
+      <PageHeader showGithub={true} />
       
-      <PageHeader showGithub={false} />
+      <div className="flex pt-[73px]">
+        {/* Left Sidebar */}
+        <aside className="w-[200px] border-r border-border flex flex-col bg-background/50 backdrop-blur-sm fixed left-0 top-[73px] bottom-0 z-30">
+        {/* Progress Header */}
+        <div className="p-6 border-b border-border">
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+            Setup Progress
+          </div>
+          <div className="text-3xl font-bold text-primary">
+            {progressPercentage}%
+          </div>
+        </div>
 
-      {/* Main Content */}
-      <main className="w-full max-w-7xl mx-auto px-6 lg:px-12 flex-1 flex flex-col relative pb-32 pt-32">
-        {/* Back Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-8"
-        >
-          <button
-            onClick={() => navigate('/')}
-            className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Home
-          </button>
-        </motion.div>
-
-        {/* Timeline Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12 pb-6 border-b border-border"
-        >
-          <div className="flex justify-between items-center">
-            <nav className="flex items-center gap-8 font-mono text-xs tracking-wider">
-              {steps.map((step, index) => {
-                const isActive = index === currentStep;
-                const isCompleted = index < currentStep;
-                
-                return (
-                  <button
-                    key={step.id}
-                    onClick={() => {
-                      setCurrentStep(index);
-                      updateLog(`jumped to ${step.name.toLowerCase()}`);
-                    }}
-                    className={`py-2 border-b-2 transition-all duration-300 uppercase ${
-                      isActive
-                        ? 'border-foreground text-foreground'
-                        : isCompleted
-                        ? 'border-border text-muted-foreground hover:text-foreground'
-                        : 'border-transparent text-muted-foreground/50 hover:text-muted-foreground'
-                    }`}
-                  >
-                    <span className="mr-2 opacity-50">0{index + 1}</span>
-                    {step.name}
-                  </button>
-                );
-              })}
-            </nav>
+        {/* Navigation Steps */}
+        <nav className="flex-1 py-6 px-3 space-y-1">
+          {steps.map((step, index) => {
+            const isActive = index === currentStep;
+            const isCompleted = index < currentStep;
             
-            <div className="flex items-center gap-6">
-              <div className="text-right">
-                <div className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
-                  Total Selected
-                </div>
-                <div className="font-mono text-xl font-bold">{selection.tools.length}</div>
-              </div>
+            return (
               <button
-                onClick={handleReset}
-                className={`text-xs text-red-400 hover:text-red-300 transition-opacity hover:underline ${
-                  selection.tools.length === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                key={step.id}
+                onClick={() => {
+                  setCurrentStep(index);
+                  updateLog(`jumped to ${step.name.toLowerCase()}`);
+                }}
+                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? 'bg-primary/10 text-primary border border-primary/20'
+                    : isCompleted
+                    ? 'text-foreground hover:bg-accent'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 }`}
               >
-                Reset
-              </button>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Stage Header & Search */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="mb-8"
-          >
-            {/* Top Section: Category Label & Actions */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <motion.p
-                  layout
-                  className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium"
-                >
-                  {steps[currentStep].subtitle}
-                </motion.p>
-                {currentCategory !== 'review' && currentCategory !== 'templates' && filteredTools.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-px bg-border" />
-                    <span className="text-xs text-muted-foreground font-mono">
-                      {filteredTools.filter(t => isToolSelected(t)).length} of {filteredTools.length} selected
-                    </span>
+                <div className="flex items-center gap-3">
+                  <span className={`text-xs font-mono ${
+                    isActive ? 'text-primary' : 'text-muted-foreground'
+                  }`}>
+                    {index + 1}
+                  </span>
+                  <span className="flex-1">{step.name}</span>
+                  {isCompleted && !isActive && (
+                    <Check className="h-3.5 w-3.5 text-green-500" />
+                  )}
+                </div>
+                {isActive && (
+                  <div className="text-[10px] text-muted-foreground mt-1 ml-6">
+                    {step.subtitle}
                   </div>
                 )}
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-h-screen ml-[200px]">
+        {/* Top Header */}
+        <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-40">
+          <div className="px-8 py-4 flex items-center justify-between">
+            {/* Left: Category Breadcrumb */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/')}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <div className="h-4 w-px bg-border" />
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Stack</span>
+                <span className="text-muted-foreground">/</span>
+                <span className="text-sm font-medium">{steps[currentStep].name}</span>
               </div>
-              
-              {currentCategory !== 'review' && currentCategory !== 'templates' && filteredTools.length > 0 && (
-                <div className="flex items-center gap-3">
-                  {brewLoading && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mr-2">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      <span>Loading packages...</span>
-                    </div>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      refreshData();
-                      toast.success('Refreshing package data...');
-                    }}
-                    className="h-8 text-xs font-medium"
-                    disabled={brewLoading}
-                  >
-                    <RefreshCw className={`h-3 w-3 mr-1.5 ${brewLoading ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={selectAllInCategory}
-                    className="h-8 text-xs font-medium"
-                  >
-                    <Check className="h-3 w-3 mr-1.5" />
-                    Select All
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearAllInCategory}
-                    className="h-8 text-xs font-medium text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="h-3 w-3 mr-1.5" />
-                    Clear All
-                  </Button>
-                </div>
-              )}
             </div>
 
-            {/* Title & Search Row */}
-            <div className="flex items-end justify-between gap-8">
-              <motion.h1
-                layout
-                className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[0.95] tracking-tight"
-              >
-                {steps[currentStep].name}
-              </motion.h1>
-              
-              {currentCategory !== 'review' && currentCategory !== 'templates' && (
-                <div className="relative group min-w-[280px]">
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      updateLog(`searching for "${e.target.value}"`);
-                    }}
-                    placeholder="Search tools..."
-                    className="w-full bg-muted/50 border border-border rounded-lg py-2.5 px-4 pr-20 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:bg-background transition-all"
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-                    <span className="font-mono bg-background border border-border rounded px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                      ⌘K
-                    </span>
-                  </div>
+            {/* Right: Search */}
+            {currentCategory !== 'review' && currentCategory !== 'templates' && (
+              <div className="relative">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    updateLog(`searching for "${e.target.value}"`);
+                  }}
+                  placeholder="Filter browsers..."
+                  className="w-[280px] bg-background border border-border rounded-lg py-2 pl-4 pr-10 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-all"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <span className="text-xs text-muted-foreground">/</span>
                 </div>
-              )}
-            </div>
-          </motion.div>
-        </AnimatePresence>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 px-8 py-6 pb-24 overflow-y-auto">
+          {/* Page Title */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-6"
+            >
+              <h1 className="text-3xl font-bold mb-2">{steps[currentStep].name}</h1>
+              <p className="text-sm text-muted-foreground">
+                {steps[currentStep].subtitle}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Recommended Section Banner */}
+          {currentCategory === 'browsers' && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-start gap-3"
+            >
+              <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-1">
+                  Recommended Section
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Most developers install standard Chrome and Firefox for cross-browser testing.
+                </p>
+              </div>
+            </motion.div>
+          )}
 
         {/* Templates Section - Only on Step 0 */}
         {currentCategory === 'templates' && (
@@ -527,32 +489,9 @@ const Configurator = () => {
               exit={{ opacity: 0 }}
               className="relative"
             >
-              {/* Info Banner */}
-              {!brewLoading && totalCount > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Check className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        Live Homebrew Data
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Showing {filteredTools.length.toLocaleString()} packages from {totalCount.toLocaleString()} total
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
               {filteredTools.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-8">
                     {filteredTools.map((tool, index) => (
                       <motion.div
                         key={tool.id}
@@ -567,6 +506,29 @@ const Configurator = () => {
                         />
                       </motion.div>
                     ))}
+                    
+                    {/* Request a Tool Card */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: filteredTools.length * 0.02, duration: 0.3 }}
+                      className="relative cursor-pointer group"
+                      onClick={() => {
+                        toast.info('Feature coming soon!', {
+                          description: 'Request tool functionality will be available soon.'
+                        });
+                      }}
+                    >
+                      <div className="relative overflow-hidden rounded-xl p-6 h-[160px] flex flex-col items-center justify-center gap-3 border-2 border-dashed border-border hover:border-primary/50 bg-muted/30 hover:bg-muted/50 transition-all duration-200">
+                        <div className="w-12 h-12 rounded-full bg-muted border border-border flex items-center justify-center group-hover:border-primary/50 transition-colors">
+                          <span className="text-2xl">➕</span>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-semibold text-foreground mb-1">Request a Tool</p>
+                          <p className="text-xs text-muted-foreground">Can't find what you need?</p>
+                        </div>
+                      </div>
+                    </motion.div>
                   </div>
                   
                   {/* Show All Tools Button */}
@@ -587,9 +549,6 @@ const Configurator = () => {
                       >
                         Show All Available Tools
                       </Button>
-                      <p className="text-xs text-muted-foreground">
-                        or use search to find specific packages
-                      </p>
                     </motion.div>
                   )}
                 </>
@@ -657,47 +616,31 @@ const Configurator = () => {
             </motion.div>
           ) : null}
         </AnimatePresence>
+        </main>
 
-        {/* Bottom Control Bar (Floating) */}
-        <motion.div 
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ 
-            y: 0, 
-            opacity: 1
-          }}
-          transition={{ 
-            delay: 0.3
-          }}
-          className="fixed bottom-8 left-0 right-0 z-50 px-8"
-        >
-          <div className="max-w-[1600px] mx-auto">
-            <div className="bg-background/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl p-5 flex items-center justify-between gap-4">
-            {/* Left: Home Button */}
-            <Button
-              onClick={() => navigate('/')}
-              variant="ghost"
-              className="gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Home
-            </Button>
-
-            {/* Center: Live Log */}
-            <div className="flex-1 mx-8 font-mono text-xs text-muted-foreground flex items-center gap-3 max-w-md min-w-0">
-              <span className="text-green-400 flex-shrink-0">➜</span>
-              <span className="flex-1 truncate">{liveLog}</span>
-              <span className="w-1.5 h-3 bg-muted-foreground/40 animate-pulse flex-shrink-0" />
+        {/* Bottom Control Bar (Fixed) */}
+        <footer className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center pb-8">
+          <div className="bg-[#1a1a1a] rounded-2xl shadow-2xl py-4 px-6 flex items-center gap-4">
+            {/* Left: Selection Count */}
+            <div className="flex items-center gap-3 pr-4 border-r border-white/10">
+              <div>
+                <div className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5 font-medium">
+                  Total Selected
+                </div>
+                <div className="text-white font-bold text-base">
+                  {selection.tools.length} Application{selection.tools.length !== 1 ? 's' : ''}
+                </div>
+              </div>
             </div>
 
-            {/* Right: Navigation */}
+            {/* Right: Navigation Buttons */}
             <div className="flex items-center gap-3">
               {currentStep > 0 && (
                 <Button
                   onClick={handleBack}
-                  variant="outline"
-                  className="gap-2"
+                  variant="ghost"
+                  className="h-10 px-6 text-white hover:bg-white/10 hover:text-white font-medium"
                 >
-                  <ArrowLeft className="h-4 w-4" />
                   Back
                 </Button>
               )}
@@ -705,25 +648,25 @@ const Configurator = () => {
               {currentStep < steps.length - 1 ? (
                 <Button
                   onClick={handleNext}
-                  className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="h-10 px-6 bg-white text-black hover:bg-white/90 font-medium gap-2"
                 >
-                  Next Step
+                  Next: {steps[currentStep + 1].name}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               ) : (
                 <Button
                   onClick={handleDownloadScript}
-                  className="gap-2 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground hover:opacity-90"
+                  className="h-10 px-6 bg-white text-black hover:bg-white/90 font-medium gap-2"
                 >
                   <Download className="h-4 w-4" />
                   Download Script
                 </Button>
               )}
             </div>
-            </div>
           </div>
-        </motion.div>
-      </main>
+        </footer>
+      </div>
+      </div>
     </div>
   );
 };
