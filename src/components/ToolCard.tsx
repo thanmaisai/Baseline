@@ -28,6 +28,13 @@ export const ToolCard = ({ tool, selected, onToggle }: ToolCardProps) => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
         <div className="relative flex items-start gap-4">
+          {/* Tool Icon */}
+          {tool.icon && (
+            <div className="flex-shrink-0 text-3xl">
+              {tool.icon}
+            </div>
+          )}
+          
           <motion.div
             animate={selected ? { scale: [1, 1.2, 1] } : {}}
             transition={{ duration: 0.3 }}

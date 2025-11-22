@@ -3,11 +3,14 @@ import { ArrowLeft, ArrowRight, Download, Check, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/ProgressBar';
 import { ToolCard } from '@/components/ToolCard';
 import { SearchBar } from '@/components/SearchBar';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { usePersistedSelection } from '@/hooks/usePersistedSelection';
 import { tools } from '@/data/tools';
-import { Tool, Selection, ToolCategory } from '@/types/tools';
+import { Tool, ToolCategory } from '@/types/tools';
 import { generateSetupScript } from '@/utils/scriptGenerator';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,11 +28,7 @@ const Configurator = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selection, setSelection] = useState<Selection>({
-    tools: [],
-    languageVersions: [],
-    customScripts: [],
-  });
+  const { selection, setSelection } = usePersistedSelection();
 
   const currentCategory = steps[currentStep].id as ToolCategory | 'review';
   
@@ -122,14 +121,26 @@ const Configurator = () => {
               <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
               Back to Home
             </motion.button>
-            <motion.h1
+            <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-xl font-bold gradient-text"
+              className="flex items-center gap-3"
             >
-              Mac Setup Genie
-            </motion.h1>
-            <div className="w-28" /> {/* Spacer */}
+              <h1 className="text-xl font-bold gradient-text">
+                Mac Setup Genie
+              </h1>
+              {selection.tools.length > 0 && (
+                <Badge variant="secondary" className="px-3 py-1">
+                  {selection.tools.length} {selection.tools.length === 1 ? 'tool' : 'tools'} selected
+                </Badge>
+              )}
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
+              <ThemeToggle />
+            </motion.div>
           </div>
         </div>
       </header>

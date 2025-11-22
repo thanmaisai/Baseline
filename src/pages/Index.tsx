@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -45,6 +46,28 @@ const Index = () => {
       {/* Animated Background Mesh */}
       <div className="absolute inset-0 bg-[image:var(--gradient-mesh)] opacity-30" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
+      
+      {/* Header with Theme Toggle */}
+      <header className="relative z-50">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center gap-2"
+          >
+            <Terminal className="w-6 h-6 text-primary" />
+            <span className="text-xl font-bold gradient-text">DevEnv Setup</span>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <ThemeToggle />
+          </motion.div>
+        </div>
+      </header>
       
       {/* Hero Section */}
       <section className="relative overflow-hidden">
