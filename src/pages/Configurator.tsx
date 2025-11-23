@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ToolCard } from '@/components/ToolCard';
 import { PageLayout } from '@/components/PageLayout';
-import { BreadcrumbSteps } from '@/components/BreadcrumbSteps';
+import { NotionBreadcrumb } from '@/components/NotionBreadcrumb';
 import { FloatingFooter } from '@/components/FloatingFooter';
 import { usePersistedSelection } from '@/hooks/usePersistedSelection';
 import { useBrewPackages } from '@/hooks/useBrewPackages';
@@ -102,23 +102,23 @@ const Configurator = () => {
     }
   }, [brewLoading, totalCount, brewError]);
   
-  // Keyboard shortcuts
+  // Keyboard shortcuts - CMD+Left for back, CMD+Right for next
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowRight') {
-        e.preventDefault();
-        if (currentStep < steps.length - 1) {
-          setCurrentStep(currentStep + 1);
-          setSearchQuery('');
-          updateLog(`navigated to ${steps[currentStep + 1].name.toLowerCase()}`);
-        }
-      }
       if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowLeft') {
         e.preventDefault();
         if (currentStep > 0) {
           setCurrentStep(currentStep - 1);
           setSearchQuery('');
           updateLog(`navigated to ${steps[currentStep - 1].name.toLowerCase()}`);
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (currentStep < steps.length - 1) {
+          setCurrentStep(currentStep + 1);
+          setSearchQuery('');
+          updateLog(`navigated to ${steps[currentStep + 1].name.toLowerCase()}`);
         }
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
@@ -448,28 +448,28 @@ const Configurator = () => {
   return (
     <PageLayout>
       {/* Header */}
-      <header className="flex-shrink-0 px-8 py-8 border-b border-gray-50 dark:border-gray-800 flex flex-col justify-center">
+      <header className="flex-shrink-0 px-6 py-6 border-b border-gray-50 dark:border-[#262626] flex flex-col justify-center">
         {/* Back to Home Link */}
-        <div className="mb-6">
+        <div className="mb-4">
           <button 
             onClick={() => navigate('/')}
-            className="inline-flex items-center text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors uppercase tracking-wider group"
+            className="inline-flex items-center text-xs font-bold text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors uppercase tracking-wider group"
           >
             <ArrowLeft className="mr-1 w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Back to Home
           </button>
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight mb-2">{steps[currentStep].name}</h1>
-            <p className="text-gray-500 dark:text-gray-400 font-light text-lg">{steps[currentStep].subtitle}</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-1.5">{steps[currentStep].name}</h1>
+            <p className="text-gray-500 dark:text-gray-400 font-light text-sm">{steps[currentStep].subtitle}</p>
           </div>
           {/* Breadcrumbs/Timeline */}
-          <div className="w-full">
-            <BreadcrumbSteps
+          <div className="w-full flex justify-end">
+            <NotionBreadcrumb
               steps={steps}
-              currentStep={currentStep}
+              currentIndex={currentStep}
               onStepClick={(index) => {
                 setCurrentStep(index);
                 updateLog(`jumped to ${steps[index].name.toLowerCase()}`);
@@ -480,7 +480,7 @@ const Configurator = () => {
 
         {/* Search Bar */}
         {currentCategory !== 'review' && currentCategory !== 'templates' && (
-          <div className="mt-6 relative">
+          <div className="mt-4 relative">
             <input
               ref={searchInputRef}
               type="text"
@@ -492,19 +492,19 @@ const Configurator = () => {
                 }
               }}
               placeholder="Search all tools..."
-              className="w-full max-w-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl py-3 pl-4 pr-12 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className="w-full max-w-md bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#262626] rounded-lg py-2.5 pl-3.5 pr-10 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
             {searchQuery !== debouncedSearchQuery ? (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />
               </div>
             ) : (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <span className="text-xs text-gray-400 font-mono">⌘F</span>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <span className="text-[10px] text-gray-400 font-mono">⌘F</span>
               </div>
             )}
             {debouncedSearchQuery && (
-              <div className="absolute right-16 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+              <div className="absolute right-12 top-1/2 -translate-y-1/2 text-[10px] text-gray-400">
                 {filteredTools.length} {filteredTools.length === 1 ? 'result' : 'results'}
               </div>
             )}
@@ -513,23 +513,23 @@ const Configurator = () => {
       </header>
 
       {/* Scrollable Content Area */}
-      <div className="flex-grow overflow-y-auto p-8 md:p-12 flex flex-col">
+      <div className="flex-grow overflow-y-auto p-6 md:p-8 flex flex-col">
         <div className="max-w-full mx-auto w-full">
           {/* Recommended Section Banner */}
           {currentCategory === 'browsers' && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-xl flex items-start gap-3"
+              className="mb-6 p-3.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-2.5"
             >
-              <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <div className="w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                <p className="text-xs font-semibold text-gray-900 dark:text-white mb-0.5">
                   Recommended Section
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-snug">
                   Most developers install standard Chrome and Firefox for cross-browser testing.
                 </p>
               </div>
@@ -542,28 +542,28 @@ const Configurator = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="mb-12"
+              className="mb-8"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {templates.map((template) => (
                 <motion.button
                   key={template.id}
                   onClick={() => applyTemplate(template.id)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="group relative p-6 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-left"
+                  className="group relative p-4 rounded-lg border-2 border-gray-200 dark:border-[#262626] hover:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-[#111111] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-all text-left"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
                   <div className="relative">
-                    <h3 className="font-bold text-xl mb-2 text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <h3 className="font-bold text-lg mb-1.5 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       {template.name}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 leading-snug">
                       {template.description}
                     </p>
                     {template.toolIds.length > 0 && (
-                      <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-                        <Check className="h-3.5 w-3.5" />
+                      <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                        <Check className="h-3 w-3" />
                         <span>{template.toolIds.length} tools included</span>
                       </div>
                     )}
@@ -586,7 +586,7 @@ const Configurator = () => {
               >
                 {filteredTools.length > 0 ? (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 pb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6">
                     {filteredTools.map((tool, index) => (
                       <motion.div
                         key={tool.id}
@@ -614,18 +614,18 @@ const Configurator = () => {
                           });
                         }}
                       >
-                        <div className="relative overflow-hidden rounded-xl h-[220px] flex flex-col border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
+                        <div className="relative overflow-hidden rounded-lg h-[160px] flex flex-col border-2 border-dashed border-gray-300 dark:border-[#262626] hover:border-blue-500 dark:hover:border-blue-400 bg-gray-50 dark:bg-[#0A0A0A] hover:bg-gray-100 dark:hover:bg-[#111111] transition-all duration-200">
                           {/* Top border */}
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600" />
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-[#262626] to-[#404040]" />
                           
-                          <div className="relative z-10 p-4 flex-1 flex flex-col items-center justify-center text-center gap-2.5">
-                            <div className="w-12 h-12 rounded-xl bg-gray-200 dark:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 group-hover:border-blue-500 dark:group-hover:border-blue-400 flex items-center justify-center transition-colors">
-                              <span className="text-xl">➕</span>
+                          <div className="relative z-10 p-3.5 flex-1 flex flex-col items-center justify-center text-center gap-2">
+                            <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-[#1A1A1A] border-2 border-dashed border-gray-300 dark:border-[#262626] group-hover:border-blue-500 dark:group-hover:border-blue-400 flex items-center justify-center transition-colors">
+                              <span className="text-lg">➕</span>
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-0.5">Request a Tool</p>
-                              <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Don't see what you need? Add<br />a custom Homebrew formula.
+                              <p className="text-xs font-bold text-gray-900 dark:text-white mb-0.5">Request a Tool</p>
+                              <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-snug">
+                                Don't see what you need? Add a custom Homebrew formula.
                               </p>
                             </div>
                           </div>
@@ -638,9 +638,9 @@ const Configurator = () => {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col items-center justify-center py-10 gap-4"
+                        className="flex flex-col items-center justify-center py-6 gap-3"
                       >
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
                           Showing {filteredTools.length} popular tools
                         </p>
                         <Button
@@ -655,14 +655,14 @@ const Configurator = () => {
                     )}
                   </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-                      <X className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-[#1A1A1A] flex items-center justify-center mb-3">
+                      <X className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    <p className="text-base font-medium text-gray-900 dark:text-white mb-1.5">
                       No tools found
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       Try adjusting your search for "{searchQuery}"
                     </p>
                   </div>
@@ -676,21 +676,21 @@ const Configurator = () => {
                 exit={{ opacity: 0, scale: 0.98 }}
                 className="space-y-8"
               >
-                <div className="bg-gray-50 dark:bg-gray-800/50 backdrop-blur border border-gray-200 dark:border-gray-700 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
-                  <p className="text-sm uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400 mb-6">
+                <div className="bg-gray-50 dark:bg-[#0A0A0A] backdrop-blur border border-gray-200 dark:border-[#262626] rounded-xl p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
+                  <p className="text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400 mb-4">
                     READY TO INITIALIZE
                   </p>
-                  <h3 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-gray-900 dark:text-gray-100">
+                  <h3 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">
                     {selection.tools.length} {selection.tools.length === 1 ? 'tool' : 'tools'} selected.
                   </h3>
-                  <p className="text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-md mx-auto">
+                  <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
                     We're ready to compile your setup script. Review your choices or go back to make changes.
                   </p>
-                  <div className="flex flex-wrap gap-2 justify-center max-w-3xl">
+                  <div className="flex flex-wrap gap-1.5 justify-center max-w-3xl">
                     {Array.from(selection.tools).map(tool => (
                       <span
                         key={tool.id}
-                        className="px-3 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 text-xs font-mono text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-default"
+                        className="px-2.5 py-1 rounded-md border border-gray-200 dark:border-[#262626] text-[10px] font-mono text-gray-600 dark:text-gray-400 bg-white dark:bg-[#111111] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-colors cursor-default"
                       >
                         {tool.name}
                       </span>
@@ -702,14 +702,14 @@ const Configurator = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 }}
-                      className="mt-12"
+                      className="mt-8"
                     >
                       <Button
                         size="lg"
                         onClick={handleDownloadScript}
-                        className="h-14 px-10 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 font-medium shadow-xl text-lg group"
+                        className="h-11 px-8 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 font-medium shadow-lg text-base group"
                       >
-                        <Download className="mr-2 h-5 w-5" />
+                        <Download className="mr-2 h-4 w-4" />
                         Download Setup Script
                       </Button>
                     </motion.div>
