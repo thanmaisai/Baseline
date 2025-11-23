@@ -16,22 +16,19 @@ const ExportSetup = () => {
   const [fileName, setFileName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const curlCommand = `curl -fsSL https://raw.githubusercontent.com/yourusername/mac-setup-genie/main/scripts/scan-mac.sh | bash`;
-  const manualCommand = `chmod +x scan-mac.sh && ./scan-mac.sh`;
+  const curlCommand = `curl -fsSL https://raw.githubusercontent.com/thanmaisai/mac-setup-genie/main/public/baseline-scan.sh | bash`;
+  const manualCommand = `chmod +x baseline-scanner.sh && ./baseline-scanner.sh`;
   
   const handleDownloadScript = () => {
-    const script = generateScanScript();
-    const blob = new Blob([script], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+    // Download the baseline script from public folder
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'scan-mac.sh';
+    a.href = '/baseline-scan.sh';
+    a.download = 'baseline-scanner.sh';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success('Script downloaded!', {
-      description: 'Run it in your terminal to scan your Mac'
+    toast.success('Scanner downloaded!', {
+      description: 'Run baseline-scanner.sh in your terminal'
     });
   };
 
@@ -85,7 +82,7 @@ const ExportSetup = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'setup-new-mac.sh';
+    a.download = 'baseline-setup.sh';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -241,9 +238,9 @@ const ExportSetup = () => {
                       className="w-full mb-4 bg-gray-900 hover:bg-gray-800 text-white font-medium"
                     >
                       <Download className="mr-2 h-4 w-4" />
-                      Download scan-mac.sh
+                      Download baseline-scanner.sh
                     </Button>
-                    <div className="mt-auto pt-4 border-t border-gray-100">
+                      <div className="mt-auto pt-4 border-t border-gray-100">
                       <p className="text-xs text-gray-400 mb-2 uppercase tracking-wide font-semibold">Then run in terminal:</p>
                       <div 
                         className="bg-gray-50 rounded-lg px-3 py-2 relative group cursor-pointer hover:bg-gray-100 transition-colors"
@@ -258,6 +255,7 @@ const ExportSetup = () => {
                           {copiedManualCommand ? 'Copied!' : 'Copy'}
                         </button>
                       </div>
+                      <p className="text-xs text-gray-500 mt-3">Outputs: <code className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">baseline-snapshot.json</code></p>
                     </div>
                   </div>
 
@@ -290,7 +288,7 @@ const ExportSetup = () => {
                     </div>
                     <div className="mt-6 flex items-start gap-2 text-xs text-gray-600 bg-white/50 rounded-lg p-3">
                       <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>Generates output file: <code className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">mac-setup-scan.json</code></span>
+                      <span>Generates: <code className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">baseline-snapshot.json</code> and <code className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">baseline-snapshot.tar.gz</code></span>
                     </div>
                   </div>
                 </div>
@@ -335,7 +333,7 @@ const ExportSetup = () => {
                         <h3 className="font-bold text-lg mb-2 text-gray-900">Click to upload</h3>
                         <p className="text-sm text-gray-500 mb-1">or drag and drop</p>
                         <p className="text-xs text-gray-400">
-                          <code className="font-mono bg-gray-100 px-2 py-0.5 rounded">mac-setup-scan.json</code>
+                          <code className="font-mono bg-gray-100 px-2 py-0.5 rounded">baseline-snapshot.json</code>
                         </p>
                       </div>
                     ) : (
@@ -435,11 +433,11 @@ const ExportSetup = () => {
                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                         <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span className="ml-2 text-xs text-gray-400 font-mono">setup-new-mac.sh</span>
+                        <span className="ml-2 text-xs text-gray-400 font-mono">baseline-setup.sh</span>
                       </div>
                       <div className="font-mono text-xs text-green-400 space-y-1">
-                        <div>$ chmod +x setup-new-mac.sh</div>
-                        <div>$ ./setup-new-mac.sh</div>
+                        <div>$ chmod +x baseline-setup.sh</div>
+                        <div>$ ./baseline-setup.sh</div>
                         <div className="text-gray-500"># Installing all your tools...</div>
                       </div>
                     </div>

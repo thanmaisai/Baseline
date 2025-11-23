@@ -29,7 +29,7 @@ const UploadScan = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'setup-new-mac.sh';
+    a.download = 'baseline-setup.sh';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -84,7 +84,7 @@ Mac Scan."
                     onChange={(e) => setScanData(e.target.value)}
                   />
                   <p className="text-sm text-muted-foreground mt-3">
-                    Extract and paste contents from <code className="bg-muted px-2 py-1 rounded font-mono">my-mac-setup.tar.gz</code>
+                    Extract and paste contents from <code className="bg-muted px-2 py-1 rounded font-mono">baseline-snapshot.tar.gz</code>
                   </p>
                 </div>
 
@@ -122,7 +122,7 @@ Mac Scan."
                   <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                     <span className="text-primary font-bold text-sm">2</span>
                   </div>
-                  <span>Generate a custom <code className="bg-muted px-2 py-1 rounded font-mono">setup-new-mac.sh</code> script</span>
+                  <span>Generate a custom <code className="bg-muted px-2 py-1 rounded font-mono">baseline-setup.sh</code> script</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
