@@ -39,8 +39,8 @@ ICON_ARROW="➜"
 ICON_TIME="⏱"
 
 # Configuration
-OUTPUT_JSON="baseline-scan.json"
-OUTPUT_ARCHIVE="baseline-scan.tar.gz"
+OUTPUT_JSON="baseline-snapshot.json"
+OUTPUT_ARCHIVE="baseline-snapshot.tar.gz"
 LOG_FILE="/tmp/baseline_debug.log"
 SCAN_VERSION="2.5.0"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")

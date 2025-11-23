@@ -1,10 +1,290 @@
+// Interface for the baseline-snapshot.json structure
+interface BaselineSnapshot {
+  meta: {
+    version: string | null;
+    timestamp: string | null;
+    hostname: string;
+    os_version: string;
+    arch: string;
+  };
+  package_managers: {
+    homebrew?: {
+      formulae: string[];
+      casks: string[];
+      taps: string[];
+    };
+  };
+  applications: string[];
+  development: {
+    vscode?: {
+      extensions: string[];
+      settings?: any;
+      keybindings?: any;
+    };
+    git?: {
+      global_config: string;
+      gitconfig_file?: string;
+    };
+  };
+  terminal: {
+    shell_configs: {
+      [key: string]: string;
+    };
+    ssh?: {
+      config?: string;
+      keys_found: string[];
+    };
+  };
+  languages: {
+    node?: {
+      versions: string[];
+      global_packages: string[];
+      nvm_installed: boolean;
+    };
+    python?: {
+      pyenv_versions: string[];
+      pyenv_global: string | null;
+      pip_packages: string[];
+    };
+    go?: string;
+    rust?: string;
+  };
+  cloud: {
+    [key: string]: any;
+  };
+}
+
+export const parseBaselineJSON = (jsonString: string): BaselineSnapshot | null => {
+  try {
+    return JSON.parse(jsonString) as BaselineSnapshot;
+  } catch (error) {
+    console.error('Failed to parse JSON:', error);
+    return null;
+  }
+};
+
 export const generateSetupFromScan = (scanData: string): string => {
+  // Try to parse as JSON first
+  const baseline = parseBaselineJSON(scanData);
+  
+  if (!baseline) {
+    // Fallback to old text format
+    return generateFromTextFormat(scanData);
+  }
+
+  let script = `#!/bin/bash
+
+# ============================================================================
+# Baseline Setup Script
+# Generated from baseline-snapshot.json
+# Date: ${new Date().toISOString().split('T')[0]}
+# ============================================================================
+
+set -e
+
+# Colors
+RED='\\033[0;31m'
+GREEN='\\033[0;32m'
+YELLOW='\\033[1;33m'
+BLUE='\\033[0;34m'
+PURPLE='\\033[0;35m'
+CYAN='\\033[0;36m'
+NC='\\033[0m' # No Color
+
+echo -e "\\\${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\\${NC}"
+echo -e "\\\${PURPLE}🚀 Baseline Setup - Restoring Your Mac\\\${NC}"
+echo -e "\\\${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\\${NC}"
+echo ""
+echo -e "\\\${BLUE}Hostname:\\\${NC} ${baseline.meta.hostname}"
+echo -e "\\\${BLUE}Source OS:\\\${NC} macOS ${baseline.meta.os_version} (${baseline.meta.arch})"
+echo ""
+
+# Check if running on macOS
+if [[ ! "$OSTYPE" == "darwin"* ]]; then
+  echo -e "\\\${RED}❌ This script is designed for macOS only.\\\${NC}"
+  exit 1
+fi
+
+# Install Homebrew if not present
+if ! command -v brew &> /dev/null; then
+  echo -e "\\\${YELLOW}📦 Installing Homebrew...\\\${NC}"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  
+  # Add Homebrew to PATH
+  if [[ $(uname -m) == 'arm64' ]]; then
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  else
+    echo 'eval "$(/usr/local/bin/brew shellenv)"' >> ~/.zprofile
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+  echo -e "\\\${GREEN}✅ Homebrew installed\\\${NC}"
+else
+  echo -e "\\\${GREEN}✅ Homebrew already installed\\\${NC}"
+fi
+
+echo ""
+`;
+
+  // Install Homebrew taps
+  if (baseline.package_managers.homebrew?.taps && baseline.package_managers.homebrew.taps.length > 0) {
+    script += `echo -e "\\\${YELLOW}📦 Adding Homebrew taps...\\\${NC}"\n`;
+    baseline.package_managers.homebrew.taps.forEach(tap => {
+      script += `brew tap ${tap}\n`;
+    });
+    script += `echo -e "\\\${GREEN}✅ Taps added\\\${NC}"\n`;
+    script += `\n`;
+  }
+
+  // Install Homebrew formulae
+  if (baseline.package_managers.homebrew?.formulae && baseline.package_managers.homebrew.formulae.length > 0) {
+    script += `echo -e "\\\${YELLOW}📦 Installing Homebrew formulae (${baseline.package_managers.homebrew.formulae.length} packages)...\\\${NC}"\n`;
+    script += `brew install \\\n`;
+    script += baseline.package_managers.homebrew.formulae.map(f => `  ${f}`).join(' \\\n');
+    script += `\necho -e "\\\${GREEN}✅ Formulae installed\\\${NC}"\n\n`;
+  }
+
+  // Install Homebrew casks
+  if (baseline.package_managers.homebrew?.casks && baseline.package_managers.homebrew.casks.length > 0) {
+    script += `echo -e "\\\${YELLOW}📦 Installing applications (${baseline.package_managers.homebrew.casks.length} apps)...\\\${NC}"\n`;
+    baseline.package_managers.homebrew.casks.forEach(cask => {
+      script += `echo -e "  Installing ${cask}..."\n`;
+      script += `brew install --cask ${cask} 2>/dev/null || echo -e "\\\${YELLOW}  ⚠ ${cask} might already be installed or unavailable\\\${NC}"\n`;
+    });
+    script += `echo -e "\\\${GREEN}✅ Applications installed\\\${NC}"\n`;
+    script += `\n`;
+  }
+
+  // Install Node.js and npm packages
+  if (baseline.languages.node && baseline.languages.node.global_packages.length > 0) {
+    script += `echo -e "\\\${YELLOW}📦 Installing Node.js packages...\\\${NC}"\n`;
+    
+    // Install Node if not present
+    script += `if ! command -v node &> /dev/null; then\n`;
+    script += `  brew install node\n`;
+    script += `fi\n\n`;
+    
+    // Filter out npm, corepack as they come with node
+    const packages = baseline.languages.node.global_packages
+      .filter(pkg => !pkg.startsWith('npm@') && !pkg.startsWith('corepack@'))
+      .map(pkg => pkg.split('@')[0]);
+    
+    if (packages.length > 0) {
+      script += `echo -e "  Installing global packages..."\n`;
+      packages.forEach(pkg => {
+        script += `npm install -g ${pkg}\n`;
+      });
+    }
+    script += `echo -e "\\\${GREEN}✅ Node.js configured\\\${NC}"\n\n`;
+  }
+
+  // Install Python packages
+  if (baseline.languages.python && baseline.languages.python.pip_packages.length > 0) {
+    const packages = baseline.languages.python.pip_packages
+      .filter(pkg => !pkg.startsWith('pip==') && !pkg.startsWith('wheel=='))
+      .map(pkg => pkg.split('==')[0]);
+    
+    if (packages.length > 0) {
+      script += `echo -e "\\\${YELLOW}📦 Installing Python packages...\\\${NC}"\n`;
+      packages.forEach(pkg => {
+        script += `pip3 install ${pkg}\n`;
+      });
+      script += `echo -e "\\\${GREEN}✅ Python packages installed\\\${NC}"\n\n`;
+    }
+  }
+
+  // Install VS Code extensions
+  if (baseline.development.vscode?.extensions && baseline.development.vscode.extensions.length > 0) {
+    script += `echo -e "\\\${YELLOW}📦 Installing VS Code extensions (${baseline.development.vscode.extensions.length} extensions)...\\\${NC}"\n`;
+    script += `if command -v code &> /dev/null; then\n`;
+    baseline.development.vscode.extensions.forEach(ext => {
+      script += `  code --install-extension ${ext} --force\n`;
+    });
+    script += `  echo -e "\\\${GREEN}✅ VS Code extensions installed\\\${NC}"\n`;
+    script += `else\n`;
+    script += `  echo -e "\\\${YELLOW}⚠ VS Code not found. Install it first, then run:\\\${NC}"\n`;
+    baseline.development.vscode.extensions.forEach(ext => {
+      script += `  echo "  code --install-extension ${ext}"\n`;
+    });
+    script += `fi\n\n`;
+  }
+
+  // Restore Git config
+  if (baseline.development.git?.global_config) {
+    script += `echo -e "\\\${YELLOW}📦 Configuring Git...\\\${NC}"\n`;
+    const configs = baseline.development.git.global_config.split('\n').filter(line => line.trim());
+    configs.forEach(config => {
+      const match = config.match(/^(.+?)=(.+)$/);
+      if (match) {
+        script += `git config --global "${match[1]}" "${match[2]}"\n`;
+      }
+    });
+    script += `echo -e "\\\${GREEN}✅ Git configured\\\${NC}"\n\n`;
+  }
+
+  // Restore shell configs
+  const shellConfigs = baseline.terminal.shell_configs;
+  if (Object.keys(shellConfigs).length > 0) {
+    script += `echo -e "\\\${YELLOW}📦 Restoring shell configuration...\\\${NC}"\n`;
+    Object.entries(shellConfigs).forEach(([filename, content]) => {
+      if (content && content.trim()) {
+        script += `echo "Restoring ${filename}..."\n`;
+        script += `cat >> ~/${filename} << 'BASELINE_EOF'\n${content}\nBASELINE_EOF\n\n`;
+      }
+    });
+    script += `echo -e "\\\${GREEN}✅ Shell configured\\\${NC}"\n\n`;
+  }
+
+  // Restore SSH config (without private keys)
+  if (baseline.terminal.ssh?.config) {
+    script += `echo -e "\\\${YELLOW}📦 Restoring SSH configuration...\\\${NC}"\n`;
+    script += `mkdir -p ~/.ssh\n`;
+    script += `chmod 700 ~/.ssh\n`;
+    script += `cat > ~/.ssh/config << 'BASELINE_EOF'\n${baseline.terminal.ssh.config}\nBASELINE_EOF\n`;
+    script += `chmod 600 ~/.ssh/config\n`;
+    script += `echo -e "\\\${GREEN}✅ SSH configured\\\${NC}"\n`;
+    
+    if (baseline.terminal.ssh.keys_found.length > 0) {
+      script += `echo -e "\\\${YELLOW}⚠ Note: You need to manually restore your SSH keys:\\\${NC}"\n`;
+      baseline.terminal.ssh.keys_found.forEach(key => {
+        if (!key.endsWith('.pub')) {
+          script += `echo "  - ${key}"\n`;
+        }
+      });
+    }
+    script += `\n`;
+  }
+
+  script += `echo ""
+echo -e "\\\${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\\${NC}"
+echo -e "\\\${GREEN}✨ Setup Complete!\\\${NC}"
+echo -e "\\\${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\\${NC}"
+echo ""
+echo -e "\\\${PURPLE}📊 Summary:\\\${NC}"
+echo -e "  ${baseline.package_managers.homebrew?.formulae.length || 0} Homebrew packages"
+echo -e "  ${baseline.package_managers.homebrew?.casks.length || 0} Applications"
+echo -e "  ${baseline.development.vscode?.extensions.length || 0} VS Code extensions"
+echo -e "  ${baseline.languages.node?.global_packages.length || 0} Node.js packages"
+echo ""
+echo -e "\\\${YELLOW}⚠ Next Steps:\\\${NC}"
+echo -e "  1. Restart your terminal or run: \\\${CYAN}source ~/.zshrc\\\${NC}"
+echo -e "  2. Restore SSH keys manually (if needed)"
+echo -e "  3. Sign in to applications and services"
+echo ""
+`;
+
+  return script;
+};
+
+// Fallback for old text-based format
+// Fallback for old text-based format
+const generateFromTextFormat = (scanData: string): string => {
   const sections = parseScanData(scanData);
   
   let script = `#!/bin/bash
 
 # macOS Development Environment Setup Script
-# Generated from Mac Scan by DevEnv Setup Tool
+# Generated from scan data
 # Date: ${new Date().toISOString().split('T')[0]}
 
 set -e
@@ -67,44 +347,6 @@ echo ""
     script += `\n`;
   }
 
-  // Install nvm and Node versions
-  if (sections.nodeVersions && sections.nodeVersions.length > 0) {
-    script += `# Install nvm and Node.js versions\n`;
-    script += `echo "📦 Installing Node.js..."\n`;
-    script += `if ! command -v nvm &> /dev/null; then\n`;
-    script += `  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash\n`;
-    script += `  export NVM_DIR="$HOME/.nvm"\n`;
-    script += `  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"\n`;
-    script += `fi\n\n`;
-    sections.nodeVersions.forEach(version => {
-      script += `nvm install ${version}\n`;
-    });
-    script += `\n`;
-  }
-
-  // Install pyenv and Python versions
-  if (sections.pythonVersions && sections.pythonVersions.length > 0) {
-    script += `# Install pyenv and Python versions\n`;
-    script += `echo "📦 Installing Python..."\n`;
-    script += `if ! command -v pyenv &> /dev/null; then\n`;
-    script += `  brew install pyenv\n`;
-    script += `fi\n\n`;
-    sections.pythonVersions.forEach(version => {
-      script += `pyenv install ${version}\n`;
-    });
-    script += `\n`;
-  }
-
-  // Install global npm packages
-  if (sections.npmGlobal && sections.npmGlobal.length > 0) {
-    script += `# Install global npm packages\n`;
-    script += `echo "📦 Installing global npm packages..."\n`;
-    sections.npmGlobal.forEach(pkg => {
-      script += `npm install -g ${pkg}\n`;
-    });
-    script += `\n`;
-  }
-
   // Install VS Code extensions
   if (sections.vscodeExtensions && sections.vscodeExtensions.length > 0) {
     script += `# Install VS Code extensions\n`;
@@ -129,13 +371,6 @@ echo ""
     script += `\n`;
   }
 
-  // Restore shell config
-  if (sections.zshrc) {
-    script += `# Restore .zshrc configuration\n`;
-    script += `echo "📦 Restoring shell configuration..."\n`;
-    script += `cat >> ~/.zshrc << 'EOF'\n${sections.zshrc}\nEOF\n\n`;
-  }
-
   script += `echo ""
 echo "✨ Setup complete!"
 echo ""
@@ -149,11 +384,6 @@ interface ScanSections {
   formulae?: string[];
   casks?: string[];
   taps?: string[];
-  nodeVersions?: string[];
-  pythonVersions?: string[];
-  rubyVersions?: string[];
-  npmGlobal?: string[];
-  pipPackages?: string[];
   vscodeExtensions?: string[];
   zshrc?: string;
   bashrc?: string;
@@ -190,41 +420,6 @@ const parseScanData = (data: string): ScanSections => {
       .filter(line => line && line !== 'None');
   }
 
-  // Parse Node versions
-  const nodeMatch = data.match(/## NODE_VERSIONS ##\n([\s\S]*?)(?=\n## |$)/);
-  if (nodeMatch) {
-    sections.nodeVersions = nodeMatch[1]
-      .trim()
-      .split('\n')
-      .filter(line => line && line !== 'None')
-      .map(line => line.replace(/[->*\s]/g, '').trim())
-      .filter(v => v && v.match(/^\d/));
-  }
-
-  // Parse Python versions
-  const pythonMatch = data.match(/## PYTHON_VERSIONS ##\n([\s\S]*?)(?=\n## |$)/);
-  if (pythonMatch) {
-    sections.pythonVersions = pythonMatch[1]
-      .trim()
-      .split('\n')
-      .filter(line => line && line !== 'None')
-      .map(line => line.replace(/[*\s]/g, '').trim())
-      .filter(v => v && v.match(/^\d/));
-  }
-
-  // Parse npm global packages
-  const npmMatch = data.match(/## NPM_GLOBAL ##\n([\s\S]*?)(?=\n## |$)/);
-  if (npmMatch) {
-    sections.npmGlobal = npmMatch[1]
-      .split('\n')
-      .filter(line => line && !line.includes('npm@') && !line.startsWith('├') && !line.startsWith('└'))
-      .map(line => {
-        const pkgMatch = line.match(/([^@\s]+)@/);
-        return pkgMatch ? pkgMatch[1] : null;
-      })
-      .filter((pkg): pkg is string => pkg !== null && pkg !== 'None');
-  }
-
   // Parse VS Code extensions
   const vscodeMatch = data.match(/## VSCODE_EXTENSIONS ##\n([\s\S]*?)(?=\n## |$)/);
   if (vscodeMatch) {
@@ -232,12 +427,6 @@ const parseScanData = (data: string): ScanSections => {
       .trim()
       .split('\n')
       .filter(line => line && line !== 'None');
-  }
-
-  // Parse zshrc
-  const zshrcMatch = data.match(/## ZSHRC ##\n([\s\S]*?)(?=\n## |$)/);
-  if (zshrcMatch) {
-    sections.zshrc = zshrcMatch[1].trim();
   }
 
   // Parse Git config

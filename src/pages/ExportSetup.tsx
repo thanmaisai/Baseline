@@ -3,7 +3,7 @@ import { Download, Upload, Check, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { generateScanScript } from '@/utils/scanScriptGenerator';
-import { generateSetupFromScan } from '@/utils/scanParser';
+import { generateSetupFromScan, parseBaselineJSON } from '@/utils/scanParser';
 import { FloatingFooter } from '@/components/FloatingFooter';
 import { toast } from 'sonner';
 
@@ -14,6 +14,7 @@ const ExportSetup = () => {
   const [copiedManualCommand, setCopiedManualCommand] = useState(false);
   const [scanData, setScanData] = useState('');
   const [fileName, setFileName] = useState('');
+  const [parsedData, setParsedData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const curlCommand = `curl -fsSL https://raw.githubusercontent.com/thanmaisai/mac-setup-genie/main/public/baseline-scan.sh | bash`;
@@ -58,37 +59,93 @@ const ExportSetup = () => {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setScanData(content);
-        setFileName(file.name);
-        toast.success('File uploaded!');
-      };
-      reader.readAsText(file);
+    
+    if (!file) {
+      console.log('No file selected');
+      return;
     }
+
+    console.log('File selected:', file.name, 'Size:', file.size);
+    
+    const reader = new FileReader();
+    
+    reader.onerror = () => {
+      console.error('FileReader error:', reader.error);
+      toast.error('Failed to read file', {
+        description: 'Please try again'
+      });
+    };
+    
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      
+      if (!content) {
+        console.error('No content read from file');
+        toast.error('File appears to be empty');
+        return;
+      }
+      
+      console.log('File content length:', content.length);
+      
+      // Set the scan data immediately
+      setScanData(content);
+      setFileName(file.name);
+      
+      // Try to parse as JSON
+      const parsed = parseBaselineJSON(content);
+      if (parsed) {
+        console.log('JSON parsed successfully:', {
+          formulae: parsed.package_managers.homebrew?.formulae.length || 0,
+          casks: parsed.package_managers.homebrew?.casks.length || 0,
+          apps: parsed.applications.length
+        });
+        setParsedData(parsed);
+        toast.success('Snapshot loaded!', {
+          description: `Found ${parsed.package_managers.homebrew?.formulae.length || 0} packages and ${parsed.applications.length} apps`
+        });
+      } else {
+        console.warn('Failed to parse JSON, treating as plain text');
+        setParsedData(null);
+        toast.success('File uploaded!');
+      }
+    };
+    
+    reader.readAsText(file);
+    
+    // Reset the input value so the same file can be uploaded again
+    event.target.value = '';
   };
 
   const handleGenerateScript = () => {
     if (!scanData.trim()) {
-      toast.error('No scan data found');
+      toast.error('No scan data found', {
+        description: 'Please upload a baseline-snapshot.json file first'
+      });
       return;
     }
     
-    const setupScript = generateSetupFromScan(scanData);
-    
-    const blob = new Blob([setupScript], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'baseline-setup.sh';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    toast.success('🎉 Setup script downloaded!');
+    try {
+      const setupScript = generateSetupFromScan(scanData);
+      
+      const blob = new Blob([setupScript], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'baseline-setup.sh';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success('🎉 Setup script downloaded!', {
+        description: 'Run baseline-setup.sh on your new Mac'
+      });
+    } catch (error) {
+      console.error('Error generating script:', error);
+      toast.error('Failed to generate script', {
+        description: 'Please check the console for details'
+      });
+    }
   };
 
   const handleBack = () => {
@@ -309,13 +366,17 @@ const ExportSetup = () => {
                 </div>
 
                 <div className="ml-0 md:ml-16">
-                  <label 
-                    className={`flex flex-col items-center justify-center w-full h-80 border-2 rounded-3xl cursor-pointer transition-all group relative overflow-hidden ${
+                  <div 
+                    className={`flex flex-col items-center justify-center w-full h-80 border-2 rounded-3xl transition-all group relative overflow-hidden ${
                       scanData
                         ? 'border-solid border-green-500 bg-green-50/10'
-                        : 'border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-blue-400'
+                        : 'border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-blue-400 cursor-pointer'
                     }`}
-                    onClick={() => !scanData && fileInputRef.current?.click()}
+                    onClick={() => {
+                      if (!scanData) {
+                        fileInputRef.current?.click();
+                      }
+                    }}
                   >
                     <input
                       ref={fileInputRef}
@@ -326,7 +387,7 @@ const ExportSetup = () => {
                     />
                     
                     {!scanData ? (
-                      <div className="flex flex-col items-center justify-center py-12 px-6 text-center transition-opacity duration-300">
+                      <div className="flex flex-col items-center justify-center py-12 px-6 text-center transition-opacity duration-300 w-full h-full">
                         <div className="w-16 h-16 rounded-full bg-gray-200 group-hover:bg-blue-100 flex items-center justify-center mb-4 transition-colors">
                           <Upload className="w-8 h-8 text-gray-400 group-hover:text-blue-500 transition-colors" />
                         </div>
@@ -350,9 +411,7 @@ const ExportSetup = () => {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setScanData('');
-                            setFileName('');
-                            toast.info('Upload cleared');
+                            fileInputRef.current?.click();
                           }}
                           className="text-xs"
                         >
@@ -360,7 +419,7 @@ const ExportSetup = () => {
                         </Button>
                       </div>
                     )}
-                  </label>
+                  </div>
                 </div>
               </section>
             )}
@@ -386,46 +445,134 @@ const ExportSetup = () => {
                     <h3 className="text-xl font-bold mb-6">Setup Script Preview</h3>
                     
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-3 gap-4 mb-8">
-                      <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
-                        <div className="text-3xl font-bold mb-1">
-                          {scanData.split('\n').filter(line => line.includes('brew')).length || '—'}
-                        </div>
-                        <div className="text-xs text-gray-400 uppercase tracking-wider">Packages</div>
-                      </div>
-                      <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
-                        <div className="text-3xl font-bold mb-1">
-                          {Math.ceil((scanData.split('\n').length || 0) / 50)}
-                        </div>
-                        <div className="text-xs text-gray-400 uppercase tracking-wider">Est. Minutes</div>
-                      </div>
-                      <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
-                        <div className="text-3xl font-bold mb-1 text-green-400">100%</div>
-                        <div className="text-xs text-gray-400 uppercase tracking-wider">Automated</div>
-                      </div>
-                    </div>
-
-                    {/* What's Included */}
-                    <div className="bg-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10">
-                      <h4 className="font-bold text-sm mb-4 uppercase tracking-wider text-gray-300">What We'll Include:</h4>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        {[
-                          'Homebrew packages',
-                          'Applications (casks)',
-                          'Node.js versions',
-                          'Python versions',
-                          'VS Code extensions',
-                          'Git configuration',
-                          'Shell configuration',
-                          'npm global packages',
-                        ].map((item, i) => (
-                          <div key={i} className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
-                            <span className="text-gray-300">{item}</span>
+                    {parsedData ? (
+                      <>
+                        <div className="grid grid-cols-3 gap-4 mb-8">
+                          <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                            <div className="text-3xl font-bold mb-1">
+                              {(parsedData.package_managers.homebrew?.formulae?.length || 0) + 
+                               (parsedData.package_managers.homebrew?.casks?.length || 0)}
+                            </div>
+                            <div className="text-xs text-gray-400 uppercase tracking-wider">Packages</div>
                           </div>
-                        ))}
+                          <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                            <div className="text-3xl font-bold mb-1">
+                              {parsedData.development.vscode?.extensions?.length || 0}
+                            </div>
+                            <div className="text-xs text-gray-400 uppercase tracking-wider">VS Code Ext.</div>
+                          </div>
+                          <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                            <div className="text-3xl font-bold mb-1 text-green-400">100%</div>
+                            <div className="text-xs text-gray-400 uppercase tracking-wider">Automated</div>
+                          </div>
+                        </div>
+
+                        {/* What's Included - Dynamic from JSON */}
+                        <div className="bg-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10 mb-6">
+                          <h4 className="font-bold text-sm mb-4 uppercase tracking-wider text-gray-300">Detected Configuration:</h4>
+                          <div className="space-y-4">
+                            {/* Homebrew Section */}
+                            {parsedData.package_managers.homebrew && (
+                              <div>
+                                <div className="text-xs text-blue-400 font-bold mb-2">📦 HOMEBREW</div>
+                                <div className="grid grid-cols-2 gap-3 text-sm ml-4">
+                                  {parsedData.package_managers.homebrew.formulae?.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                      <span className="text-gray-300">{parsedData.package_managers.homebrew.formulae.length} formulae</span>
+                                    </div>
+                                  )}
+                                  {parsedData.package_managers.homebrew.casks?.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                      <span className="text-gray-300">{parsedData.package_managers.homebrew.casks.length} applications</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* VS Code Section */}
+                            {parsedData.development.vscode?.extensions?.length > 0 && (
+                              <div>
+                                <div className="text-xs text-purple-400 font-bold mb-2">💻 VS CODE</div>
+                                <div className="text-sm ml-4">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                    <span className="text-gray-300">{parsedData.development.vscode.extensions.length} extensions</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Languages Section */}
+                            {(parsedData.languages.node?.global_packages?.length > 0 || 
+                              parsedData.languages.python?.pip_packages?.length > 0) && (
+                              <div>
+                                <div className="text-xs text-yellow-400 font-bold mb-2">🔧 LANGUAGES</div>
+                                <div className="grid grid-cols-2 gap-3 text-sm ml-4">
+                                  {parsedData.languages.node?.global_packages?.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                      <span className="text-gray-300">Node.js packages</span>
+                                    </div>
+                                  )}
+                                  {parsedData.languages.python?.pip_packages?.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                      <span className="text-gray-300">Python packages</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Git Section */}
+                            {parsedData.development.git?.global_config && (
+                              <div>
+                                <div className="text-xs text-orange-400 font-bold mb-2">🔗 GIT</div>
+                                <div className="text-sm ml-4">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                    <span className="text-gray-300">Global configuration</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Shell Section */}
+                            {Object.keys(parsedData.terminal.shell_configs || {}).length > 0 && (
+                              <div>
+                                <div className="text-xs text-cyan-400 font-bold mb-2">⚡ SHELL</div>
+                                <div className="text-sm ml-4">
+                                  {Object.keys(parsedData.terminal.shell_configs).map(shell => (
+                                    <div key={shell} className="flex items-center gap-2 mb-1">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                      <span className="text-gray-300">{shell}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-4 mb-8">
+                        <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                          <div className="text-3xl font-bold mb-1">—</div>
+                          <div className="text-xs text-gray-400 uppercase tracking-wider">Packages</div>
+                        </div>
+                        <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                          <div className="text-3xl font-bold mb-1">—</div>
+                          <div className="text-xs text-gray-400 uppercase tracking-wider">Est. Minutes</div>
+                        </div>
+                        <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                          <div className="text-3xl font-bold mb-1 text-green-400">100%</div>
+                          <div className="text-xs text-gray-400 uppercase tracking-wider">Automated</div>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Terminal Preview */}
                     <div className="mt-6 bg-black/40 rounded-xl p-4 backdrop-blur-sm border border-white/10">
@@ -460,7 +607,7 @@ const ExportSetup = () => {
         primaryButtonText={getPrimaryButtonText()}
         primaryButtonIcon={getPrimaryButtonIcon()}
         onPrimaryAction={handleNext}
-        primaryButtonDisabled={currentStep === 2 && !scanData.trim()}
+        primaryButtonDisabled={(currentStep === 2 || currentStep === 3) && !scanData.trim()}
       />
     </div>
   );
