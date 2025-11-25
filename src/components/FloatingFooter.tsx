@@ -15,19 +15,23 @@ interface FloatingFooterProps {
   primaryButtonIcon?: React.ReactNode;
   onPrimaryAction: () => void;
   primaryButtonDisabled?: boolean;
+  primaryShortcut?: string;
   secondaryButtonText?: string;
   secondaryButtonIcon?: React.ReactNode;
   onSecondaryAction?: () => void;
   secondaryButtonDisabled?: boolean;
+  secondaryShortcut?: string;
   showThemeToggle?: boolean;
   showKeyboardShortcuts?: boolean;
 }
 
-const Kbd = ({ children, variant = 'dark' }: { children: React.ReactNode; variant?: 'dark' | 'light' }) => {
+const Kbd = ({ children, variant = 'dark' }: { children: React.ReactNode; variant?: 'dark' | 'light' | 'orange' | 'theme' }) => {
   const baseStyles = "inline-flex items-center justify-center text-[10px] font-mono rounded px-1.5 py-0.5 border";
   const variants = {
-    dark: "text-[var(--brand-sand)] border-[var(--brand-sand)]/20 bg-[var(--brand-ink)]/60",
-    light: "text-[var(--brand-ink)] border-[var(--brand-ink)]/20 bg-[var(--brand-sand)]/80",
+    dark: "text-[var(--brand-sand)] border-[var(--brand-sand)] bg-[var(--brand-ink)]/60",
+    light: "text-white border-[var(--brand-ink)] bg-[var(--brand-ink)]/70",
+    orange: "text-[var(--brand-ink)] border-[var(--brand-ink)] bg-transparent",
+    theme: "text-[var(--brand-ink)] dark:text-[var(--brand-sand)] border-[var(--brand-ink)] dark:border-[var(--brand-sand)] bg-transparent",
   };
 
   return <span className={`${baseStyles} ${variants[variant]}`}>{children}</span>;
@@ -44,10 +48,12 @@ export const FloatingFooter = ({
   primaryButtonIcon,
   onPrimaryAction,
   primaryButtonDisabled = false,
+  primaryShortcut,
   secondaryButtonText,
   secondaryButtonIcon,
   onSecondaryAction,
   secondaryButtonDisabled = false,
+  secondaryShortcut,
   showThemeToggle = true,
   showKeyboardShortcuts = true,
 }: FloatingFooterProps) => {
@@ -58,17 +64,6 @@ export const FloatingFooter = ({
     backgroundColor: isDark ? colors.background.secondary : brand.ink,
     color: isDark ? colors.text.primary : brand.sand,
     borderColor: isDark ? colors.border.default : brand.ink,
-  };
-
-  const primaryButtonStyles = {
-    backgroundColor: brand.sunset,
-    color: brand.ink,
-  };
-
-  const secondaryButtonStyles = {
-    backgroundColor: isDark ? 'transparent' : brand.dunes,
-    color: isDark ? brand.sand : brand.ink,
-    borderColor: isDark ? brand.sand : brand.ink,
   };
 
   return (
@@ -112,7 +107,7 @@ export const FloatingFooter = ({
           {showThemeToggle && (
             <div className="flex items-center">
               <div className="h-8 w-px bg-[var(--brand-sand)]/20 mr-3"></div>
-              <div className="[&_button]:text-[var(--brand-sand)] [&_button]:hover:text-[var(--brand-sand)] [&_button]:hover:bg-[var(--brand-sunset)]/20 [&_button]:h-8 [&_button]:w-8">
+              <div className="[&_button]:text-[var(--brand-sand)] [&_button]:hover:text-[var(--brand-sand)] [&_button]:hover:bg-[var(--brand-sand)]/10 dark:[&_button]:hover:bg-white/5 [&_button]:h-8 [&_button]:w-8">
                 <ThemeToggle />
               </div>
             </div>
@@ -122,7 +117,11 @@ export const FloatingFooter = ({
           {showBackButton && onBack && (
             <button
               onClick={onBack}
-              className="group relative flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[var(--brand-sand)]/20 hover:bg-[var(--brand-sunset)]/10 transition-all duration-200"
+              className="group relative flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all duration-200 hover:bg-[var(--brand-sand)]/10 dark:hover:bg-white/5"
+              style={{
+                borderColor: isDark ? 'rgba(235, 222, 201, 0.3)' : 'rgba(235, 222, 201, 0.4)',
+                backgroundColor: 'transparent',
+              }}
               aria-keyshortcuts="Meta+ArrowLeft"
             >
               {showKeyboardShortcuts && (
@@ -136,41 +135,48 @@ export const FloatingFooter = ({
           )}
 
           {/* Primary Button with Keyboard Shortcut */}
-          <Button
+          <button
             onClick={onPrimaryAction}
             disabled={primaryButtonDisabled}
-            className="group relative font-bold py-2.5 px-6 rounded-lg text-sm flex items-center gap-2 transition-all duration-200 shadow-lg transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none border border-[var(--brand-ink)]/10"
-            style={primaryButtonStyles}
-            aria-keyshortcuts="Meta+ArrowRight"
+            className="group relative font-bold py-2.5 px-6 rounded-lg text-sm flex items-center gap-2 transition-all duration-200 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            style={{
+              backgroundColor: brand.sunset,
+              color: brand.ink,
+              border: `2px solid ${brand.ink}`,
+            }}
+            aria-keyshortcuts={primaryShortcut ? `Meta+${primaryShortcut}` : "Meta+ArrowRight"}
           >
             {primaryButtonIcon}
             <span>{primaryButtonText}</span>
             {showKeyboardShortcuts && (
               <span className="flex items-center gap-0.5 ml-2">
-                <Kbd variant="light">⌘</Kbd>
-                <Kbd variant="light">→</Kbd>
+                <Kbd variant="orange">⌘</Kbd>
+                <Kbd variant="orange">{primaryShortcut || '→'}</Kbd>
               </span>
             )}
-          </Button>
+          </button>
 
           {secondaryButtonText && onSecondaryAction && (
-            <Button
-              variant="outline"
+            <button
               onClick={onSecondaryAction}
               disabled={secondaryButtonDisabled}
-              className="group relative font-semibold py-2.5 px-5 rounded-lg text-sm flex items-center gap-2 transition-all duration-200 border"
-              style={secondaryButtonStyles}
-              aria-keyshortcuts="Meta+Digit2"
+              className="group relative font-semibold py-2.5 px-5 rounded-lg text-sm flex items-center gap-2 transition-all duration-200"
+              style={{
+                backgroundColor: isDark ? 'transparent' : brand.sand,
+                color: isDark ? brand.sand : brand.ink,
+                border: isDark ? `2px solid ${brand.sand}` : `2px solid ${brand.ink}`,
+              }}
+              aria-keyshortcuts={secondaryShortcut ? `Meta+${secondaryShortcut}` : "Meta+Digit2"}
             >
               {secondaryButtonIcon}
               <span>{secondaryButtonText}</span>
               {showKeyboardShortcuts && (
                 <span className="flex items-center gap-0.5 ml-1">
-                  <Kbd variant="dark">⌘</Kbd>
-                  <Kbd variant="dark">2</Kbd>
+                  <Kbd variant="theme">⌘</Kbd>
+                  <Kbd variant="theme">{secondaryShortcut || '2'}</Kbd>
                 </span>
               )}
-            </Button>
+            </button>
           )}
         </div>
       </div>

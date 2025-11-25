@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, Download, Check, X, Loader2, RefreshCw } from 'lucide-react';
+import { Download, Check, X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import { Button } from '@/components/ui/button';
@@ -102,38 +102,90 @@ const Configurator = () => {
     }
   }, [brewLoading, totalCount, brewError]);
 
-  // Keyboard shortcuts - CMD+Left for back, CMD+Right for next
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowLeft') {
-        e.preventDefault();
-        if (currentStep > 0) {
-          setCurrentStep(currentStep - 1);
-          setSearchQuery('');
-          updateLog(`navigated to ${steps[currentStep - 1].name.toLowerCase()}`);
-        }
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowRight') {
-        e.preventDefault();
-        if (currentStep < steps.length - 1) {
-          setCurrentStep(currentStep + 1);
-          setSearchQuery('');
-          updateLog(`navigated to ${steps[currentStep + 1].name.toLowerCase()}`);
-        }
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+  const handleNext = useCallback(() => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+      setSearchQuery('');
+      updateLog(`navigated to ${steps[currentStep + 1].name.toLowerCase()}`);
+    }
   }, [currentStep]);
+
+  const handleBack = useCallback(() => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      setSearchQuery('');
+      updateLog(`navigated to ${steps[currentStep - 1].name.toLowerCase()}`);
+    } else {
+      navigate('/');
+    }
+  }, [currentStep, navigate]);
 
   const updateLog = (message: string) => {
     setLiveLog(message);
   };
+
+  const handleDownloadScript = useCallback(() => {
+    const script = generateSetupScript(selection);
+    const blob = new Blob([script], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'setup-macos.sh';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    updateLog('generating script...');
+
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+
+    toast.success('🎉 Setup script downloaded!', {
+      description: 'Run it with: bash setup-macos.sh',
+    });
+  }, [selection]);
+
+  // Keyboard shortcuts - CMD+Left for back, CMD+Right for next, CMD+H for home
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if modifiers are not pressed
+      if (!(e.metaKey || e.ctrlKey)) return;
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          handleBack();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          if (currentStep < steps.length - 1) {
+            handleNext();
+          }
+          break;
+        case 'Enter':
+          if (currentStep === steps.length - 1) {
+            e.preventDefault();
+            handleDownloadScript();
+          }
+          break;
+        case 'h':
+          e.preventDefault();
+          navigate('/');
+          break;
+        case 'f':
+          e.preventDefault();
+          searchInputRef.current?.focus();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleBack, handleNext, navigate, currentStep, handleDownloadScript]);
 
   const filteredTools = useMemo(() => {
     if (currentCategory === 'review' || currentCategory === 'templates') return [];
@@ -369,51 +421,10 @@ const Configurator = () => {
     toast.success(`All tools in ${steps[currentStep].name} cleared`);
   };
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-      setSearchQuery('');
-      updateLog(`navigated to ${steps[currentStep + 1].name.toLowerCase()}`);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-      setSearchQuery('');
-      updateLog(`navigated to ${steps[currentStep - 1].name.toLowerCase()}`);
-    }
-  };
-
   const handleReset = () => {
     clearSelection();
     updateLog('reset selection');
     toast.success('Selection cleared');
-  };
-
-  const handleDownloadScript = () => {
-    const script = generateSetupScript(selection);
-    const blob = new Blob([script], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'setup-macos.sh';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    updateLog('generating script...');
-
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
-
-    toast.success('🎉 Setup script downloaded!', {
-      description: 'Run it with: bash setup-macos.sh',
-    });
   };
 
   const selectedByCategory = (category: ToolCategory) => {
@@ -716,10 +727,11 @@ const Configurator = () => {
         statusText={footerStatus.text}
         showBackButton={true}
         backButtonText={currentCategory === 'templates' ? 'Back to Home' : 'Back'}
-        onBack={currentCategory === 'templates' ? () => navigate('/') : handleBack}
+        onBack={handleBack}
         primaryButtonText={getPrimaryButtonText()}
         primaryButtonIcon={getPrimaryButtonIcon()}
         onPrimaryAction={currentStep < steps.length - 1 ? handleNext : handleDownloadScript}
+        primaryShortcut={currentStep === steps.length - 1 ? 'Enter' : undefined}
         showThemeToggle={true}
         showKeyboardShortcuts={true}
       />

@@ -54,19 +54,11 @@ const Index = () => {
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey)) return;
-      if (event.key === '1') {
+      if (event.key === 'ArrowLeft') {
         event.preventDefault();
         navigate('/configure');
-      }
-      if (event.key === '2') {
-        event.preventDefault();
-        navigate('/export-setup');
       }
       if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        navigate('/configure');
-      }
-      if (event.key === 'ArrowLeft') {
         event.preventDefault();
         navigate('/export-setup');
       }
@@ -279,11 +271,13 @@ const Index = () => {
         statusText="Choose your journey"
         showBackButton={false}
         primaryButtonText="Design a Setup"
-        primaryButtonIcon={<ArrowRight className="w-4 h-4" />}
+        primaryButtonIcon={<Layers className="w-4 h-4" />}
         onPrimaryAction={() => navigate('/configure')}
+        primaryShortcut="←"
         secondaryButtonText="Export Current Mac"
         secondaryButtonIcon={<Upload className="w-4 h-4" />}
         onSecondaryAction={() => navigate('/export-setup')}
+        secondaryShortcut="→"
       />
     </>
   );

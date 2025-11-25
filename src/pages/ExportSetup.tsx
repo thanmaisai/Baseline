@@ -62,16 +62,12 @@ const ExportSetup = () => {
     const file = event.target.files?.[0];
     
     if (!file) {
-      console.log('No file selected');
       return;
     }
 
-    console.log('File selected:', file.name, 'Size:', file.size);
-    
     const reader = new FileReader();
     
     reader.onerror = () => {
-      console.error('FileReader error:', reader.error);
       toast.error('Failed to read file', {
         description: 'Please try again'
       });
@@ -81,12 +77,9 @@ const ExportSetup = () => {
       const content = e.target?.result as string;
       
       if (!content) {
-        console.error('No content read from file');
         toast.error('File appears to be empty');
         return;
       }
-      
-      console.log('File content length:', content.length);
       
       // Set the scan data immediately
       setScanData(content);
@@ -95,17 +88,11 @@ const ExportSetup = () => {
       // Try to parse as JSON
       const parsed = parseBaselineJSON(content);
       if (parsed) {
-        console.log('JSON parsed successfully:', {
-          formulae: parsed.package_managers.homebrew?.formulae.length || 0,
-          casks: parsed.package_managers.homebrew?.casks.length || 0,
-          apps: parsed.applications.length
-        });
         setParsedData(parsed);
         toast.success('Snapshot loaded!', {
           description: `Found ${parsed.package_managers.homebrew?.formulae.length || 0} packages and ${parsed.applications.length} apps`
         });
       } else {
-        console.warn('Failed to parse JSON, treating as plain text');
         setParsedData(null);
         toast.success('File uploaded!');
       }
@@ -151,7 +138,6 @@ const ExportSetup = () => {
         description: 'Run baseline-setup.sh on your new Mac'
       });
     } catch (error) {
-      console.error('Error generating script:', error);
       toast.error('Failed to generate script', {
         description: 'Please check the console for details'
       });
@@ -177,20 +163,34 @@ const ExportSetup = () => {
       // CMD+ArrowRight for next
       if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowRight') {
         e.preventDefault();
-        handleNext();
+        if (currentStep < 3) {
+          handleNext();
+        }
+      }
+      // CMD+Enter for download (last step)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        if (currentStep === 3) {
+          e.preventDefault();
+          handleGenerateScript();
+        }
+      }
+      // CMD+H for home
+      if ((e.metaKey || e.ctrlKey) && e.key === 'h') {
+        e.preventDefault();
+        navigate('/');
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleBack, handleNext]);
+  }, [handleBack, handleNext, navigate, currentStep, handleGenerateScript]);
 
   const getFooterStatus = () => {
     switch (currentStep) {
       case 1:
         return { label: 'CURRENT STATUS', text: 'Scanner Download' };
       case 2:
-        return { label: 'CURRENT STATUS', text: scanData ? 'Scan Ready' : 'Waiting for Upload...' };
+        return { label: 'CURRENT STATUS', text: scanData ? 'Scan Ready' : 'Waiting for Upload' };
       case 3:
         return { label: 'READY TO INSTALL', text: 'Setup Complete' };
       default:
@@ -625,6 +625,7 @@ const ExportSetup = () => {
         primaryButtonIcon={getPrimaryButtonIcon()}
         onPrimaryAction={handleNext}
         primaryButtonDisabled={(currentStep === 2 || currentStep === 3) && !scanData.trim()}
+        primaryShortcut={currentStep === 3 ? 'Enter' : undefined}
         showThemeToggle={true}
         showKeyboardShortcuts={true}
       />
