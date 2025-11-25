@@ -59,11 +59,13 @@ export const ToolCard = ({ tool, selected, onToggle }: ToolCardProps) => {
             }
           };
           
+          // Silently fail on error (don't log to console)
           img.onerror = () => cleanup(false);
           
-          // Faster timeout: 500ms (better UX, fail fast)
-          setTimeout(() => cleanup(false), 500);
+          // Faster timeout: 300ms (better UX, fail fast)
+          setTimeout(() => cleanup(false), 300);
           
+          // Set src after handlers to ensure we catch all events
           img.src = url;
         });
       };

@@ -13,15 +13,22 @@ interface IconSource {
 }
 
 // Map of common app names to their proper identifiers
+// Only includes apps that definitely exist on Simple Icons or DevIcon
 const APP_NAME_MAPPINGS: Record<string, string> = {
-  'vscode': 'visual-studio-code',
-  'vs code': 'visual-studio-code',
-  'visual studio code': 'visual-studio-code',
-  'google chrome': 'google-chrome',
+  'vscode': 'visualstudiocode',
+  'vs code': 'visualstudiocode',
+  'visual studio code': 'visualstudiocode',
+  'google chrome': 'googlechrome',
+  'chrome': 'googlechrome',
   'arc browser': 'arc',
+  'arc': 'arc',
   'brave browser': 'brave',
+  'brave': 'brave',
   'firefox': 'firefox',
   'safari': 'safari',
+  'microsoft edge': 'microsoftedge',
+  'edge': 'microsoftedge',
+  'opera': 'opera',
   'docker': 'docker',
   'figma': 'figma',
   'slack': 'slack',
@@ -58,6 +65,7 @@ const APP_NAME_MAPPINGS: Record<string, string> = {
   'discord': 'discord',
   'telegram': 'telegram',
   'whatsapp': 'whatsapp',
+  'signal': 'signal',
   'obsidian': 'obsidian',
   'raycast': 'raycast',
   'rectangle': 'rectangle',
@@ -68,6 +76,7 @@ const APP_NAME_MAPPINGS: Record<string, string> = {
   '1password': '1password',
   'bitwarden': 'bitwarden',
   'vlc': 'vlc',
+  'cursor': 'cursor',
   'typescript': 'typescript',
   'javascript': 'javascript',
   'react': 'react',
@@ -122,9 +131,50 @@ const APP_NAME_MAPPINGS: Record<string, string> = {
 };
 
 // Tools that should use emoji fallback (no reliable logo sources)
+// Expanded list to prevent unnecessary 404 requests
 const USE_EMOJI_FALLBACK: Set<string> = new Set([
   'duckdb',
   'kind',
+  'aloha-browser',
+  'aloha browser',
+  'amfora',
+  'arcade-learning-environment',
+  'archey4',
+  'archgw',
+  'archi-steam-farm',
+  'archipelago',
+  'architype-renner',
+  'archiver',
+  'archivewebpage',
+  'archive web page',
+  'archaeology',
+  'architects-daughter',
+  'aarch64-elf-gcc',
+  'aarch64-elf-binutils',
+  'aarch64-elf-gdb',
+  'safari-technology-preview',
+  'safari technology preview',
+  'archivo',
+  'archivo-black',
+  '115browser',
+  '115 browser',
+  'archivemount',
+  'deep-hiarcs-chess-explorer',
+  'tuple',
+  'telegram for macos',
+  'telegram-for-macos',
+  'microsoft teams',
+  'microsoft-teams',
+  'bear',
+  'fantastical',
+  'craft',
+  'notion-calendar',
+  'notion calendar',
+  'roam-research',
+  'roam research',
+  'superhuman',
+  'apache-directory-studio',
+  'apache directory studio',
 ]);
 
 // Icon sources with fallback priority
@@ -202,8 +252,15 @@ export function getAppIconFallbacks(appName: string, url?: string): string[] {
   const lowerName = appName.toLowerCase();
   
   // If tool should use emoji fallback, return empty array to trigger emoji
-  if (USE_EMOJI_FALLBACK.has(lowerName)) {
+  if (USE_EMOJI_FALLBACK.has(lowerName) || USE_EMOJI_FALLBACK.has(slug)) {
     return [];
+  }
+  
+  // Only try CDN if we have a known mapping or URL
+  // This prevents 404 spam for unknown tools
+  const hasMapping = APP_NAME_MAPPINGS[lowerName];
+  if (!hasMapping && !url) {
+    return []; // Use emoji fallback for unknown tools
   }
   
   // PRIORITY 1: Simple Icons - 2000+ brand logos (best for known brands)
