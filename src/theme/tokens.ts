@@ -12,74 +12,70 @@ export const themeTokens = {
       sunset: '#FF6D1F',
       ink: '#222222',
     },
-    // Light Mode
     light: {
       background: {
-        primary: '#F9FAFB', // gray-50
-        secondary: '#FFFFFF', // white
-        card: '#FFFFFF',
-        hover: '#F3F4F6', // gray-100
+        primary: '#FAF3E1',
+        secondary: '#F5E7C6',
+        card: '#F5E7C6',
+        hover: '#FAF3E1',
       },
       text: {
-        primary: '#111827', // gray-900
-        secondary: '#6B7280', // gray-500
-        tertiary: '#9CA3AF', // gray-400
-        muted: '#D1D5DB', // gray-300
+        primary: '#222222',
+        secondary: '#222222',
+        tertiary: '#222222',
+        muted: '#222222',
       },
       border: {
-        default: '#E5E7EB', // gray-200
-        light: '#F3F4F6', // gray-100
-        dark: '#D1D5DB', // gray-300
+        default: '#F5E7C6',
+        light: '#FAF3E1',
+        dark: '#FF6D1F',
       },
       accent: {
-        primary: '#3B82F6', // blue-500
-        hover: '#2563EB', // blue-600
-        light: '#DBEAFE', // blue-100
+        primary: '#FF6D1F',
+        hover: '#FF6D1F',
+        light: '#F5E7C6',
       },
     },
-    // Dark Mode (Pitch Black)
     dark: {
       background: {
-        primary: '#000000', // pitch black
-        secondary: '#0A0A0A', // near black
-        card: '#111111', // very dark gray
-        hover: '#1A1A1A', // dark gray
+        primary: '#222222',
+        secondary: '#222222',
+        card: '#222222',
+        hover: '#FF6D1F',
       },
       text: {
-        primary: '#FFFFFF', // white
-        secondary: '#D4D4D4', // light gray
-        tertiary: '#A3A3A3', // medium gray
-        muted: '#737373', // dark gray
+        primary: '#FAF3E1',
+        secondary: '#F5E7C6',
+        tertiary: '#F5E7C6',
+        muted: '#FAF3E1',
       },
       border: {
-        default: '#262626', // gray-800
-        light: '#1F1F1F', // gray-900
-        dark: '#404040', // gray-700
+        default: '#222222',
+        light: '#FF6D1F',
+        dark: '#222222',
       },
       accent: {
-        primary: '#3B82F6', // blue-500
-        hover: '#60A5FA', // blue-400
-        light: '#1E3A8A', // blue-900
+        primary: '#FF6D1F',
+        hover: '#FF6D1F',
+        light: '#F5E7C6',
       },
     },
-    // Shared colors (same in both modes)
     shared: {
-      success: '#10B981', // green-500
-      warning: '#F59E0B', // amber-500
-      error: '#EF4444', // red-500
-      info: '#3B82F6', // blue-500
+      success: '#FF6D1F',
+      warning: '#FF6D1F',
+      error: '#FF6D1F',
+      info: '#F5E7C6',
     },
-    // Footer specific (dark always)
     footer: {
-      background: '#1A1A1A',
-      text: '#FFFFFF',
-      textMuted: '#9CA3AF',
-      border: '#374151', // gray-700
+      background: '#222222',
+      text: '#FAF3E1',
+      textMuted: '#F5E7C6',
+      border: '#222222',
       button: {
-        primary: '#FFFFFF',
-        primaryText: '#000000',
-        secondary: '#374151',
-        secondaryText: '#FFFFFF',
+        primary: '#FF6D1F',
+        primaryText: '#222222',
+        secondary: '#F5E7C6',
+        secondaryText: '#222222',
       },
     },
   },

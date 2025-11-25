@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { PageLayout } from '@/components/PageLayout';
 import { FloatingFooter } from '@/components/FloatingFooter';
 import { TerminalWindow } from '@/components/TerminalWindow';
-import { useThemeTokens } from '@/theme/useThemeTokens';
+import { useEffect } from 'react';
 
 const heroStats = [
   { label: 'Minutes to onboard', value: '5', detail: 'Average runtime' },
@@ -50,26 +50,50 @@ const terminalDemo = [
 
 const Index = () => {
   const navigate = useNavigate();
-  const { brand } = useThemeTokens();
+
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey)) return;
+      if (event.key === '1') {
+        event.preventDefault();
+        navigate('/configure');
+      }
+      if (event.key === '2') {
+        event.preventDefault();
+        navigate('/export-setup');
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        navigate('/configure');
+      }
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        navigate('/export-setup');
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-[var(--brand-sand)] text-foreground pb-32">
       <PageLayout className="h-auto min-h-[85vh]">
         <div className="flex flex-col gap-12 px-6 md:px-10 py-10 overflow-y-auto">
           <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="grid lg:grid-cols-[2fr,1fr] gap-10"
           >
             <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 bg-white/70 dark:bg-white/5 text-xs font-bold uppercase tracking-[0.3em] px-4 py-2 rounded-full border border-white/60 dark:border-white/10 text-[var(--brand-ink)] dark:text-white">
+              <div className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/80 dark:bg-[var(--brand-ink)]/80 text-xs font-bold uppercase tracking-[0.3em] px-4 py-2 rounded-full border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/20 text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
                 <span className="w-2 h-2 rounded-full bg-[var(--brand-sunset)]" />
                 Baseline / Mac Ops
               </div>
               <div>
                 <p className="text-sm uppercase tracking-[0.4em] text-muted-foreground mb-4">Bring every Mac to the same Baseline.</p>
-                <h1 className="text-4xl md:text-6xl font-semibold leading-tight text-[var(--brand-ink)] dark:text-white">
+                <h1 className="text-4xl md:text-6xl font-semibold leading-tight text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
                   A visual, opinionated studio for macOS environments.
                 </h1>
               </div>
@@ -78,47 +102,49 @@ const Index = () => {
                 The layout you&apos;re inside right now is the same canvas we use for every journey: configure something new or export what already works.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button
-                  onClick={() => navigate('/configure')}
-                  size="lg"
-                  className="h-12 px-8 bg-[var(--brand-sunset)] text-[var(--brand-ink)] hover:bg-[#ff7f3c]"
-                >
+              <Button
+                onClick={() => navigate('/configure')}
+                size="lg"
+                  className="h-12 px-8 bg-[var(--brand-sunset)] text-[var(--brand-ink)] hover:bg-[var(--brand-sunset)]/90"
+                  aria-keyshortcuts="Meta+1"
+              >
                   Design a Setup
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-                <Button
-                  onClick={() => navigate('/export-setup')}
-                  size="lg"
-                  variant="outline"
-                  className="h-12 px-8 border-[var(--brand-ink)]/20 bg-white/70 hover:bg-white"
-                >
-                  Export Current Mac
-                </Button>
-              </div>
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+              <Button
+                onClick={() => navigate('/export-setup')}
+                size="lg"
+                variant="outline"
+                  className="h-12 px-8 border-[var(--brand-ink)]/40 bg-[var(--brand-sand)]/60 hover:bg-[var(--brand-dunes)]/80 text-[var(--brand-ink)]"
+                  aria-keyshortcuts="Meta+2"
+              >
+                Export Current Mac
+              </Button>
+          </div>
               <div className="grid md:grid-cols-3 gap-6">
                 {heroStats.map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-white/60 dark:border-white/10 bg-white/60 dark:bg-black/30 p-4">
+                  <div key={stat.label} className="rounded-2xl border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/15 bg-[var(--brand-sand)]/70 dark:bg-[var(--brand-ink)]/70 p-4">
                     <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-1">{stat.label}</p>
-                    <p className="text-3xl font-semibold text-[var(--brand-ink)] dark:text-white">{stat.value}</p>
+                    <p className="text-3xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">{stat.value}</p>
                     <p className="text-sm text-muted-foreground">{stat.detail}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/60 dark:border-white/10 bg-white/80 dark:bg-black/40 p-6 flex flex-col justify-between">
+            <div className="rounded-[28px] border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/20 bg-[var(--brand-sand)]/85 dark:bg-[var(--brand-ink)]/80 p-6 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-6">
                   <img src="/brand/baseline-mark.png" alt="Baseline" className="w-12 h-12 rounded-2xl" />
                   <div>
                     <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Brand System</p>
-                    <p className="text-lg font-semibold text-[var(--brand-ink)] dark:text-white">Baseline Studio</p>
-                  </div>
+                    <p className="text-lg font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">Baseline Studio</p>
+                    </div>
                 </div>
                 <p className="text-base text-muted-foreground mb-6">
                   Layout, floating footer, steady typography—the same UX flows through Configurator and Export. It keeps new hires oriented, whichever path they choose.
                 </p>
-                <div className="space-y-3 text-sm font-mono text-[var(--brand-ink)]/70 dark:text-white/70">
+                <div className="space-y-3 text-sm font-mono text-[var(--brand-ink)]/80 dark:text-[var(--brand-sand)]/80">
                   <p>⌘ → Continue to next step</p>
                   <p>⌘ ← Navigate backwards</p>
                   <p>⌘ F Search every tool</p>
@@ -127,12 +153,12 @@ const Index = () => {
               <div className="mt-8">
                 <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground mb-2">Trusted by</p>
                 <div className="flex gap-3">
-                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-white/70">Founders</span>
-                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-white/70">Platform teams</span>
-                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-white/70">Indie makers</span>
-                </div>
-              </div>
-            </div>
+                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-[var(--brand-sand)]/80">Founders</span>
+                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-[var(--brand-sand)]/80">Platform teams</span>
+                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-[var(--brand-sand)]/80">Indie makers</span>
+                    </div>
+                      </div>
+                      </div>
           </motion.section>
 
           <section className="grid lg:grid-cols-2 gap-6">
@@ -141,7 +167,7 @@ const Index = () => {
               return (
                 <div
                   key={journey.id}
-                  className="rounded-3xl border border-white/60 dark:border-white/10 bg-white/80 dark:bg-black/40 p-6 flex flex-col gap-6"
+                  className="rounded-3xl border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/15 bg-[var(--brand-sand)]/85 dark:bg-[var(--brand-ink)]/80 p-6 flex flex-col gap-6"
                 >
                   <div className="flex items-center gap-3">
                     <span className="h-12 w-12 rounded-2xl bg-[var(--brand-sunset)]/20 flex items-center justify-center text-[var(--brand-ink)]">
@@ -149,37 +175,41 @@ const Index = () => {
                     </span>
                     <div>
                       <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{journey.id}</p>
-                      <h3 className="text-2xl font-semibold text-[var(--brand-ink)] dark:text-white">{journey.title}</h3>
+                      <h3 className="text-2xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">{journey.title}</h3>
                     </div>
                   </div>
                   <p className="text-muted-foreground">{journey.description}</p>
                   <div className="space-y-3">
-                    {journey.steps.map((step) => (
-                      <div key={step} className="flex items-center gap-3 text-sm text-[var(--brand-ink)] dark:text-white">
+                    {journey.steps.map((step, index) => (
+                      <div key={step} className="flex items-center gap-3 text-sm text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
                         <span className="w-6 h-6 rounded-full border border-[var(--brand-ink)]/20 flex items-center justify-center text-xs font-semibold">
-                          <ArrowRight className="w-3 h-3" />
+                          {index + 1}
                         </span>
                         {step}
-                      </div>
+                </div>
                     ))}
-                  </div>
+                </div>
                   <Button
                     onClick={() => navigate(journey.action.route)}
                     className="mt-auto bg-[var(--brand-sunset)]/90 text-[var(--brand-ink)] hover:bg-[var(--brand-sunset)]"
+                    aria-keyshortcuts={journey.id === 'configure' ? 'Meta+1' : 'Meta+2'}
                   >
                     {journey.action.label}
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
+                  <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                    Shortcut {journey.id === 'configure' ? '⌘ + 1' : '⌘ + 2'}
+                  </p>
                 </div>
               );
             })}
-          </section>
+      </section>
 
           <section className="grid lg:grid-cols-2 gap-10 items-start">
-            <div className="rounded-3xl border border-white/60 dark:border-white/10 bg-white dark:bg-black/60 p-6 shadow-card">
+            <div className="rounded-3xl border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/15 bg-[var(--brand-sand)] dark:bg-[var(--brand-ink)]/80 p-6 shadow-card">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Live script</p>
-                <span className="inline-flex items-center text-xs font-bold tracking-widest text-[var(--brand-ink)] dark:text-white">
+                <span className="inline-flex items-center text-xs font-bold tracking-widest text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
                   Baseline CLI
                 </span>
               </div>
@@ -191,53 +221,53 @@ const Index = () => {
                 return (
                   <div
                     key={item.title}
-                    className="rounded-3xl border border-white/60 dark:border-white/10 bg-white/70 dark:bg-black/40 p-6 flex gap-4"
+                    className="rounded-3xl border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/15 bg-[var(--brand-sand)]/80 dark:bg-[var(--brand-ink)]/70 p-6 flex gap-4"
                   >
-                    <span className="mt-1 h-12 w-12 rounded-2xl bg-[var(--brand-sunset)]/15 flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-[var(--brand-ink)]" />
+                    <span className="mt-1 h-12 w-12 rounded-2xl bg-[var(--brand-sunset)]/20 flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-[var(--brand-ink)] dark:text-[var(--brand-sand)]" />
                     </span>
                     <div>
-                      <h4 className="text-xl font-semibold text-[var(--brand-ink)] dark:text-white">{item.title}</h4>
+                      <h4 className="text-xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">{item.title}</h4>
                       <p className="text-muted-foreground">{item.copy}</p>
-                    </div>
-                  </div>
+              </div>
+            </div>
                 );
               })}
-              <div className="rounded-3xl border border-white/60 dark:border-white/10 bg-[var(--brand-dunes)]/80 dark:bg-black/50 p-6">
+              <div className="rounded-3xl border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/15 bg-[var(--brand-dunes)]/90 dark:bg-[var(--brand-ink)]/70 p-6">
                 <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-2">Promise</p>
-                <p className="text-2xl font-semibold text-[var(--brand-ink)] dark:text-white">
+                <p className="text-2xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
                   Five minutes of runway for every new hire. Same layout, same CTA, same confidence.
                 </p>
               </div>
-            </div>
-          </section>
+        </div>
+      </section>
 
-          <section className="rounded-[32px] border border-white/60 dark:border-white/10 bg-white/80 dark:bg-black/40 p-8">
+          <section className="rounded-[32px] border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/15 bg-[var(--brand-sand)]/85 dark:bg-[var(--brand-ink)]/80 p-8">
             <div className="flex flex-col lg:flex-row gap-8 items-start">
               <div className="flex-1 space-y-4">
                 <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Playbook</p>
-                <h2 className="text-3xl font-semibold text-[var(--brand-ink)] dark:text-white">
+                <h2 className="text-3xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
                   “Baseline let us replace a 12 page Confluence doc with a single CTA. Every page in the product feels like this card—focused, confident, and reusable.”
-                </h2>
+            </h2>
                 <p className="text-sm text-muted-foreground">— Head of Developer Productivity, Series B fintech</p>
               </div>
-              <div className="w-full lg:w-64 rounded-3xl border border-white/60 dark:border-white/10 bg-white/70 dark:bg-black/20 p-6 space-y-3">
+              <div className="w-full lg:w-64 rounded-3xl border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/15 bg-[var(--brand-sand)]/80 dark:bg-[var(--brand-ink)]/60 p-6 space-y-3">
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-[var(--brand-ink)]" />
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Before</p>
-                    <p className="text-lg font-semibold text-[var(--brand-ink)] dark:text-white">360 minutes</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
+                    <p className="text-lg font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">360 minutes</p>
+            </div>
+        </div>
+            <div className="flex items-center gap-3">
                   <ShieldCheck className="w-5 h-5 text-[var(--brand-ink)]" />
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">After Baseline</p>
-                    <p className="text-lg font-semibold text-[var(--brand-ink)] dark:text-white">5 minutes</p>
+                    <p className="text-lg font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">5 minutes</p>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">Consistent layout across Configure + Export flows makes onboarding unmistakable.</p>
-              </div>
+            </div>
             </div>
           </section>
         </div>
@@ -248,9 +278,12 @@ const Index = () => {
         statusLabel="CURRENT STATUS"
         statusText="Choose your journey"
         showBackButton={false}
-        primaryButtonText="Open Configurator"
+        primaryButtonText="Design a Setup"
         primaryButtonIcon={<ArrowRight className="w-4 h-4" />}
         onPrimaryAction={() => navigate('/configure')}
+        secondaryButtonText="Export Current Mac"
+        secondaryButtonIcon={<Upload className="w-4 h-4" />}
+        onSecondaryAction={() => navigate('/export-setup')}
       />
     </div>
   );

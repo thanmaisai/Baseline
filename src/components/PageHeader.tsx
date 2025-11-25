@@ -23,7 +23,7 @@ export const PageHeader = ({ showGithub = true }: PageHeaderProps) => {
             <img
               src="/brand/baseline-mark-192.png"
               alt="Baseline mark"
-              className="w-9 h-9 rounded-2xl shadow-card border border-white/40 dark:border-white/10"
+              className="w-9 h-9 rounded-2xl shadow-card border border-[var(--brand-dunes)]/60 dark:border-[var(--brand-sand)]/20 bg-[var(--brand-sand)]/90 dark:bg-[var(--brand-ink)]"
             />
             <div className="leading-tight">
               <span className="text-lg font-semibold tracking-tight block">Baseline</span>

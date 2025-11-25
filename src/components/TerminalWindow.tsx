@@ -47,13 +47,13 @@ export const TerminalWindow = ({ lines, className = '', showCursor = true }: Ter
   const getLineColor = (type?: string) => {
     switch (type) {
       case 'command':
-        return 'text-emerald-400';
+        return 'text-[var(--brand-sunset)]';
       case 'success':
-        return 'text-green-400';
+        return 'text-[var(--brand-dunes)]';
       case 'error':
-        return 'text-red-400';
+        return 'text-[var(--brand-ink)]';
       case 'info':
-        return 'text-blue-400';
+        return 'text-[var(--brand-sand)]/80';
       default:
         return 'text-muted-foreground';
     }
@@ -81,9 +81,9 @@ export const TerminalWindow = ({ lines, className = '', showCursor = true }: Ter
         {/* Terminal Header */}
         <div className="flex items-center gap-2 px-4 py-3 bg-muted border-b border-border">
           <div className="flex gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors" />
-            <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors" />
+            <div className="w-3 h-3 rounded-full bg-[var(--brand-sunset)] transition-colors" />
+            <div className="w-3 h-3 rounded-full bg-[var(--brand-dunes)] transition-colors" />
+            <div className="w-3 h-3 rounded-full bg-[var(--brand-sand)] transition-colors" />
           </div>
           <div className="flex-1 text-center">
             <span className="text-sm text-muted-foreground font-mono">bash — setup-macos.sh</span>
