@@ -107,9 +107,7 @@ export const FloatingFooter = ({
           {showThemeToggle && (
             <div className="flex items-center">
               <div className="h-8 w-px bg-[var(--brand-sand)]/20 mr-3"></div>
-              <div className="[&_button]:text-[var(--brand-sand)] [&_button]:hover:text-[var(--brand-sand)] [&_button]:hover:bg-[var(--brand-sand)]/10 dark:[&_button]:hover:bg-white/5 [&_button]:h-8 [&_button]:w-8">
-                <ThemeToggle />
-              </div>
+              <ThemeToggle className="h-9 w-9 text-[var(--brand-sand)] hover:text-[var(--brand-sand)] hover:!bg-[var(--brand-sand)]/20 focus-visible:ring-offset-[var(--brand-ink)]" />
             </div>
           )}
 
