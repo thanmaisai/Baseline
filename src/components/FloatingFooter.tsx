@@ -164,7 +164,7 @@ export const FloatingFooter = ({
               style={{
                 backgroundColor: isDark ? 'transparent' : brand.sand,
                 color: isDark ? brand.sand : brand.ink,
-                border: isDark ? `2px solid ${brand.sand}` : `2px solid ${brand.ink}`,
+                border: isDark ? `1px solid ${brand.dunes}` : `1px solid ${brand.ink}`,
               }}
               aria-keyshortcuts={secondaryShortcut ? `Meta+${secondaryShortcut}` : "Meta+Digit2"}
             >

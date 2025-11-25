@@ -225,15 +225,15 @@ const ExportSetup = () => {
       {/* Header */}
       <header className="flex-shrink-0 px-6 py-6 border-b border-gray-50 dark:border-[#262626] flex flex-col justify-center">
         {/* Back to Home Link */}
-        <div className="mb-4">
-          <button 
+        {/* <div className="mb-4"> */}
+          {/* <button 
             onClick={() => navigate('/')}
-            className="inline-flex items-center text-xs font-bold text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors uppercase tracking-wider group"
+            className="inline-flex items-center text-xs font-bold text-gray-400 dark:text-green-400 hover:text-gray-900 dark:hover:text-white transition-colors uppercase tracking-wider group"
           >
             <ArrowLeft className="mr-1 w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Back to Home
           </button>
-        </div>
+        </div> */}
 
         <div className="flex items-end justify-between">
           <div>
