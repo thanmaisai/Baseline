@@ -11,7 +11,7 @@ export const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-4 md:p-6 relative overflow-hidden"
+      className="min-h-screen w-full flex flex-col items-center justify-start px-4 md:px-6 py-8 md:py-12 relative overflow-hidden"
       style={{
         background: isDark
           ? `linear-gradient(180deg, ${brand.ink} 0%, ${brand.sunset} 100%)`
