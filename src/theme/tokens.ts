@@ -29,6 +29,8 @@ export const themeTokens = {
         default: '#F5E7C6',
         light: '#FAF3E1',
         dark: '#FF6D1F',
+        card: 'rgba(235, 222, 201, 0.4)', // Main card borders - consistent across themes
+        cardInner: 'rgba(235, 222, 201, 0.3)', // Inner elements (dividers, nested borders)
       },
       accent: {
         primary: '#FF6D1F',
@@ -53,6 +55,8 @@ export const themeTokens = {
         default: '#222222',
         light: '#FF6D1F',
         dark: '#222222',
+        card: 'rgba(235, 222, 201, 0.4)', // Main card borders - consistent across themes
+        cardInner: 'rgba(235, 222, 201, 0.3)', // Inner elements (dividers, nested borders)
       },
       accent: {
         primary: '#FF6D1F',

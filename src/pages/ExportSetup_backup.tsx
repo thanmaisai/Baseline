@@ -7,12 +7,9 @@ import { generateSetupFromScan, parseBaselineJSON } from '@/utils/scanParser';
 import { FloatingFooter } from '@/components/FloatingFooter';
 import { PageLayout } from '@/components/PageLayout';
 import { toast } from 'sonner';
-import { themeTokens } from '@/theme/tokens';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const ExportSetup = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
   const [currentStep, setCurrentStep] = useState(1);
   const [copiedCommand, setCopiedCommand] = useState(false);
   const [copiedManualCommand, setCopiedManualCommand] = useState(false);
@@ -21,17 +18,11 @@ const ExportSetup = () => {
   const [parsedData, setParsedData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Get theme-aware border colors
-  const isDark = theme === 'dark';
-  const borderColors = {
-    card: themeTokens.colors[isDark ? 'dark' : 'light'].border.card,
-    cardInner: themeTokens.colors[isDark ? 'dark' : 'light'].border.cardInner,
-  };
-
   const curlCommand = `curl -fsSL https://raw.githubusercontent.com/thanmaisai/mac-setup-genie/main/public/baseline-scan.sh | bash`;
   const manualCommand = `chmod +x baseline-scanner.sh && ./baseline-scanner.sh`;
   
   const handleDownloadScript = () => {
+    // Download the baseline script from public folder
     const a = document.createElement('a');
     a.href = '/baseline-scan.sh';
     a.download = 'baseline-scanner.sh';
@@ -90,9 +81,11 @@ const ExportSetup = () => {
         return;
       }
       
+      // Set the scan data immediately
       setScanData(content);
       setFileName(file.name);
       
+      // Try to parse as JSON
       const parsed = parseBaselineJSON(content);
       if (parsed) {
         setParsedData(parsed);
@@ -106,8 +99,11 @@ const ExportSetup = () => {
     };
     
     reader.readAsText(file);
+    
+    // Reset the input value so the same file can be uploaded again
     event.target.value = '';
   };
+
 
   const handleBack = useCallback(() => {
     if (currentStep > 1) {
@@ -156,24 +152,29 @@ const ExportSetup = () => {
     }
   }, [currentStep, handleGenerateScript]);
 
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // CMD+ArrowLeft for back
       if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowLeft') {
         e.preventDefault();
         handleBack();
       }
+      // CMD+ArrowRight for next
       if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowRight') {
         e.preventDefault();
         if (currentStep < 3) {
           handleNext();
         }
       }
+      // CMD+Enter for download (last step)
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         if (currentStep === 3) {
           e.preventDefault();
           handleGenerateScript();
         }
       }
+      // CMD+H for home
       if ((e.metaKey || e.ctrlKey) && e.key === 'h') {
         e.preventDefault();
         navigate('/');
@@ -222,16 +223,10 @@ const ExportSetup = () => {
   return (
     <PageLayout>
       {/* Header */}
-      <header 
-        className="flex-shrink-0 px-6 md:px-10 py-8 border-b flex flex-col justify-center"
-        style={{ borderColor: borderColors.cardInner }}
-      >
+      <header className="flex-shrink-0 px-6 md:px-10 py-8 border-b border-[var(--brand-dunes)]/30 dark:border-[var(--brand-sand)]/10 flex flex-col justify-center">
         <div className="flex items-end justify-between">
           <div className="space-y-2">
-            <div 
-              className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/60 dark:bg-[var(--brand-ink)]/60 text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1.5 rounded-full border text-[var(--brand-ink)] dark:text-[var(--brand-sand)]"
-              style={{ borderColor: borderColors.cardInner }}
-            >
+            <div className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/60 dark:bg-[var(--brand-ink)]/60 text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1.5 rounded-full border border-[var(--brand-dunes)]/40 dark:border-[var(--brand-sand)]/20 text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-sunset)]" />
               Clone your Mac
             </div>
@@ -303,13 +298,7 @@ const ExportSetup = () => {
 
               <div className="ml-0 md:ml-17 grid md:grid-cols-2 gap-6">
                 {/* Option 1: Manual */}
-                <div 
-                  className="p-8 rounded-2xl border-2 transition-all duration-200 hover:bg-[var(--brand-sand)]/10 dark:hover:bg-white/5 flex flex-col h-full group"
-                  style={{
-                    borderColor: borderColors.card,
-                    backgroundColor: 'transparent',
-                  }}
-                >
+                <div className="p-8 rounded-2xl border border-[var(--brand-dunes)]/40 dark:border-[var(--brand-sand)]/20 bg-[var(--brand-sand)]/30 dark:bg-[var(--brand-ink)]/30 hover:border-[var(--brand-sunset)]/40 dark:hover:border-[var(--brand-sunset)]/40 transition-all hover:shadow-2xl hover:-translate-y-1 flex flex-col h-full group">
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h3 className="font-bold text-base mb-1 text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">Option 1: Manual</h3>
@@ -323,14 +312,10 @@ const ExportSetup = () => {
                     <Download className="mr-2 h-4 w-4" />
                     Download baseline-scanner.sh
                   </Button>
-                  <div 
-                    className="mt-auto pt-4 border-t"
-                    style={{ borderColor: borderColors.cardInner }}
-                  >
+                  <div className="mt-auto pt-4 border-t border-[var(--brand-dunes)]/30 dark:border-[var(--brand-sand)]/10">
                     <p className="text-[10px] text-[var(--brand-ink)]/50 dark:text-[var(--brand-sand)]/50 mb-2 uppercase tracking-widest font-bold">Then run in terminal:</p>
                     <div 
-                      className="bg-[var(--brand-ink)]/5 dark:bg-[var(--brand-sand)]/5 rounded-xl px-4 py-3 relative cursor-pointer hover:bg-[var(--brand-ink)]/10 dark:hover:bg-[var(--brand-sand)]/10 transition-colors border"
-                      style={{ borderColor: borderColors.cardInner }}
+                      className="bg-[var(--brand-ink)]/5 dark:bg-[var(--brand-sand)]/5 rounded-xl px-4 py-3 relative cursor-pointer hover:bg-[var(--brand-ink)]/10 dark:hover:bg-[var(--brand-sand)]/10 transition-colors border border-[var(--brand-dunes)]/20 dark:border-[var(--brand-sand)]/10"
                       onClick={handleCopyManualCommand}
                     >
                       <code className="block text-xs font-mono text-[var(--brand-ink)] dark:text-[var(--brand-sand)] pr-16">
@@ -347,13 +332,7 @@ const ExportSetup = () => {
                 </div>
 
                 {/* Option 2: Curl (Recommended) */}
-                <div 
-                  className="p-8 rounded-2xl border-2 transition-all duration-200 hover:bg-[var(--brand-sand)]/10 dark:hover:bg-white/5 relative overflow-hidden flex flex-col h-full group"
-                  style={{
-                    borderColor: borderColors.card,
-                    backgroundColor: 'transparent',
-                  }}
-                >
+                <div className="p-8 rounded-2xl border-2 border-[var(--brand-sunset)]/30 dark:border-[var(--brand-sunset)]/30 bg-[var(--brand-sunset)]/5 dark:bg-[var(--brand-sunset)]/10 relative overflow-hidden flex flex-col h-full group hover:shadow-2xl hover:-translate-y-1 transition-all">
                   <div className="absolute top-4 right-4">
                     <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-[var(--brand-sunset)] text-[var(--brand-ink)] uppercase tracking-[0.2em]">
                       Recommended
@@ -379,10 +358,7 @@ const ExportSetup = () => {
                       </button>
                     </div>
                   </div>
-                  <div 
-                    className="mt-5 flex items-start gap-2.5 text-xs text-[var(--brand-ink)]/60 dark:text-[var(--brand-sand)]/60 bg-[var(--brand-sand)]/30 dark:bg-[var(--brand-ink)]/30 rounded-xl p-3 border"
-                    style={{ borderColor: borderColors.cardInner }}
-                  >
+                  <div className="mt-5 flex items-start gap-2.5 text-xs text-[var(--brand-ink)]/60 dark:text-[var(--brand-sand)]/60 bg-[var(--brand-sand)]/30 dark:bg-[var(--brand-ink)]/30 rounded-xl p-3 border border-[var(--brand-dunes)]/20 dark:border-[var(--brand-sand)]/10">
                     <Check className="w-4 h-4 text-[var(--brand-sunset)] flex-shrink-0 mt-0.5" />
                     <span>Generates: <code className="font-mono bg-[var(--brand-ink)]/10 dark:bg-[var(--brand-sand)]/10 px-2 py-1 rounded">baseline-snapshot.json</code> and <code className="font-mono bg-[var(--brand-ink)]/10 dark:bg-[var(--brand-sand)]/10 px-2 py-1 rounded">baseline-snapshot.tar.gz</code></span>
                   </div>
@@ -408,10 +384,9 @@ const ExportSetup = () => {
                 <div 
                   className={`flex flex-col items-center justify-center w-full h-72 border-2 rounded-2xl transition-all group relative overflow-hidden ${
                     scanData
-                      ? 'border-solid bg-[var(--brand-sunset)]/10 shadow-lg'
-                      : 'border-dashed bg-[var(--brand-sand)]/20 dark:bg-[var(--brand-ink)]/20 hover:bg-[var(--brand-sand)]/40 dark:hover:bg-[var(--brand-ink)]/40 hover:border-[var(--brand-sunset)]/50 cursor-pointer hover:shadow-xl'
+                      ? 'border-solid border-[var(--brand-sunset)] bg-[var(--brand-sunset)]/10 shadow-lg'
+                      : 'border-dashed border-[var(--brand-dunes)]/40 dark:border-[var(--brand-sand)]/20 bg-[var(--brand-sand)]/20 dark:bg-[var(--brand-ink)]/20 hover:bg-[var(--brand-sand)]/40 dark:hover:bg-[var(--brand-ink)]/40 hover:border-[var(--brand-sunset)]/50 cursor-pointer hover:shadow-xl'
                   }`}
-                  style={{ borderColor: scanData ? 'var(--brand-sunset)' : borderColors.card }}
                     onClick={() => {
                       if (!scanData) {
                         fileInputRef.current?.click();
@@ -477,10 +452,7 @@ const ExportSetup = () => {
                 </div>
               </div>
 
-              <div 
-                className="ml-0 md:ml-17 bg-[var(--brand-ink)] dark:bg-black rounded-2xl p-8 md:p-10 text-[var(--brand-sand)] shadow-2xl relative overflow-hidden border"
-                style={{ borderColor: borderColors.cardInner }}
-              >
+              <div className="ml-0 md:ml-17 bg-[var(--brand-ink)] dark:bg-black rounded-2xl p-8 md:p-10 text-[var(--brand-sand)] shadow-2xl relative overflow-hidden border border-[var(--brand-sand)]/10">
                 {/* Decorative gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-sunset)]/10 via-transparent to-[var(--brand-sunset)]/5 pointer-events-none" />
                 
@@ -490,40 +462,28 @@ const ExportSetup = () => {
                   {/* Stats Grid */}
                   {parsedData ? (
                     <>
-                      <div className="grid grid-cols-3 gap-4 mb-8">
-                        <div 
-                          className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border"
-                          style={{ borderColor: borderColors.cardInner }}
-                        >
-                          <div className="text-3xl font-bold mb-1.5 text-[var(--brand-sand)]">
+                      <div className="grid grid-cols-3 gap-3 mb-6">
+                        <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm border border-white/10">
+                          <div className="text-2xl font-bold mb-1">
                             {(parsedData.package_managers.homebrew?.formulae?.length || 0) + 
                              (parsedData.package_managers.homebrew?.casks?.length || 0)}
                           </div>
-                          <div className="text-[10px] text-[var(--brand-sand)]/50 uppercase tracking-[0.2em] font-bold">Packages</div>
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wider">Packages</div>
                         </div>
-                        <div 
-                          className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border"
-                          style={{ borderColor: borderColors.cardInner }}
-                        >
-                          <div className="text-3xl font-bold mb-1.5 text-[var(--brand-sand)]">
+                        <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm border border-white/10">
+                          <div className="text-2xl font-bold mb-1">
                             {parsedData.development.vscode?.extensions?.length || 0}
                           </div>
                           <div className="text-[10px] text-[var(--brand-sand)]/50 uppercase tracking-[0.2em] font-bold">VS Code Ext.</div>
                         </div>
-                        <div 
-                          className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border"
-                          style={{ borderColor: borderColors.cardInner }}
-                        >
+                        <div className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border border-[var(--brand-sand)]/10">
                           <div className="text-3xl font-bold mb-1.5 text-[var(--brand-sunset)]">100%</div>
                           <div className="text-[10px] text-[var(--brand-sand)]/50 uppercase tracking-[0.2em] font-bold">Automated</div>
                         </div>
                       </div>
 
                       {/* What's Included - Dynamic from JSON */}
-                      <div 
-                        className="bg-[var(--brand-sand)]/5 rounded-xl p-5 backdrop-blur-sm border mb-6"
-                        style={{ borderColor: borderColors.cardInner }}
-                      >
+                      <div className="bg-[var(--brand-sand)]/5 rounded-xl p-5 backdrop-blur-sm border border-[var(--brand-sand)]/10 mb-6">
                         <h4 className="font-bold text-xs mb-4 uppercase tracking-[0.2em] text-[var(--brand-sand)]/70">Detected Configuration:</h4>
                         <div className="space-y-3">
                             {/* Homebrew Section */}
@@ -614,24 +574,15 @@ const ExportSetup = () => {
                       </>
                     ) : (
                       <div className="grid grid-cols-3 gap-4 mb-8">
-                        <div 
-                          className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border"
-                          style={{ borderColor: borderColors.cardInner }}
-                        >
+                        <div className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border border-[var(--brand-sand)]/10">
                           <div className="text-3xl font-bold mb-1.5 text-[var(--brand-sand)]">—</div>
                           <div className="text-[10px] text-[var(--brand-sand)]/50 uppercase tracking-[0.2em] font-bold">Packages</div>
                         </div>
-                        <div 
-                          className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border"
-                          style={{ borderColor: borderColors.cardInner }}
-                        >
+                        <div className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border border-[var(--brand-sand)]/10">
                           <div className="text-3xl font-bold mb-1.5 text-[var(--brand-sand)]">—</div>
                           <div className="text-[10px] text-[var(--brand-sand)]/50 uppercase tracking-[0.2em] font-bold">Est. Minutes</div>
                         </div>
-                        <div 
-                          className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border"
-                          style={{ borderColor: borderColors.cardInner }}
-                        >
+                        <div className="bg-[var(--brand-sand)]/5 rounded-xl p-4 backdrop-blur-sm border border-[var(--brand-sand)]/10">
                           <div className="text-3xl font-bold mb-1.5 text-[var(--brand-sunset)]">100%</div>
                           <div className="text-[10px] text-[var(--brand-sand)]/50 uppercase tracking-[0.2em] font-bold">Automated</div>
                         </div>
@@ -639,10 +590,7 @@ const ExportSetup = () => {
                     )}
 
                     {/* Terminal Preview */}
-                    <div 
-                      className="mt-6 bg-black/60 dark:bg-black/80 rounded-xl p-4 backdrop-blur-sm border"
-                      style={{ borderColor: borderColors.cardInner }}
-                    >
+                    <div className="mt-6 bg-black/60 dark:bg-black/80 rounded-xl p-4 backdrop-blur-sm border border-[var(--brand-sand)]/10">
                       <div className="flex items-center gap-2 mb-3">
                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
