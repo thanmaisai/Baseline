@@ -179,18 +179,35 @@
     scroll-behavior: smooth;
   }
   
-  /* Custom scrollbar */
+  /* Custom scrollbar - Neobrutalist style */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-secondary/30;
+    @apply bg-[#FAF3E1] dark:bg-[#222222];
+    border-left: 2px solid #222222;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary/30 rounded-full hover:bg-primary/50 transition-colors;
+    @apply bg-[#FF6D1F];
+    border: 2px solid #222222;
+    border-radius: 0;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-[#e55c15];
+  }
+
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-[#0A0A0A];
+    border-left: 2px solid #3A3A3A;
+  }
+  
+  .dark ::-webkit-scrollbar-thumb {
+    border: 2px solid #3A3A3A;
   }
   
   /* No scrollbar utility */

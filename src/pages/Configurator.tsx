@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { Download, Check, X, Loader2 } from 'lucide-react';
+import { Download, Check, X, Loader2, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import { Button } from '@/components/ui/button';
@@ -520,18 +520,21 @@ const Configurator = () => {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-3.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-2.5"
+              className="mb-6 p-6 bg-[#222222] dark:bg-[#1A1A1A] text-[#FAF3E1] rounded-xl border-2 border-[#222222] dark:border-[#3A3A3A] shadow-[4px_4px_0px_0px_#FF6D1F] relative overflow-hidden group"
             >
-              <div className="w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-gray-900 dark:text-white mb-0.5">
-                  Recommended Section
-                </p>
-                <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-snug">
-                  Most developers install standard Chrome and Firefox for cross-browser testing.
-                </p>
+              {/* Decorative circle */}
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#FF6D1F] rounded-full opacity-20 group-hover:scale-150 transition-transform duration-500"></div>
+              
+              <div className="flex items-start gap-5 relative z-10">
+                <div className="w-12 h-12 bg-[#FF6D1F] text-[#222222] rounded-lg flex items-center justify-center border-2 border-[#FAF3E1] shadow-sm shrink-0">
+                  <Star className="h-6 w-6 fill-current" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold mb-1 text-[#FAF3E1]">Recommended Stack</h3>
+                  <p className="text-[#F5E7C6]/90 dark:text-[#F5E7C6] font-medium max-w-2xl">
+                    Most developers install standard <span className="text-white border-b-2 border-[#FF6D1F] font-bold">Chrome</span> and <span className="text-white border-b-2 border-[#FF6D1F] font-bold">Firefox</span> for cross-browser testing.
+                  </p>
+                </div>
               </div>
             </motion.div>
           )}
@@ -549,25 +552,20 @@ const Configurator = () => {
                   <motion.button
                     key={template.id}
                     onClick={() => applyTemplate(template.id)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="group relative p-6 rounded-xl border-2 border-[hsl(var(--template-border))] hover:border-[hsl(var(--primary))] bg-[hsl(var(--card))] hover:shadow-lg transition-all text-left overflow-hidden"
+                    className="group relative p-6 rounded-xl border-2 border-[#222222] dark:border-[#3A3A3A] hover:border-[#FF6D1F] bg-[#F5E7C6] dark:bg-[#111111] shadow-[4px_4px_0px_0px_#222222] dark:shadow-[4px_4px_0px_0px_#3A3A3A] hover:shadow-[6px_6px_0px_0px_#222222] dark:hover:shadow-[6px_6px_0px_0px_#3A3A3A] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all text-left overflow-hidden"
                   >
-                    {/* Subtle gradient overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--primary))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    
-                    {/* Top accent bar */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--card))] via-[hsl(var(--primary))] to-[hsl(var(--card))] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {/* Decorative gradient on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#FF6D1F]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     
                     <div className="relative">
-                      <h3 className="font-bold text-lg mb-2 text-[hsl(var(--card-foreground))] group-hover:text-[hsl(var(--primary))] transition-colors">
+                      <h3 className="font-bold text-lg mb-2 text-[#222222] dark:text-white group-hover:text-[#FF6D1F] transition-colors">
                         {template.name}
                       </h3>
-                      <p className="text-xs text-[hsl(var(--muted-foreground))] mb-4 leading-relaxed">
+                      <p className="text-xs text-[#222222]/70 dark:text-gray-400 mb-4 leading-relaxed font-medium">
                         {template.description}
                       </p>
                       {template.toolIds.length > 0 && (
-                        <div className="flex items-center gap-2 text-[11px] font-medium text-[hsl(var(--muted-foreground))]/80 group-hover:text-[hsl(var(--primary))] transition-colors">
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-[#222222]/60 dark:text-gray-400 group-hover:text-[#FF6D1F] transition-colors">
                           <Check className="h-3.5 w-3.5" />
                           <span>{template.toolIds.length} tools included</span>
                         </div>
@@ -619,17 +617,14 @@ const Configurator = () => {
                           });
                         }}
                       >
-                        <div className="relative overflow-hidden rounded-lg h-[160px] flex flex-col border-2 border-dashed border-gray-300 dark:border-[#262626] hover:border-blue-500 dark:hover:border-blue-400 bg-gray-50 dark:bg-[#0A0A0A] hover:bg-gray-100 dark:hover:bg-[#111111] transition-all duration-200">
-                          {/* Top border */}
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-[#262626] to-[#404040]" />
-
-                          <div className="relative z-10 p-3.5 flex-1 flex flex-col items-center justify-center text-center gap-2">
-                            <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-[#1A1A1A] border-2 border-dashed border-gray-300 dark:border-[#262626] group-hover:border-blue-500 dark:group-hover:border-blue-400 flex items-center justify-center transition-colors">
-                              <span className="text-lg">➕</span>
+                        <div className="relative overflow-hidden rounded-xl h-[200px] flex flex-col border-2 border-dashed border-[#222222] dark:border-[#3A3A3A] hover:border-[#FF6D1F] dark:hover:border-[#FF6D1F] bg-[#FAF3E1] dark:bg-[#0A0A0A] hover:bg-[#F5E7C6] dark:hover:bg-[#111111] transition-all duration-200 shadow-[4px_4px_0px_0px_#222222] dark:shadow-[4px_4px_0px_0px_#3A3A3A] hover:shadow-[6px_6px_0px_0px_#222222] dark:hover:shadow-[6px_6px_0px_0px_#3A3A3A] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
+                          <div className="relative z-10 p-5 flex-1 flex flex-col items-center justify-center text-center gap-3">
+                            <div className="w-14 h-14 rounded-xl bg-white dark:bg-[#1A1A1A] border-2 border-dashed border-[#222222] dark:border-[#3A3A3A] group-hover:border-[#FF6D1F] dark:group-hover:border-[#FF6D1F] flex items-center justify-center transition-colors">
+                              <span className="text-2xl">➕</span>
                             </div>
-                            <div>
-                              <p className="text-xs font-bold text-gray-900 dark:text-white mb-0.5">Request a Tool</p>
-                              <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-snug">
+                            <div className="px-4">
+                              <p className="text-base font-bold text-[#222222] dark:text-white mb-1.5 leading-tight">Request a Tool</p>
+                              <p className="text-[10.5px] text-[#222222]/70 dark:text-gray-400 leading-[1.4] font-medium">
                                 Don't see what you need? Add a custom Homebrew formula.
                               </p>
                             </div>

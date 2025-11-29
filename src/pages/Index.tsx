@@ -267,7 +267,7 @@ const Index = () => {
 
       <FloatingFooter
         branding="Baseline"
-        statusLabel="CURRENT STATUS"
+        statusLabel=""
         statusText="Choose your journey"
         showBackButton={false}
         primaryButtonText="Design a Setup"
