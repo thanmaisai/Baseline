@@ -551,19 +551,24 @@ const Configurator = () => {
                     onClick={() => applyTemplate(template.id)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="group relative p-4 rounded-lg border-2 border-gray-200 dark:border-[#262626] hover:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-[#111111] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-all text-left"
+                    className="group relative p-6 rounded-xl border-2 border-[hsl(var(--template-border))] hover:border-[hsl(var(--primary))] bg-[hsl(var(--card))] hover:shadow-lg transition-all text-left overflow-hidden"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+                    {/* Subtle gradient overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--primary))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
+                    {/* Top accent bar */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--card))] via-[hsl(var(--primary))] to-[hsl(var(--card))] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
                     <div className="relative">
-                      <h3 className="font-bold text-lg mb-1.5 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      <h3 className="font-bold text-lg mb-2 text-[hsl(var(--card-foreground))] group-hover:text-[hsl(var(--primary))] transition-colors">
                         {template.name}
                       </h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 leading-snug">
+                      <p className="text-xs text-[hsl(var(--muted-foreground))] mb-4 leading-relaxed">
                         {template.description}
                       </p>
                       {template.toolIds.length > 0 && (
-                        <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">
-                          <Check className="h-3 w-3" />
+                        <div className="flex items-center gap-2 text-[11px] font-medium text-[hsl(var(--muted-foreground))]/80 group-hover:text-[hsl(var(--primary))] transition-colors">
+                          <Check className="h-3.5 w-3.5" />
                           <span>{template.toolIds.length} tools included</span>
                         </div>
                       )}

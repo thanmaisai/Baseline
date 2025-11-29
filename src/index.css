@@ -66,6 +66,8 @@
     --brand-dunes: #F5E7C6;
     --brand-sunset: #FF6D1F;
     --brand-ink: #222222;
+    
+    --template-border: 0 0% 13% / 0.1;
   }
 
   .dark {
@@ -110,6 +112,8 @@
     --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.8), 0 1px 2px -1px rgba(0,0,0,0.8);
     --shadow-hover: 0 20px 25px -5px rgba(0,0,0,0.8), 0 8px 10px -6px rgba(0,0,0,0.8);
     --shadow-glow: 0 0 30px rgba(255,109,31,0.25);
+    
+    --template-border: 43.2 71.4% 93% / 0.2;
     --sidebar-background: 0 0% 13.3%;
     --sidebar-foreground: 43.2 71.4% 93.1%;
     --sidebar-primary: 20.9 100% 56.1%;
