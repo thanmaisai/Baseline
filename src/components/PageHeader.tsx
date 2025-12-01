@@ -28,7 +28,7 @@ export const PageHeader = ({ showGithub = true }: PageHeaderProps) => {
             <div className="leading-tight">
               <span className="text-lg font-semibold tracking-tight block">Baseline</span>
               <span className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground block">
-                Mac Setup Studio
+                Baseline
               </span>
             </div>
           </motion.div>

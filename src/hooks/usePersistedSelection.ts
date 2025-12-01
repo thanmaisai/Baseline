@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Selection } from '@/types/tools';
 
-const STORAGE_KEY = 'mac-setup-genie-selection';
+const STORAGE_KEY = 'baseline-selection';
 
 const defaultSelection: Selection = {
   tools: [],

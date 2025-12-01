@@ -53,7 +53,7 @@ LOG_FILE="/tmp/mac_setup_genie.log"
 set -e
 
 # Initialize log file
-echo "Mac Setup Started: \$TIMESTAMP" > "\$LOG_FILE"
+echo "Baseline Setup Started: \$TIMESTAMP" > "\$LOG_FILE"
 echo "======================================" >> "\$LOG_FILE"
 echo "" >> "\$LOG_FILE"
 

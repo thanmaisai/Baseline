@@ -633,7 +633,7 @@ main() {
   echo -e "  \${PINK}\${ICON_LOCK} Size:\${RESET}            \${WHITE}$(ls -lh \$OUTPUT_ARCHIVE | awk '{print \$5}')\${RESET}"
   echo ""
   echo -e "  \${BOLD}Next Steps:\${RESET}"
-  echo -e "    \${GREEN}1.\${RESET} Upload \${CYAN}\${OUTPUT_JSON}\${RESET} to Mac Setup Genie"
+  echo -e "    \${GREEN}1.\${RESET} Upload \${CYAN}\${OUTPUT_JSON}\${RESET} to Baseline"
   echo -e "    \${GREEN}2.\${RESET} Review and customize your configuration"
   echo -e "    \${GREEN}3.\${RESET} Generate your setup script"
   echo ""
