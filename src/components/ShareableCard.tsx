@@ -401,7 +401,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
 
   return (
     <>
-    <div className="w-full flex gap-8 items-start justify-center px-4 py-4">
+    <div className="w-full flex gap-8 items-center justify-center px-4 py-2">
       {/* Card Preview - Left Side */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -412,7 +412,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
           <CardBody className="relative">
             <div
               ref={cardRef}
-              className="relative w-[480px] h-[720px] rounded-3xl overflow-hidden shadow-xl"
+              className="relative w-[400px] h-[600px] rounded-2xl overflow-hidden shadow-xl"
               style={{
                 backgroundColor: theme.cardBg,
                 border: `1px solid ${theme.border}`,
@@ -421,21 +421,21 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               {/* Pattern Background */}
               {currentPattern !== 'minimal' && (
                 <div
-                  className="absolute top-0 left-0 w-full h-[300px] pointer-events-none"
+                  className="absolute top-0 left-0 w-full h-[250px] pointer-events-none"
                   dangerouslySetInnerHTML={{ __html: patternSvg }}
                 />
               )}
 
               {/* Content */}
-              <div className="relative z-10 h-full flex flex-col p-8">
+              <div className="relative z-10 h-full flex flex-col p-7">
                 {/* Top Section */}
-                <div className="mt-[24%] flex-shrink-0">
+                <div className="mt-[20%] flex-shrink-0">
                   <div
-                className="w-10 h-1 rounded-full mb-3"
+                className="w-9 h-1 rounded-full mb-2.5"
                 style={{ backgroundColor: theme.accent }}
               />
               <h2
-                className="text-[3rem] font-black tracking-tighter leading-[0.8] mb-2.5"
+                className="text-[2.5rem] font-black tracking-tighter leading-[0.85] mb-2.5"
                 style={{ 
                   color: theme.text,
                   textShadow: `0 2px 20px ${theme.accent}40`
@@ -445,9 +445,9 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                 <br />
                 STACK
               </h2>
-              <div className="flex items-center gap-2.5 mb-3">
+              <div className="flex items-center gap-2 mb-2.5">
                 <span
-                  className="text-[10px] font-mono font-bold tracking-[0.15em] uppercase px-2.5 py-1 rounded-lg border-2"
+                  className="text-[9px] font-mono font-bold tracking-[0.15em] uppercase px-2.5 py-0.5 rounded-md border-2"
                   style={{
                     color: theme.accent,
                     backgroundColor: theme.accentLight,
@@ -457,21 +457,21 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                   {selectedTools.length} TOOLS
                 </span>
                 <span className="h-px w-5" style={{ backgroundColor: theme.border }} />
-                <span className="text-[10px] font-mono font-semibold" style={{ color: theme.textMuted }}>
+                <span className="text-[9px] font-mono font-semibold" style={{ color: theme.textMuted }}>
                   {currentDate}
                 </span>
               </div>
             </div>
 
             {/* Tool Pills Section - Fixed height with scroll */}
-            <div className="flex-shrink-0 mb-4" style={{ height: '260px' }}>
-              <div className="h-full flex flex-wrap gap-2 overflow-y-auto no-scrollbar content-start">
+            <div className="flex-shrink-0 mb-4" style={{ height: '210px' }}>
+              <div className="h-full flex flex-wrap gap-1.5 overflow-y-auto no-scrollbar content-start">
                 {toolNames.map((name, idx) => (
                   <span
                     key={idx}
-                    className={`font-mono font-medium rounded-md transition-all cursor-default select-none backdrop-blur-sm flex-shrink-0 ${toolPillPadding}`}
+                    className="font-mono font-medium rounded-md transition-all cursor-default select-none backdrop-blur-sm flex-shrink-0 px-2.5 py-1"
                     style={{
-                      fontSize: toolPillFontSize,
+                      fontSize: '9px',
                       color: theme.text,
                       backgroundColor: theme.accentLight,
                       border: `1px solid ${theme.border}`,
@@ -483,9 +483,9 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                 ))}
                 {remainingCount > 0 && (
                   <span
-                    className={`font-mono font-bold rounded-md transition-all cursor-default select-none backdrop-blur-sm flex-shrink-0 ${toolPillPadding}`}
+                    className="font-mono font-bold rounded-md transition-all cursor-default select-none backdrop-blur-sm flex-shrink-0 px-2.5 py-1"
                     style={{
-                      fontSize: toolPillFontSize,
+                      fontSize: '9px',
                       color: theme.accent,
                       backgroundColor: theme.accentLight,
                       border: `2px solid ${theme.accent}`,
@@ -500,7 +500,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
 
             {/* Stats Row - Minimal inline design */}
             <div 
-              className="flex-shrink-0 mb-4 pb-3 border-b"
+              className="flex-shrink-0 mb-3 pb-2.5 border-b"
               style={{
                 borderColor: theme.border,
               }}
@@ -508,18 +508,18 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               <div className="text-[7px] font-mono tracking-widest uppercase mb-1.5" style={{ color: theme.textMuted }}>
                 TOP CATEGORIES
               </div>
-              <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2.5 flex-wrap">
                 {topCategories.map(([category, tools]) => (
                   <div key={category} className="flex items-center gap-1.5">
                     <div
                       className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: theme.accent }}
                     />
-                    <span className="text-[10px] font-medium capitalize whitespace-nowrap" style={{ color: theme.text }}>
+                    <span className="text-[9px] font-medium capitalize whitespace-nowrap" style={{ color: theme.text }}>
                       {category}
                     </span>
                     <span 
-                      className="text-[9px] font-mono font-bold whitespace-nowrap"
+                      className="text-[8px] font-mono font-bold whitespace-nowrap"
                       style={{ 
                         color: theme.accent,
                       }}
@@ -532,20 +532,20 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
             </div>
 
             {/* Footer - QR Code and Branding */}
-            <div className="flex-shrink-0 flex items-center justify-between mt-auto pt-4">
+            <div className="flex-shrink-0 flex items-center justify-between mt-auto pt-3">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-white rounded-xl shadow-lg flex-shrink-0">
+                <div className="p-1.5 bg-white rounded-lg shadow-md flex-shrink-0">
                   <img
                     src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://mac-baseline.vercel.app/&color=222222"
                     alt="Scan to visit"
-                    style={{ display: 'block', width: '52px', height: '52px' }}
+                    style={{ display: 'block', width: '42px', height: '42px' }}
                   />
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[8px] font-mono uppercase tracking-wider" style={{ color: theme.textMuted }}>
+                <div className="flex flex-col gap-0">
+                  <span className="text-[7px] font-mono uppercase tracking-wider" style={{ color: theme.textMuted }}>
                     SCAN TO VISIT
                   </span>
-                  <span className="text-[11px] font-bold" style={{ color: theme.text }}>
+                  <span className="text-[10px] font-bold" style={{ color: theme.text }}>
                     mac-baseline
                   </span>
                 </div>
@@ -554,16 +554,16 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               {/* Branding */}
               <div className="text-right leading-none flex-shrink-0">
                 <span
-                  className="block text-[8px] font-bold tracking-widest uppercase mb-1.5"
+                  className="block text-[7px] font-bold tracking-widest uppercase mb-1"
                   style={{ color: theme.textMuted }}
                 >
                   POWERED BY
                 </span>
                 <div className="flex items-baseline justify-end gap-0.5">
-                  <span className="font-sans text-[22px] font-black tracking-tight" style={{ color: theme.text }}>
+                  <span className="font-sans text-[18px] font-black tracking-tight" style={{ color: theme.text }}>
                     Baseline
                   </span>
-                  <span className="text-[28px]" style={{ color: theme.accent }}>
+                  <span className="text-[22px]" style={{ color: theme.accent }}>
                     .
                   </span>
                 </div>
@@ -579,12 +579,12 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
       <motion.div 
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="flex flex-col gap-5 w-full max-w-sm flex-shrink-0"
+        className="flex flex-col gap-4 w-full max-w-xs flex-shrink-0"
       >
         {/* Header */}
         <div className="text-left">
           <h2 
-            className="text-3xl font-black mb-2 tracking-tight"
+            className="text-2xl font-black mb-1 tracking-tight"
             style={{ color: tokens.colors.text.primary }}
           >
             Share Your Dev Stack
@@ -600,11 +600,10 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
         {/* Tool Selection Notice */}
         {needsSelection && (
           <div 
-            className="w-full p-4 rounded-xl border-2"
+            className="w-full p-3 rounded-xl border-2"
             style={{
               backgroundColor: tokens.colors.background.card,
               borderColor: tokens.brand.sunset,
-              boxShadow: `0 0 20px ${tokens.brand.sunset}15`,
             }}
           >
             <div className="flex items-center justify-between gap-3">
@@ -619,12 +618,12 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                   className="text-xs"
                   style={{ color: tokens.colors.text.secondary }}
                 >
-                  You have {selectedTools.length} tools. Choose your top {MAX_DISPLAY_TOOLS} to display on the card.
+                  Choose your top {MAX_DISPLAY_TOOLS} to display.
                 </p>
               </div>
               <button
                 onClick={() => setShowToolSelector(true)}
-                className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95"
+                className="flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95"
                 style={{
                   backgroundColor: tokens.brand.sunset,
                   color: '#fff',
@@ -639,53 +638,53 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
 
         {/* Action Buttons Grid */}
         <div 
-          className="p-4 rounded-xl border"
+          className="p-3 rounded-xl border"
           style={{
             backgroundColor: tokens.colors.background.card,
             borderColor: tokens.colors.border.card,
           }}
         >
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <button
               onClick={randomizeAll}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border"
               style={{
                 backgroundColor: tokens.colors.background.secondary,
                 borderColor: tokens.colors.border.card,
                 color: tokens.colors.text.primary,
               }}
             >
-              <RefreshCw className="w-4 h-4" />
-              Randomize All
+              <RefreshCw className="w-3.5 h-3.5" />
+              Randomize
             </button>
             <button
               onClick={randomizeTheme}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border"
               style={{
                 backgroundColor: tokens.colors.background.secondary,
                 borderColor: tokens.colors.border.card,
                 color: tokens.colors.text.primary,
               }}
             >
-              <Palette className="w-4 h-4" />
-              New Theme
+              <Palette className="w-3.5 h-3.5" />
+              Theme
             </button>
             <button
               onClick={randomizePattern}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border"
               style={{
                 backgroundColor: tokens.colors.background.secondary,
                 borderColor: tokens.colors.border.card,
                 color: tokens.colors.text.primary,
               }}
             >
-              <RefreshCw className="w-4 h-4" />
-              New Pattern
+              <RefreshCw className="w-3.5 h-3.5" />
+              Pattern
             </button>
             <button
               onClick={handleDownload}
               disabled={isExporting}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
               style={{
                 background: `linear-gradient(135deg, ${tokens.brand.sunset} 0%, #e85d10 100%)`,
                 color: '#fff',
@@ -696,7 +695,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                 <>Exporting...</>
               ) : (
                 <>
-                  <Download className="w-4 h-4" />
+                  <Download className="w-3.5 h-3.5" />
                   Save Card
                 </>
               )}
@@ -704,7 +703,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
           </div>
           
           <p 
-            className="text-xs text-center mt-3 pt-3 border-t"
+            className="text-[10px] text-center mt-2 pt-2 border-t"
             style={{ 
               color: tokens.colors.text.secondary,
               borderColor: tokens.colors.border.card,
@@ -716,22 +715,22 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
 
         {/* Installation Instructions */}
         <div 
-          className="rounded-xl p-5 border"
+          className="rounded-xl p-4 border"
           style={{
             backgroundColor: tokens.colors.background.card,
             borderColor: tokens.colors.border.card,
           }}
         >
           <h3 
-            className="text-xs font-bold mb-4 uppercase tracking-wider"
+            className="text-[10px] font-bold mb-3 uppercase tracking-wider"
             style={{ color: tokens.colors.text.primary }}
           >
             Installation Instructions
           </h3>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-start gap-3">
+          <div className="space-y-2 text-sm">
+            <div className="flex items-start gap-2">
               <span 
-                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
                 style={{ 
                   backgroundColor: `${tokens.brand.sunset}20`,
                   color: tokens.brand.sunset 
@@ -739,18 +738,16 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               >
                 1
               </span>
-              <div>
-                <p 
-                  className="font-medium text-xs"
-                  style={{ color: tokens.colors.text.primary }}
-                >
-                  Download the script below
-                </p>
-              </div>
+              <p 
+                className="font-medium text-[11px]"
+                style={{ color: tokens.colors.text.primary }}
+              >
+                Download the script below
+              </p>
             </div>
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2">
               <span 
-                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
                 style={{ 
                   backgroundColor: `${tokens.brand.sunset}20`,
                   color: tokens.brand.sunset 
@@ -760,13 +757,13 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               </span>
               <div>
                 <p 
-                  className="font-medium text-xs"
+                  className="font-medium text-[11px]"
                   style={{ color: tokens.colors.text.primary }}
                 >
                   Make it executable
                 </p>
                 <code 
-                  className="font-mono text-[10px] px-2 py-1 rounded mt-1 inline-block"
+                  className="font-mono text-[9px] px-1.5 py-0.5 rounded mt-0.5 inline-block"
                   style={{ 
                     backgroundColor: tokens.colors.background.secondary,
                     color: tokens.colors.text.secondary 
@@ -776,9 +773,9 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                 </code>
               </div>
             </div>
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2">
               <span 
-                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
                 style={{ 
                   backgroundColor: `${tokens.brand.sunset}20`,
                   color: tokens.brand.sunset 
@@ -788,13 +785,13 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               </span>
               <div>
                 <p 
-                  className="font-medium text-xs"
+                  className="font-medium text-[11px]"
                   style={{ color: tokens.colors.text.primary }}
                 >
                   Run it
                 </p>
                 <code 
-                  className="font-mono text-[10px] px-2 py-1 rounded mt-1 inline-block"
+                  className="font-mono text-[9px] px-1.5 py-0.5 rounded mt-0.5 inline-block"
                   style={{ 
                     backgroundColor: tokens.colors.background.secondary,
                     color: tokens.colors.text.secondary 
