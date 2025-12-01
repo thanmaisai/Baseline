@@ -127,39 +127,39 @@ const themes = {
 
 const patterns = {
   wave: (theme: typeof themes.dark) => `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 480 300">
       <defs>
         <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.6" />
           <stop offset="100%" style="stop-color:${theme.gradientTo};stop-opacity:0.8" />
         </linearGradient>
       </defs>
-      <path d="M0,0 L400,0 L400,240 C350,240 320,160 270,160 C220,160 200,260 140,260 C80,260 60,180 0,180 Z" fill="url(#waveGrad)"/>
+      <path d="M0,0 L480,0 L480,240 C420,240 384,160 324,160 C264,160 240,260 168,260 C96,260 72,180 0,180 Z" fill="url(#waveGrad)"/>
     </svg>
   `,
   dots: (theme: typeof themes.dark) => `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
           <circle cx="20" cy="20" r="2" fill="${theme.accent}" opacity="0.3"/>
         </pattern>
       </defs>
-      <rect width="400" height="300" fill="url(#dots)"/>
-      <rect width="400" height="300" fill="url(#dots)" transform="translate(20, 20)"/>
+      <rect width="480" height="300" fill="url(#dots)"/>
+      <rect width="480" height="300" fill="url(#dots)" transform="translate(20, 20)"/>
     </svg>
   `,
   grid: (theme: typeof themes.dark) => `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
           <path d="M 40 0 L 0 0 0 40" fill="none" stroke="${theme.accent}" stroke-width="1" opacity="0.2"/>
         </pattern>
       </defs>
-      <rect width="400" height="300" fill="url(#grid)"/>
+      <rect width="480" height="300" fill="url(#grid)"/>
     </svg>
   `,
   gradient: (theme: typeof themes.dark) => `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.4" />
@@ -170,38 +170,38 @@ const patterns = {
           <stop offset="100%" style="stop-color:transparent;stop-opacity:0" />
         </radialGradient>
       </defs>
-      <rect width="400" height="300" fill="url(#grad)"/>
-      <ellipse cx="100" cy="80" rx="120" ry="120" fill="url(#radial)"/>
-      <ellipse cx="320" cy="220" rx="100" ry="100" fill="url(#radial)"/>
+      <rect width="480" height="300" fill="url(#grad)"/>
+      <ellipse cx="120" cy="80" rx="120" ry="120" fill="url(#radial)"/>
+      <ellipse cx="384" cy="220" rx="100" ry="100" fill="url(#radial)"/>
     </svg>
   `,
   minimal: () => ``,
   circles: (theme: typeof themes.dark) => `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="circleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.2" />
           <stop offset="100%" style="stop-color:${theme.gradientTo};stop-opacity:0.4" />
         </linearGradient>
       </defs>
-      <circle cx="80" cy="80" r="100" fill="url(#circleGrad)"/>
-      <circle cx="320" cy="160" r="120" fill="url(#circleGrad)"/>
-      <circle cx="200" cy="250" r="90" fill="url(#circleGrad)"/>
+      <circle cx="96" cy="80" r="100" fill="url(#circleGrad)"/>
+      <circle cx="384" cy="160" r="120" fill="url(#circleGrad)"/>
+      <circle cx="240" cy="250" r="90" fill="url(#circleGrad)"/>
     </svg>
   `,
   hexagon: (theme: typeof themes.dark) => `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <pattern id="hexagon" x="0" y="0" width="50" height="43.3" patternUnits="userSpaceOnUse">
           <path d="M25 0 L50 12.5 L50 37.5 L25 50 L0 37.5 L0 12.5 Z" 
                 fill="none" stroke="${theme.accent}" stroke-width="1" opacity="0.25"/>
         </pattern>
       </defs>
-      <rect width="400" height="300" fill="url(#hexagon)"/>
+      <rect width="480" height="300" fill="url(#hexagon)"/>
     </svg>
   `,
   diagonal: (theme: typeof themes.dark) => `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="diagGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.5" />
@@ -212,21 +212,21 @@ const patterns = {
           <line x1="0" y1="0" x2="0" y2="30" stroke="${theme.accent}" stroke-width="2" opacity="0.2"/>
         </pattern>
       </defs>
-      <rect width="400" height="300" fill="url(#diagGrad)"/>
-      <rect width="400" height="300" fill="url(#diagLines)"/>
+      <rect width="480" height="300" fill="url(#diagGrad)"/>
+      <rect width="480" height="300" fill="url(#diagLines)"/>
     </svg>
   `,
   zigzag: (theme: typeof themes.dark) => `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="zigzagGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.6" />
           <stop offset="100%" style="stop-color:${theme.gradientTo};stop-opacity:0.7" />
         </linearGradient>
       </defs>
-      <path d="M0,0 L400,0 L400,120 L350,140 L300,120 L250,140 L200,120 L150,140 L100,120 L50,140 L0,120 Z" 
+      <path d="M0,0 L480,0 L480,120 L420,140 L360,120 L300,140 L240,120 L180,140 L120,120 L60,140 L0,120 Z" 
             fill="url(#zigzagGrad)"/>
-      <path d="M0,180 L50,160 L100,180 L150,160 L200,180 L250,160 L300,180 L350,160 L400,180 L400,300 L0,300 Z" 
+      <path d="M0,180 L60,160 L120,180 L180,160 L240,180 L300,160 L360,180 L420,160 L480,180 L480,300 L0,300 Z" 
             fill="url(#zigzagGrad)" opacity="0.5"/>
     </svg>
   `,
@@ -271,8 +271,8 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     .sort(([, a], [, b]) => b.length - a.length)
     .slice(0, 3);
 
-  // Get all tool names for the pills
-  const toolNames = selectedTools.map(t => t.name).slice(0, 24); // Limit to avoid overflow
+  // Get all tool names for the pills - show all tools
+  const toolNames = selectedTools.map(t => t.name);
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -349,7 +349,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
       >
         <div
           ref={cardRef}
-          className="relative w-[400px] h-[640px] rounded-3xl overflow-hidden shadow-2xl"
+          className="relative w-[480px] h-[750px] rounded-3xl overflow-hidden shadow-2xl"
           style={{
             backgroundColor: theme.cardBg,
             border: `1px solid ${theme.border}`,
@@ -358,30 +358,33 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
           {/* Pattern Background */}
           {currentPattern !== 'minimal' && (
             <div
-              className="absolute top-0 left-0 w-full h-[300px] pointer-events-none"
+              className="absolute top-0 left-0 w-full h-[280px] pointer-events-none"
               dangerouslySetInnerHTML={{ __html: patternSvg }}
             />
           )}
 
           {/* Content */}
-          <div className="relative z-10 h-full flex flex-col justify-between p-8">
+          <div className="relative z-10 h-full flex flex-col p-8">
             {/* Top Section */}
-            <div className="mt-[45%]">
+            <div className="mt-[24%]">
               <div
-                className="w-10 h-1 rounded-full mb-4"
+                className="w-12 h-1.5 rounded-full mb-4"
                 style={{ backgroundColor: theme.accent }}
               />
               <h2
-                className="text-[3.5rem] font-black tracking-tighter leading-[0.85] mb-3"
-                style={{ color: theme.text }}
+                className="text-[3.5rem] font-black tracking-tighter leading-[0.8] mb-3"
+                style={{ 
+                  color: theme.text,
+                  textShadow: `0 2px 20px ${theme.accent}40`
+                }}
               >
                 MY DEV
                 <br />
                 STACK
               </h2>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mb-2">
                 <span
-                  className="text-[10px] font-mono font-bold tracking-[0.2em] uppercase px-2 py-1 rounded border"
+                  className="text-[11px] font-mono font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-lg border-2"
                   style={{
                     color: theme.accent,
                     backgroundColor: theme.accentLight,
@@ -390,22 +393,22 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                 >
                   {selectedTools.length} TOOLS
                 </span>
-                <span className="h-px w-8" style={{ backgroundColor: theme.border }} />
-                <span className="text-[10px] font-mono" style={{ color: theme.textMuted }}>
+                <span className="h-px w-6" style={{ backgroundColor: theme.border }} />
+                <span className="text-[11px] font-mono font-semibold" style={{ color: theme.textMuted }}>
                   {currentDate}
                 </span>
               </div>
             </div>
 
-            {/* Tool Pills */}
-            <div className="flex-1 mt-6 mb-6 overflow-hidden">
-              <div className="flex flex-wrap gap-2 max-h-[220px] overflow-y-auto no-scrollbar">
+            {/* Tool Pills Section - Much more space for all tools */}
+            <div className="flex-1 mt-4 mb-4 overflow-hidden">
+              <div className="flex flex-wrap gap-2 max-h-[310px] overflow-y-auto no-scrollbar content-start">
                 {toolNames.map((name, idx) => (
                   <span
                     key={idx}
-                    className="text-[11px] font-mono font-medium px-2.5 py-1.5 rounded-lg transition-all cursor-default select-none"
+                    className="text-[10px] font-mono font-medium px-2.5 py-1.5 rounded-md transition-all cursor-default select-none backdrop-blur-sm"
                     style={{
-                      color: theme.textMuted,
+                      color: theme.text,
                       backgroundColor: theme.accentLight,
                       border: `1px solid ${theme.border}`,
                     }}
@@ -416,30 +419,60 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               </div>
             </div>
 
-            {/* Footer */}
-            <div
-              className="flex items-end justify-between pt-6 border-t"
-              style={{ borderColor: theme.border }}
+            {/* Stats Row - Minimal inline design */}
+            <div 
+              className="mb-4 pb-4 border-b"
+              style={{
+                borderColor: theme.border,
+              }}
             >
-              {/* Left: Stats */}
-              <div className="flex flex-col gap-2">
-                <div className="text-[9px] font-mono tracking-wider uppercase" style={{ color: theme.textMuted }}>
-                  TOP CATEGORIES
-                </div>
+              <div className="text-[8px] font-mono tracking-widest uppercase mb-2" style={{ color: theme.textMuted }}>
+                TOP CATEGORIES
+              </div>
+              <div className="flex items-center gap-4 flex-wrap">
                 {topCategories.map(([category, tools]) => (
-                  <div key={category} className="flex items-center gap-2">
+                  <div key={category} className="flex items-center gap-1.5">
                     <div
-                      className="w-1 h-1 rounded-full"
+                      className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: theme.accent }}
                     />
-                    <span className="text-[10px] font-medium" style={{ color: theme.text }}>
-                      {category} ({tools.length})
+                    <span className="text-[11px] font-medium capitalize" style={{ color: theme.text }}>
+                      {category}
+                    </span>
+                    <span 
+                      className="text-[10px] font-mono font-bold"
+                      style={{ 
+                        color: theme.accent,
+                      }}
+                    >
+                      {tools.length}
                     </span>
                   </div>
                 ))}
               </div>
+            </div>
 
-              {/* Right: Branding */}
+            {/* Footer - QR Code and Branding */}
+            <div className="flex items-end justify-between pt-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-xl shadow-lg">
+                  <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://mac-baseline.vercel.app/&color=222222"
+                    alt="Scan to visit"
+                    className="w-12 h-12"
+                  />
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[8px] font-mono uppercase tracking-wider" style={{ color: theme.textMuted }}>
+                    SCAN TO VISIT
+                  </span>
+                  <span className="text-[11px] font-bold" style={{ color: theme.text }}>
+                    mac-baseline
+                  </span>
+                </div>
+              </div>
+              
+              {/* Branding */}
               <div className="text-right leading-none">
                 <span
                   className="block text-[8px] font-bold tracking-widest uppercase mb-1"
@@ -448,10 +481,10 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                   POWERED BY
                 </span>
                 <div className="flex items-baseline justify-end gap-0.5">
-                  <span className="font-sans text-2xl font-black tracking-tight" style={{ color: theme.text }}>
+                  <span className="font-sans text-[22px] font-black tracking-tight" style={{ color: theme.text }}>
                     Baseline
                   </span>
-                  <span className="text-3xl" style={{ color: theme.accent }}>
+                  <span className="text-[28px]" style={{ color: theme.accent }}>
                     .
                   </span>
                 </div>
