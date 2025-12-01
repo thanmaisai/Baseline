@@ -357,11 +357,84 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     setIsExporting(true);
 
     try {
-      const dataUrl = await toPng(cardRef.current, {
+      // Create wrapper with background - positioned off-screen but still rendered
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: -9999px;
+        width: 520px;
+        height: 720px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 50%, ${theme.bg} 100%);
+        padding: 60px;
+        box-sizing: border-box;
+        z-index: -1;
+        opacity: 1;
+      `;
+      
+      // Add glow overlay
+      const glow = document.createElement('div');
+      glow.style.cssText = `
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 20% 20%, ${theme.accent}20 0%, transparent 50%), 
+                    radial-gradient(circle at 80% 80%, ${theme.gradientTo}20 0%, transparent 50%);
+        pointer-events: none;
+      `;
+      wrapper.appendChild(glow);
+      
+      // Clone the card
+      const cardClone = cardRef.current.cloneNode(true) as HTMLElement;
+      cardClone.style.transform = 'none';
+      cardClone.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.5)';
+      wrapper.appendChild(cardClone);
+      
+      // Add watermark
+      const watermark = document.createElement('div');
+      watermark.style.cssText = `
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        font-weight: 500;
+        color: ${theme.textMuted};
+        opacity: 0.6;
+        letter-spacing: 0.5px;
+        font-family: system-ui, -apple-system, sans-serif;
+        white-space: nowrap;
+      `;
+      watermark.textContent = 'mac-baseline.vercel.app';
+      wrapper.appendChild(watermark);
+      
+      document.body.appendChild(wrapper);
+      
+      // Force layout calculation
+      wrapper.offsetHeight;
+      
+      // Wait for render
+      await new Promise(r => setTimeout(r, 50));
+      
+      // Temporarily move into view for capture (html-to-image needs this)
+      wrapper.style.left = '0';
+      wrapper.style.zIndex = '-9999';
+      wrapper.style.pointerEvents = 'none';
+      
+      await new Promise(r => setTimeout(r, 10));
+      
+      const dataUrl = await toPng(wrapper, {
         quality: 1,
         pixelRatio: 3,
         cacheBust: true,
+        width: 520,
+        height: 720,
       });
+      
+      // Clean up
+      document.body.removeChild(wrapper);
 
       const link = document.createElement('a');
       link.download = `dev-stack-${currentTheme}-${Date.now()}.png`;
