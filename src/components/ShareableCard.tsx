@@ -1252,7 +1252,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                     <div 
                       className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{ 
-                        backgroundColor: redirectCountdown.platform === 'twitter' ? '#1DA1F2' : '#0A66C2',
+                        backgroundColor: redirectCountdown.platform === 'twitter' ? '#000000' : '#0A66C2',
                       }}
                     >
                       {redirectCountdown.platform === 'twitter' ? (
@@ -1357,7 +1357,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                   }}
                   className="w-full px-4 py-3 rounded-lg text-sm font-medium transition-all hover:opacity-90"
                   style={{ 
-                    backgroundColor: redirectCountdown.platform === 'twitter' ? '#1DA1F2' : '#0A66C2',
+                    backgroundColor: redirectCountdown.platform === 'twitter' ? '#000000' : '#0A66C2',
                     color: '#fff'
                   }}
                 >
