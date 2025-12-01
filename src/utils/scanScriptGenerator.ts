@@ -1,79 +1,128 @@
 export const generateScanScript = (): string => {
   return `#!/bin/bash
 
-# ============================================================================
-#  ____                  _ _            
-# | __ )  __ _ ___  ___| (_)_ __   ___ 
-# |  _ \\ / _\` / __|/ _ \\ | | '_ \\ / _ \\
-# | |_) | (_| \\__ \\  __/ | | | | |  __/
-# |____/ \\__,_|___/\\___|_|_|_| |_|\\___|
-#                                        
-# macOS Configuration Scanner
-# Captures complete system state for replication
-# ============================================================================
+# ==============================================================================
+#  B A S E L I N E   -   U L T I M A T E   E D I T I O N
+#  The gold standard for macOS configuration scanning.
+# ==============================================================================
 
-set -e
-set -o pipefail
+# Trap Ctrl+C to restore cursor
+trap 'tput cnorm; echo -e "\\n\\n\${RED}✖ Aborted by user\${RESET}"; exit 1' SIGINT
+
+# --- 1. THE UI ENGINE ---------------------------------------------------------
+
+# Colors & Styles
+ESC=$(printf '\\033')
+RESET="\${ESC}[0m"
+BOLD="\${ESC}[1m"
+DIM="\${ESC}[2m"
+ITALIC="\${ESC}[3m"
+
+# Neon Palette
+CYAN="\${ESC}[38;5;51m"
+GREEN="\${ESC}[38;5;46m"
+PURPLE="\${ESC}[38;5;99m"
+PINK="\${ESC}[38;5;213m"
+YELLOW="\${ESC}[38;5;226m"
+RED="\${ESC}[38;5;196m"
+GRAY="\${ESC}[38;5;240m"
+WHITE="\${ESC}[38;5;255m"
+
+# Icons
+ICON_ROCKET="🚀"
+ICON_CHECK="✔"
+ICON_CROSS="✖"
+ICON_GEAR="⚡"
+ICON_PKG="📦"
+ICON_CODE=" "
+ICON_LOCK="🔒"
+ICON_ARROW="➜"
+ICON_TIME="⏱"
 
 # Configuration
 OUTPUT_JSON="baseline-scan.json"
 OUTPUT_ARCHIVE="baseline-scan.tar.gz"
 SCAN_VERSION="2.0.0"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+START_TIME=$(date +%s)
 
-# Color codes for output
-RED='\\033[0;31m'
-GREEN='\\033[0;32m'
-YELLOW='\\033[1;33m'
-BLUE='\\033[0;34m'
-MAGENTA='\\033[0;35m'
-CYAN='\\033[0;36m'
-NC='\\033[0m' # No Color
-BOLD='\\033[1m'
-
-# Progress tracking
-TOTAL_STEPS=14
-CURRENT_STEP=0
+set -e
+set -o pipefail
 
 # ============================================================================
 # UTILITY FUNCTIONS
 # ============================================================================
 
-print_header() {
-  echo -e "\${CYAN}\${BOLD}"
-  cat << 'EOF'
- ____                  _ _            
-| __ )  __ _ ___  ___| (_)_ __   ___ 
-|  _ \\ / _\` / __|/ _ \\ | | '_ \\ / _ \\
-| |_) | (_| \\__ \\  __/ | | | | |  __/
-|____/ \\__,_|___/\\___|_|_|_| |_|\\___|
-                                        
-EOF
-  echo -e "\${NC}"
-  echo -e "\${BOLD}macOS Configuration Scanner v\${SCAN_VERSION}\${NC}"
-  echo "Capturing complete system state..."
-  echo ""
+# Function: Typewriter Effect
+typewriter() {
+    text="$1"
+    delay="$2"
+    for (( i=0; i<\${#text}; i++ )); do
+        echo -n "\${text:$i:1}"
+        sleep "$delay"
+    done
+    echo ""
 }
 
-step() {
-  CURRENT_STEP=$((CURRENT_STEP + 1))
-  echo -e "\${BLUE}[\${CURRENT_STEP}/\${TOTAL_STEPS}]\${NC} \${BOLD}$1\${NC}"
+# Function: The Header
+show_header() {
+    clear
+    echo ""
+    # Gradient-ish ASCII Art
+    echo -e "\${PURPLE}  ██████╗  █████╗ ███████╗███████╗██╗     ██╗███╗   ██╗███████╗\${RESET}"
+    echo -e "\${PURPLE}  ██╔══██╗██╔══██╗██╔════╝██╔════╝██║     ██║████╗  ██║██╔════╝\${RESET}"
+    echo -e "\${CYAN}  ██████╔╝███████║███████╗█████╗  ██║     ██║██╔██╗ ██║█████╗  \${RESET}"
+    echo -e "\${CYAN}  ██╔══██╗██╔══██║╚════██║██╔══╝  ██║     ██║██║╚██╗██║██╔══╝  \${RESET}"
+    echo -e "\${PINK}  ██████╔╝██║  ██║███████║███████╗███████╗██║██║ ╚████║███████╗\${RESET}"
+    echo -e "\${PINK}  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝\${RESET}"
+    echo ""
+    
+    echo -ne "  \${BOLD}\${WHITE}"
+    typewriter "System Configuration Scanner v\${SCAN_VERSION}" 0.02
+    echo -e "\${RESET}"
+    echo -e "  \${GRAY}Initialize sequence...\${RESET}"
+    echo -e "  \${GRAY}────────────────────────────────────────────────────────────\${RESET}"
+    echo ""
 }
 
-success() {
-  echo -e "\${GREEN}  ✓\${NC} $1"
+# Function: Section Header
+section() {
+    echo ""
+    echo -e "  \${BOLD}\${PINK}:: $1\${RESET}"
 }
 
-warning() {
-  echo -e "\${YELLOW}  ⚠\${NC} $1"
-}
-
-error() {
-  echo -e "\${RED}  ✗\${NC} $1"
-}
-
-info() {
-  echo -e "\${CYAN}  →\${NC} $1"
+# Function: Async Spinner with Result Capture
+execute() {
+    local label="$1"
+    local cmd="$2"
+    
+    # Hide Cursor
+    tput civis
+    
+    # Run command in background
+    eval "$cmd" >> /dev/null 2>&1 &
+    local pid=$!
+    
+    # Spinner Animation Frames (Braille)
+    local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local i=0
+    
+    while kill -0 $pid 2>/dev/null; do
+        i=$(( (i+1) % 10 ))
+        printf "\\r  \${CYAN}\${spin:$i:1}\${RESET} \${WHITE}%-40s\${RESET}" "$label..."
+        sleep 0.08
+    done
+    
+    wait $pid
+    local exit_code=$?
+    
+    if [ $exit_code -eq 0 ]; then
+        printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET}\\n" "$label"
+    else
+        printf "\\r  \${RED}\${ICON_CROSS}\${RESET} \${WHITE}%-40s\${RESET} \${RED}Failed\${RESET}\\n" "$label"
+    fi
+    
+    tput cnorm
 }
 
 json_escape() {
@@ -85,24 +134,14 @@ json_escape() {
 # ============================================================================
 
 scan_system_info() {
-  step "Scanning system information"
-  
   HOSTNAME=$(hostname)
   MACOS_VERSION=$(sw_vers -productVersion)
   MACOS_BUILD=$(sw_vers -buildVersion)
   HARDWARE_MODEL=$(sysctl -n hw.model)
   ARCH=$(uname -m)
-  
-  info "Host: \${HOSTNAME}"
-  info "macOS: \${MACOS_VERSION} (Build \${MACOS_BUILD})"
-  info "Architecture: \${ARCH}"
-  success "System info captured"
-  echo ""
 }
 
 scan_homebrew() {
-  step "Scanning Homebrew packages"
-  
   if command -v brew &> /dev/null; then
     BREW_PREFIX=$(brew --prefix)
     BREW_VERSION=$(brew --version | head -n1 | awk '{print \$2}')
@@ -118,36 +157,25 @@ scan_homebrew() {
     # Get taps
     BREW_TAPS=$(brew tap 2>/dev/null || echo "")
     TAPS_COUNT=$(echo "\$BREW_TAPS" | grep -v "^$" | wc -l | tr -d ' ')
-    
-    success "Found \${FORMULAE_COUNT} formulae, \${CASKS_COUNT} casks, \${TAPS_COUNT} taps"
   else
-    warning "Homebrew not installed"
     BREW_PREFIX=""
     BREW_VERSION=""
     BREW_FORMULAE=""
     BREW_CASKS=""
     BREW_TAPS=""
   fi
-  echo ""
 }
 
 scan_applications() {
-  step "Scanning installed applications"
-  
   # Scan /Applications
   APP_LIST=$(find /Applications -maxdepth 2 -name "*.app" -type d 2>/dev/null | sort)
   APP_COUNT=$(echo "\$APP_LIST" | grep -v "^$" | wc -l | tr -d ' ')
   
   # Get just app names (without .app extension and path)
   APP_NAMES=$(echo "\$APP_LIST" | sed 's|.*/||' | sed 's|.app$||' | sort)
-  
-  success "Found \${APP_COUNT} applications"
-  echo ""
 }
 
 scan_vscode() {
-  step "Scanning VS Code configuration"
-  
   if command -v code &> /dev/null; then
     # Extensions
     VSCODE_EXTENSIONS=$(code --list-extensions 2>/dev/null || echo "")
@@ -176,21 +204,15 @@ scan_vscode() {
     else
       VSCODE_SNIPPETS_FILES=""
     fi
-    
-    success "Found \${EXT_COUNT} extensions and configuration files"
   else
-    warning "VS Code not installed"
     VSCODE_EXTENSIONS=""
     VSCODE_SETTINGS="{}"
     VSCODE_KEYBINDINGS="[]"
     VSCODE_SNIPPETS_FILES=""
   fi
-  echo ""
 }
 
 scan_shell_configs() {
-  step "Scanning shell configurations"
-  
   SHELL_FILES=()
   
   # Zsh
@@ -237,32 +259,17 @@ scan_shell_configs() {
   else
     PROFILE_CONTENT=""
   fi
-  
-  success "Found \${#SHELL_FILES[@]} shell configuration files"
-  echo ""
 }
 
 scan_bin_scripts() {
-  step "Scanning custom scripts in ~/.bin"
-  
   if [ -d "$HOME/.bin" ]; then
     BIN_SCRIPTS=$(find "$HOME/.bin" -type f -perm +111 2>/dev/null || echo "")
-    if [ -n "\$BIN_SCRIPTS" ]; then
-      SCRIPT_COUNT=$(echo "\$BIN_SCRIPTS" | wc -l | tr -d ' ')
-      success "Found \${SCRIPT_COUNT} executable scripts"
-    else
-      warning "No executable scripts found"
-    fi
   else
-    warning "~/.bin directory not found"
     BIN_SCRIPTS=""
   fi
-  echo ""
 }
 
 scan_git_config() {
-  step "Scanning Git configuration"
-  
   if command -v git &> /dev/null; then
     # Global config
     GIT_CONFIG=$(git config --list --global 2>/dev/null || echo "")
@@ -280,20 +287,14 @@ scan_git_config() {
     else
       GITIGNORE_GLOBAL=""
     fi
-    
-    success "Git configuration captured"
   else
-    warning "Git not installed"
     GIT_CONFIG=""
     GITCONFIG_CONTENT=""
     GITIGNORE_GLOBAL=""
   fi
-  echo ""
 }
 
 scan_ssh_config() {
-  step "Scanning SSH configuration"
-  
   if [ -d "$HOME/.ssh" ]; then
     # SSH config
     if [ -f "$HOME/.ssh/config" ]; then
@@ -311,21 +312,14 @@ scan_ssh_config() {
     else
       KNOWN_HOSTS_COUNT=0
     fi
-    
-    success "SSH configuration captured (\${KNOWN_HOSTS_COUNT} known hosts)"
-    info "Note: Key file names recorded, but private keys not copied for security"
   else
-    warning "~/.ssh directory not found"
     SSH_CONFIG=""
     SSH_KEYS=""
     KNOWN_HOSTS_COUNT=0
   fi
-  echo ""
 }
 
 scan_nvm() {
-  step "Scanning Node.js versions (nvm)"
-  
   if [ -d "$HOME/.nvm" ]; then
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
@@ -334,24 +328,17 @@ scan_nvm() {
       NVM_VERSIONS=$(nvm list 2>/dev/null | grep -v "^->" | sed 's/[->*]//g' | sed 's/^[ \t]*//' | grep "^v" || echo "")
       NVM_CURRENT=$(nvm current 2>/dev/null || echo "")
       VERSION_COUNT=$(echo "\$NVM_VERSIONS" | grep -v "^$" | wc -l | tr -d ' ')
-      
-      success "Found \${VERSION_COUNT} Node.js versions"
     else
-      warning "nvm not properly configured"
       NVM_VERSIONS=""
       NVM_CURRENT=""
     fi
   else
-    info "nvm not installed"
     NVM_VERSIONS=""
     NVM_CURRENT=""
   fi
-  echo ""
 }
 
 scan_npm_globals() {
-  step "Scanning global npm packages"
-  
   if command -v npm &> /dev/null; then
     NPM_GLOBALS=$(npm list -g --depth=0 --json 2>/dev/null | python3 -c "
 import sys, json
@@ -364,63 +351,37 @@ try:
 except:
     pass
 " || echo "")
-    
-    PKG_COUNT=$(echo "\$NPM_GLOBALS" | grep -v "^$" | wc -l | tr -d ' ')
-    success "Found \${PKG_COUNT} global npm packages"
   else
-    info "npm not installed"
     NPM_GLOBALS=""
   fi
-  echo ""
 }
 
 scan_pyenv() {
-  step "Scanning Python versions (pyenv)"
-  
   if command -v pyenv &> /dev/null; then
     PYENV_VERSIONS=$(pyenv versions 2>/dev/null | sed 's/[*]//g' | sed 's/^[ \t]*//' | grep "^[0-9]" || echo "")
     PYENV_GLOBAL=$(pyenv global 2>/dev/null || echo "")
-    VERSION_COUNT=$(echo "\$PYENV_VERSIONS" | grep -v "^$" | wc -l | tr -d ' ')
-    
-    success "Found \${VERSION_COUNT} Python versions"
   else
-    info "pyenv not installed"
     PYENV_VERSIONS=""
     PYENV_GLOBAL=""
   fi
-  echo ""
 }
 
 scan_rbenv() {
-  step "Scanning Ruby versions (rbenv)"
-  
   if command -v rbenv &> /dev/null; then
     RBENV_VERSIONS=$(rbenv versions 2>/dev/null | sed 's/[*]//g' | sed 's/^[ \t]*//' | grep "^[0-9]" || echo "")
     RBENV_GLOBAL=$(rbenv global 2>/dev/null || echo "")
-    VERSION_COUNT=$(echo "\$RBENV_VERSIONS" | grep -v "^$" | wc -l | tr -d ' ')
-    
-    success "Found \${VERSION_COUNT} Ruby versions"
   else
-    info "rbenv not installed"
     RBENV_VERSIONS=""
     RBENV_GLOBAL=""
   fi
-  echo ""
 }
 
 scan_pip_packages() {
-  step "Scanning pip packages"
-  
   if command -v pip3 &> /dev/null; then
     PIP_PACKAGES=$(pip3 list --format=freeze 2>/dev/null || echo "")
-    PKG_COUNT=$(echo "\$PIP_PACKAGES" | grep -v "^$" | wc -l | tr -d ' ')
-    
-    success "Found \${PKG_COUNT} pip packages"
   else
-    info "pip3 not installed"
     PIP_PACKAGES=""
   fi
-  echo ""
 }
 
 # ============================================================================
@@ -428,8 +389,6 @@ scan_pip_packages() {
 # ============================================================================
 
 generate_json() {
-  step "Generating JSON output"
-  
   # Create JSON using Python for proper escaping
   python3 << EOF > "\$OUTPUT_JSON"
 import json
@@ -576,9 +535,6 @@ scan_data = {
 
 print(json.dumps(scan_data, indent=2, ensure_ascii=False))
 EOF
-  
-  success "JSON file created: \$OUTPUT_JSON"
-  echo ""
 }
 
 # ============================================================================
@@ -586,51 +542,104 @@ EOF
 # ============================================================================
 
 main() {
-  print_header
+  show_header
   
-  # Run all scans
+  # Phase 1: Environment Analysis
+  section "Environment Analysis"
+  
+  tput civis
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Analyzing System Hardware..."
   scan_system_info
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Analyzing System Hardware" "\$HOSTNAME (\$ARCH)"
+  
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Scanning Package Manager..."
   scan_homebrew
+  FORMULAE_COUNT=$(echo "\$BREW_FORMULAE" | grep -v "^$" | wc -l | tr -d ' ')
+  CASKS_COUNT=$(echo "\$BREW_CASKS" | grep -v "^$" | wc -l | tr -d ' ')
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Scanning Package Manager" "\${FORMULAE_COUNT} Formulae, \${CASKS_COUNT} Casks"
+  
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Indexing Applications..."
   scan_applications
+  APP_COUNT=$(echo "\$APP_NAMES" | grep -v "^$" | wc -l | tr -d ' ')
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Indexing Applications" "\${APP_COUNT} Applications found"
+  tput cnorm
+  
+  # Phase 2: Developer Tools
+  section "Developer Ecosystem"
+  
+  tput civis
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Scanning VS Code Config..."
   scan_vscode
+  EXT_COUNT=$(echo "\$VSCODE_EXTENSIONS" | grep -v "^$" | wc -l | tr -d ' ')
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Scanning VS Code Config" "\${EXT_COUNT} Extensions Configured"
+  
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Analyzing Shell Dotfiles..."
   scan_shell_configs
+  local s="Unknown"
+  [[ "\$SHELL" == */zsh ]] && s="Zsh"
+  [[ "\$SHELL" == */bash ]] && s="Bash"
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Analyzing Shell Dotfiles" "Active: \$s"
+  
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Scanning Custom Scripts..."
   scan_bin_scripts
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Scanning Custom Scripts" "~/.bin scanned"
+  
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Scanning Git Configuration..."
   scan_git_config
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Scanning Git Configuration" "Git Config Captured"
+  
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Detecting SSH Configuration..."
   scan_ssh_config
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Detecting SSH Configuration" "SSH Config (No Private Keys)"
+  
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Detecting Language Runtimes..."
   scan_nvm
   scan_npm_globals
   scan_pyenv
-  scan_rbenv
   scan_pip_packages
+  scan_rbenv
+  local l=""
+  command -v node >/dev/null && l="\${l}Node "
+  command -v python3 >/dev/null && l="\${l}Py "
+  command -v ruby >/dev/null && l="\${l}Ruby "
+  [ -z "\$l" ] && l="None detected"
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Detecting Language Runtimes" "\$l"
+  tput cnorm
   
-  # Generate JSON
+  # Phase 3: Output
+  section "Artifact Generation"
+  
+  tput civis
+  printf "\\r  \${CYAN}⠋\${RESET} \${WHITE}%-40s\${RESET}" "Compiling JSON Manifest..."
   generate_json
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Compiling JSON Manifest" "$(ls -lh \$OUTPUT_JSON 2>/dev/null | awk '{print \$5}')"
   
-  # Create archive
-  step "Creating archive"
+  printf "\\r  \${CYAN}⠼\${RESET} \${WHITE}%-40s\${RESET}" "Compressing Archive..."
   tar -czf "\$OUTPUT_ARCHIVE" "\$OUTPUT_JSON" 2>/dev/null
-  success "Archive created: \$OUTPUT_ARCHIVE"
-  echo ""
+  printf "\\r  \${GREEN}\${ICON_CHECK}\${RESET} \${WHITE}%-40s\${RESET} \${GRAY}%s\${RESET}\\n" "Compressing Archive" ".tar.gz"
+  tput cnorm
+  
+  # Final Calculation
+  END_TIME=$(date +%s)
+  DURATION=$((END_TIME - START_TIME))
   
   # Summary
-  echo -e "\${GREEN}\${BOLD}========================================\${NC}"
-  echo -e "\${GREEN}\${BOLD}Scan Complete!\${NC}"
-  echo -e "\${GREEN}\${BOLD}========================================\${NC}"
   echo ""
-  echo -e "\${BOLD}Output Files:\${NC}"
-  echo -e "  • JSON:    \${CYAN}\$OUTPUT_JSON\${NC}"
-  echo -e "  • Archive: \${CYAN}\$OUTPUT_ARCHIVE\${NC}"
+  echo -e "  \${GREEN}\${BOLD}✨ SCAN COMPLETED SUCCESSFULLY\${RESET}"
   echo ""
-  echo -e "\${BOLD}File Size:\${NC}"
-  ls -lh "\$OUTPUT_JSON" | awk '{print "  • " \$5 " (" \$9 ")"}'
+  echo -e "  \${CYAN}\${ICON_ARROW} JSON Output:\${RESET}     \${WHITE}$(pwd)/\${OUTPUT_JSON}\${RESET}"
+  echo -e "  \${CYAN}\${ICON_ARROW} Archive:\${RESET}         \${WHITE}$(pwd)/\${OUTPUT_ARCHIVE}\${RESET}"
+  echo -e "  \${PURPLE}\${ICON_TIME} Time:\${RESET}            \${WHITE}\${DURATION}s\${RESET}"
+  echo -e "  \${PINK}\${ICON_LOCK} Size:\${RESET}            \${WHITE}$(ls -lh \$OUTPUT_ARCHIVE | awk '{print \$5}')\${RESET}"
   echo ""
-  echo -e "\${BOLD}Next Steps:\${NC}"
-  echo -e "  1. Review the JSON file to verify captured data"
-  echo -e "  2. Upload to Baseline to generate restore script"
-  echo -e "  3. Keep the archive in a safe location"
+  echo -e "  \${BOLD}Next Steps:\${RESET}"
+  echo -e "    \${GREEN}1.\${RESET} Upload \${CYAN}\${OUTPUT_JSON}\${RESET} to Mac Setup Genie"
+  echo -e "    \${GREEN}2.\${RESET} Review and customize your configuration"
+  echo -e "    \${GREEN}3.\${RESET} Generate your setup script"
   echo ""
-  echo -e "\${YELLOW}Note:\${NC} SSH private keys are not included for security."
-  echo -e "You'll need to manually copy them or regenerate keys."
+  echo -e "  \${DIM}Note: The archive (\${OUTPUT_ARCHIVE}) contains the same data in compressed form.\${RESET}"
+  echo ""
+  echo -e "  \${GREEN}\${ICON_ROCKET}\${RESET} \${BOLD}Ready to transform your Mac setup!\${RESET}"
   echo ""
 }
 
