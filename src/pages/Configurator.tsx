@@ -42,6 +42,12 @@ const steps = [
 
 const templates = [
   {
+    id: 'dev-favorites',
+    name: 'Developer Favorites',
+    description: 'All developer-recommended tools',
+    toolIds: 'devPick', // Special flag to select all devPick tools
+  },
+  {
     id: 'frontend',
     name: 'Frontend Developer',
     description: 'Tools for modern web development',
@@ -432,7 +438,15 @@ const Configurator = () => {
     const template = templates.find(t => t.id === templateId);
     if (!template) return;
 
-    const selectedTools = tools.filter(tool => template.toolIds.includes(tool.id));
+    let selectedTools: Tool[];
+    
+    // Special handling for dev-favorites template
+    if (template.toolIds === 'devPick') {
+      selectedTools = tools.filter(tool => tool.devPick === true);
+    } else {
+      selectedTools = tools.filter(tool => (template.toolIds as string[]).includes(tool.id));
+    }
+    
     setSelection(prev => ({
       ...prev,
       tools: selectedTools,
@@ -443,7 +457,7 @@ const Configurator = () => {
     });
     // Move to next step after selecting template
     handleNext();
-  }, [setSelection]);
+  }, [setSelection, handleNext]);
 
   const selectAllInCategory = () => {
     const categoryTools = tools.filter(t => t.category === currentCategory);
@@ -609,10 +623,15 @@ const Configurator = () => {
                       <p className="text-xs text-[#222222]/70 dark:text-gray-400 mb-4 leading-relaxed font-medium">
                         {template.description}
                       </p>
-                      {template.toolIds.length > 0 && (
+                      {(template.toolIds === 'devPick' || (Array.isArray(template.toolIds) && template.toolIds.length > 0)) && (
                         <div className="flex items-center gap-2 text-[11px] font-bold text-[#222222]/60 dark:text-gray-400 group-hover:text-[#FF6D1F] transition-colors">
                           <Check className="h-3.5 w-3.5" />
-                          <span>{template.toolIds.length} tools included</span>
+                          <span>
+                            {template.toolIds === 'devPick' 
+                              ? `${tools.filter(t => t.devPick).length} tools included`
+                              : `${(template.toolIds as string[]).length} tools included`
+                            }
+                          </span>
                         </div>
                       )}
                     </div>

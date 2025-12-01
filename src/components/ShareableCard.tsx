@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Tool } from '@/types/tools';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, RefreshCw, Palette, X, Check } from 'lucide-react';
@@ -398,6 +399,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
   };
 
   return (
+    <>
     <div className="w-full min-h-screen flex gap-8 items-center justify-center px-4 py-8">
       {/* Card Preview - Left Side */}
       <motion.div
@@ -659,146 +661,91 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
           Theme: <span className="font-medium">{theme.name}</span> • Pattern: <span className="font-medium capitalize">{currentPattern}</span>
         </p>
       </motion.div>
+    </div>
 
       {/* Tool Selection Modal */}
-      <AnimatePresence>
-        {showToolSelector && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[999]"
+      {createPortal(
+        <AnimatePresence>
+          {showToolSelector && (
+            <div 
+              className="fixed inset-0 z-[999] flex items-center justify-center"
               style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}
               onClick={() => setShowToolSelector(false)}
-            />
-
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[80vh] rounded-2xl shadow-2xl z-[101] flex flex-col overflow-hidden"
-              style={{ backgroundColor: tokens.colors.background.primary }}
             >
-              {/* Header */}
-              <div 
-                className="flex items-center justify-between p-6 border-b"
-                style={{ borderColor: tokens.colors.border.card }}
+              {/* Modal */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-[90%] max-w-3xl max-h-[85vh] rounded-xl flex flex-col overflow-hidden"
+                style={{ 
+                  backgroundColor: tokens.colors.background.primary,
+                  border: `1px solid ${tokens.colors.border.card}`
+                }}
               >
-                <div>
-                  <h3 
-                    className="text-lg font-bold"
-                    style={{ color: tokens.colors.text.primary }}
-                  >
-                    Select Tools for Card
-                  </h3>
-                  <p 
-                    className="text-sm mt-1"
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4">
+                  <div>
+                    <h3 
+                      className="text-base font-semibold"
+                      style={{ color: tokens.colors.text.primary }}
+                    >
+                      Select Tools for Card
+                    </h3>
+                    <p 
+                      className="text-xs mt-0.5"
+                      style={{ color: tokens.colors.text.secondary }}
+                    >
+                      {selectedToolsForCard.length}/{MAX_DISPLAY_TOOLS} selected
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowToolSelector(false)}
+                    className="p-1.5 rounded-md transition-colors"
                     style={{ color: tokens.colors.text.secondary }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = tokens.colors.text.primary}
+                    onMouseLeave={(e) => e.currentTarget.style.color = tokens.colors.text.secondary}
                   >
-                    Choose {MAX_DISPLAY_TOOLS} tools to display ({selectedToolsForCard.length}/{MAX_DISPLAY_TOOLS} selected)
-                  </p>
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowToolSelector(false)}
-                  className="p-2 rounded-lg transition-all hover:scale-105"
-                  style={{ 
-                    color: tokens.colors.text.secondary,
-                    backgroundColor: 'transparent'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = tokens.colors.background.hover;
-                    e.currentTarget.style.color = tokens.colors.text.primary;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = tokens.colors.text.secondary;
-                  }}
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
 
-              {/* Tool Grid */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {selectedTools.map((tool) => {
-                    const isSelected = selectedToolsForCard.includes(tool.id);
-                    const canSelect = selectedToolsForCard.length < MAX_DISPLAY_TOOLS;
+                {/* Tool Pills */}
+                <div className="flex-1 overflow-y-auto px-6 pb-6">
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTools.map((tool) => {
+                      const isSelected = selectedToolsForCard.includes(tool.id);
+                      const canSelect = selectedToolsForCard.length < MAX_DISPLAY_TOOLS;
 
-                    return (
-                      <button
-                        key={tool.id}
-                        onClick={() => toggleToolSelection(tool.id)}
-                        disabled={!isSelected && !canSelect}
-                        className="relative p-4 rounded-lg border-2 transition-all text-left hover:scale-[1.02] active:scale-[0.98]"
-                        style={{
-                          borderColor: isSelected ? tokens.brand.sunset : tokens.colors.border.card,
-                          backgroundColor: isSelected ? `${tokens.brand.sunset}20` : tokens.colors.background.card,
-                          opacity: !isSelected && !canSelect ? 0.4 : 1,
-                          cursor: !isSelected && !canSelect ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        <div className="flex items-start gap-2">
-                          <div 
-                            className="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center"
-                            style={{
-                              borderColor: isSelected ? tokens.brand.sunset : tokens.colors.border.default,
-                              backgroundColor: isSelected ? tokens.brand.sunset : 'transparent'
-                            }}
-                          >
-                            {isSelected && <Check className="w-3 h-3 text-white" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p 
-                              className="text-sm font-medium truncate"
-                              style={{ color: tokens.colors.text.primary }}
-                            >
-                              {tool.name}
-                            </p>
-                            <p 
-                              className="text-xs truncate mt-0.5"
-                              style={{ color: tokens.colors.text.secondary }}
-                            >
-                              {tool.category}
-                            </p>
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
+                      return (
+                        <button
+                          key={tool.id}
+                          onClick={() => toggleToolSelection(tool.id)}
+                          disabled={!isSelected && !canSelect}
+                          className="px-3 py-1.5 rounded-full text-sm font-medium transition-all"
+                          style={{
+                            borderWidth: '2px',
+                            borderStyle: 'solid',
+                            borderColor: isSelected ? tokens.brand.sunset : tokens.colors.border.card,
+                            backgroundColor: tokens.colors.background.card,
+                            color: tokens.colors.text.primary,
+                            opacity: !isSelected && !canSelect ? 0.3 : 1,
+                            cursor: !isSelected && !canSelect ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {tool.name}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-
-              {/* Footer */}
-              <div 
-                className="flex items-center justify-between p-6 border-t"
-                style={{ borderColor: tokens.colors.border.card }}
-              >
-                <p 
-                  className="text-sm"
-                  style={{ color: tokens.colors.text.secondary }}
-                >
-                  {selectedToolsForCard.length < MAX_DISPLAY_TOOLS && (
-                    <>Select {MAX_DISPLAY_TOOLS - selectedToolsForCard.length} more tools</>
-                  )}
-                  {selectedToolsForCard.length === MAX_DISPLAY_TOOLS && (
-                    <>All {MAX_DISPLAY_TOOLS} tools selected</>
-                  )}
-                </p>
-                <Button
-                  onClick={() => setShowToolSelector(false)}
-                  disabled={selectedToolsForCard.length === 0}
-                >
-                  Done
-                </Button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar {
@@ -809,6 +756,6 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
           scrollbar-width: none;
         }
       `}</style>
-    </div>
+    </>
   );
 };
