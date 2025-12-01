@@ -48,7 +48,7 @@ ICON_SPARKLE="✨"
 SETUP_VERSION="1.0.0"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 START_TIME=$(date +%s)
-LOG_FILE="/tmp/mac_setup_genie.log"
+LOG_FILE="/tmp/baseline.log"
 
 set -e
 

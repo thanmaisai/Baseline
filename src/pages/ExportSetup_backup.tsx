@@ -18,7 +18,7 @@ const ExportSetup = () => {
   const [parsedData, setParsedData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const curlCommand = `curl -fsSL https://raw.githubusercontent.com/thanmaisai/mac-setup-genie/main/public/baseline-scan.sh | bash`;
+  const curlCommand = `curl -fsSL https://raw.githubusercontent.com/thanmaisai/baseline/main/public/baseline-scan.sh | bash`;
   const manualCommand = `chmod +x baseline-scanner.sh && ./baseline-scanner.sh`;
   
   const handleDownloadScript = () => {
