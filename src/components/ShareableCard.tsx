@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Tool } from '@/types/tools';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, RefreshCw, Palette, X, Check } from 'lucide-react';
+import { Download, RefreshCw, Palette, X, Share2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
 import { Button } from './ui/button';
@@ -328,33 +328,87 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     setIsExporting(true);
 
     try {
-      // Temporarily reset any transforms and ensure clean state
-      const originalTransform = cardRef.current.style.transform;
-      const originalBoxShadow = cardRef.current.style.boxShadow;
+      // Create a wrapper with a nice themed background
+      const exportWrapper = document.createElement('div');
+      exportWrapper.style.cssText = `
+        position: fixed;
+        top: -9999px;
+        left: -9999px;
+        width: 520px;
+        height: 720px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 50%, ${theme.bg} 100%);
+        padding: 40px;
+        box-sizing: border-box;
+      `;
       
-      cardRef.current.style.transform = 'none';
-      cardRef.current.style.boxShadow = 'none';
+      // Add subtle pattern overlay
+      const patternOverlay = document.createElement('div');
+      patternOverlay.style.cssText = `
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at 20% 20%, ${theme.accent}15 0%, transparent 50%),
+                          radial-gradient(circle at 80% 80%, ${theme.gradientTo}15 0%, transparent 50%);
+        pointer-events: none;
+      `;
+      exportWrapper.appendChild(patternOverlay);
+      
+      // Clone the card
+      const cardClone = cardRef.current.cloneNode(true) as HTMLElement;
+      cardClone.style.cssText = `
+        width: 400px;
+        height: 600px;
+        border-radius: 16px;
+        overflow: hidden;
+        background-color: ${theme.cardBg};
+        border: 1px solid ${theme.border};
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        position: relative;
+        z-index: 1;
+        transform: none;
+        flex-shrink: 0;
+      `;
+      exportWrapper.appendChild(cardClone);
+      
+      // Add branding watermark at bottom
+      const watermark = document.createElement('div');
+      watermark.style.cssText = `
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 10px;
+        font-weight: 500;
+        color: ${theme.textMuted};
+        opacity: 0.6;
+        z-index: 2;
+        letter-spacing: 0.5px;
+      `;
+      watermark.textContent = 'mac-baseline.vercel.app';
+      exportWrapper.appendChild(watermark);
+      
+      document.body.appendChild(exportWrapper);
+      
+      // Wait for styles to settle
+      await new Promise(resolve => setTimeout(resolve, 150));
 
-      // Wait a bit for styles to settle
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      const canvas = await html2canvas(cardRef.current, {
+      const canvas = await html2canvas(exportWrapper, {
         scale: 3,
         backgroundColor: null,
         useCORS: true,
         logging: false,
         allowTaint: true,
-        windowWidth: 480,
-        windowHeight: 720,
-        width: 480,
+        width: 520,
         height: 720,
         imageTimeout: 0,
-        removeContainer: true,
+        removeContainer: false,
       });
 
-      // Restore original styles
-      cardRef.current.style.transform = originalTransform;
-      cardRef.current.style.boxShadow = originalBoxShadow;
+      // Clean up
+      document.body.removeChild(exportWrapper);
 
       const link = document.createElement('a');
       link.download = `dev-stack-${currentTheme}-${Date.now()}.png`;
@@ -374,6 +428,25 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const shareToTwitter = () => {
+    const text = `Check out my dev stack! ${selectedTools.length} essential tools for macOS development 🚀\n\nBuilt with @baseline_dev`;
+    const url = 'https://mac-baseline.vercel.app';
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
+  const shareToLinkedIn = () => {
+    const url = 'https://mac-baseline.vercel.app';
+    window.open(
+      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
   };
 
   const randomizePattern = () => {
@@ -711,6 +784,54 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
           >
             Theme: <span className="font-semibold" style={{ color: tokens.colors.text.primary }}>{theme.name}</span> • Pattern: <span className="font-semibold capitalize" style={{ color: tokens.colors.text.primary }}>{currentPattern}</span>
           </p>
+        </div>
+
+        {/* Share Section */}
+        <div 
+          className="p-3 rounded-xl border"
+          style={{
+            backgroundColor: tokens.colors.background.card,
+            borderColor: tokens.colors.border.card,
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Share2 className="w-3.5 h-3.5" style={{ color: tokens.colors.text.secondary }} />
+            <span 
+              className="text-[10px] font-bold uppercase tracking-wider"
+              style={{ color: tokens.colors.text.secondary }}
+            >
+              Share Your Stack
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={shareToTwitter}
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                backgroundColor: '#000000',
+                color: '#ffffff',
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              Post on X
+            </button>
+            <button
+              onClick={shareToLinkedIn}
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                backgroundColor: '#0A66C2',
+                color: '#ffffff',
+              }}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              Share
+            </button>
+          </div>
         </div>
 
         {/* Installation Instructions */}
