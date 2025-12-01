@@ -14,7 +14,7 @@
 
 [Live Demo](https://baseline-mac.com) • [Documentation](#documentation) • [Features](#-features) • [Quick Start](#-quick-start)
 
-![Baseline Hero](https://via.placeholder.com/1200x600/0a0a0a/00ff88?text=Baseline+-+Mac+Setup+Genie)
+![Baseline Hero](https://via.placeholder.com/1200x600/0a0a0a/00ff88?text=Baseline)
 
 </div>
 
