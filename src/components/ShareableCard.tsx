@@ -6,6 +6,7 @@ import { Download, RefreshCw, Palette, X, Check } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
 import { Button } from './ui/button';
+import { CardContainer, CardBody } from './ui/3d-card';
 import { useThemeTokens } from '@/theme/useThemeTokens';
 
 export type CardTheme = 'dark' | 'sunset' | 'ocean' | 'forest' | 'light' | 'neon' | 'midnight' | 'rose' | 'cyber';
@@ -400,34 +401,36 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
 
   return (
     <>
-    <div className="w-full min-h-screen flex gap-8 items-center justify-center px-4 py-8">
+    <div className="w-full flex gap-8 items-start justify-center px-4 py-4">
       {/* Card Preview - Left Side */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         className="relative flex-shrink-0"
       >
-        <div
-          ref={cardRef}
-          className="relative w-[480px] h-[720px] rounded-3xl overflow-hidden shadow-2xl"
-          style={{
-            backgroundColor: theme.cardBg,
-            border: `1px solid ${theme.border}`,
-          }}
-        >
-          {/* Pattern Background */}
-          {currentPattern !== 'minimal' && (
+        <CardContainer containerClassName="py-0">
+          <CardBody className="relative">
             <div
-              className="absolute top-0 left-0 w-full h-[300px] pointer-events-none"
-              dangerouslySetInnerHTML={{ __html: patternSvg }}
-            />
-          )}
+              ref={cardRef}
+              className="relative w-[480px] h-[720px] rounded-3xl overflow-hidden shadow-xl"
+              style={{
+                backgroundColor: theme.cardBg,
+                border: `1px solid ${theme.border}`,
+              }}
+            >
+              {/* Pattern Background */}
+              {currentPattern !== 'minimal' && (
+                <div
+                  className="absolute top-0 left-0 w-full h-[300px] pointer-events-none"
+                  dangerouslySetInnerHTML={{ __html: patternSvg }}
+                />
+              )}
 
-          {/* Content */}
-          <div className="relative z-10 h-full flex flex-col p-8">
-            {/* Top Section */}
-            <div className="mt-[24%] flex-shrink-0">
-              <div
+              {/* Content */}
+              <div className="relative z-10 h-full flex flex-col p-8">
+                {/* Top Section */}
+                <div className="mt-[24%] flex-shrink-0">
+                  <div
                 className="w-10 h-1 rounded-full mb-3"
                 style={{ backgroundColor: theme.accent }}
               />
@@ -567,28 +570,47 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               </div>
             </div>
           </div>
-        </div>
+            </div>
+          </CardBody>
+        </CardContainer>
       </motion.div>
 
       {/* Controls - Right Side */}
       <motion.div 
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="flex flex-col gap-4 w-full max-w-sm flex-shrink-0"
+        className="flex flex-col gap-5 w-full max-w-sm flex-shrink-0"
       >
+        {/* Header */}
+        <div className="text-left">
+          <h2 
+            className="text-3xl font-black mb-2 tracking-tight"
+            style={{ color: tokens.colors.text.primary }}
+          >
+            Share Your Dev Stack
+          </h2>
+          <p 
+            className="text-sm font-medium"
+            style={{ color: tokens.colors.text.secondary }}
+          >
+            {selectedTools.length} {selectedTools.length === 1 ? 'tool' : 'tools'} selected • Create a shareable card
+          </p>
+        </div>
+
         {/* Tool Selection Notice */}
         {needsSelection && (
           <div 
-            className="w-full p-4 rounded-lg border"
+            className="w-full p-4 rounded-xl border-2"
             style={{
               backgroundColor: tokens.colors.background.card,
-              borderColor: tokens.colors.border.card,
+              borderColor: tokens.brand.sunset,
+              boxShadow: `0 0 20px ${tokens.brand.sunset}15`,
             }}
           >
-            <div className="flex items-start gap-3">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
                 <p 
-                  className="text-sm font-medium mb-1"
+                  className="text-sm font-bold mb-0.5"
                   style={{ color: tokens.colors.text.primary }}
                 >
                   {selectedToolsForCard.length} of {MAX_DISPLAY_TOOLS} tools selected
@@ -600,66 +622,190 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                   You have {selectedTools.length} tools. Choose your top {MAX_DISPLAY_TOOLS} to display on the card.
                 </p>
               </div>
-              <Button
+              <button
                 onClick={() => setShowToolSelector(true)}
-                size="sm"
-                variant="outline"
-                className="flex-shrink-0"
+                className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95"
+                style={{
+                  backgroundColor: tokens.brand.sunset,
+                  color: '#fff',
+                  boxShadow: `0 4px 14px ${tokens.brand.sunset}40`,
+                }}
               >
                 Select Tools
-              </Button>
+              </button>
             </div>
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3 flex-wrap justify-center">
-          <Button
-            onClick={randomizeAll}
-            variant="outline"
-            size="sm"
-            className="gap-2"
+        {/* Action Buttons Grid */}
+        <div 
+          className="p-4 rounded-xl border"
+          style={{
+            backgroundColor: tokens.colors.background.card,
+            borderColor: tokens.colors.border.card,
+          }}
+        >
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={randomizeAll}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border"
+              style={{
+                backgroundColor: tokens.colors.background.secondary,
+                borderColor: tokens.colors.border.card,
+                color: tokens.colors.text.primary,
+              }}
+            >
+              <RefreshCw className="w-4 h-4" />
+              Randomize All
+            </button>
+            <button
+              onClick={randomizeTheme}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border"
+              style={{
+                backgroundColor: tokens.colors.background.secondary,
+                borderColor: tokens.colors.border.card,
+                color: tokens.colors.text.primary,
+              }}
+            >
+              <Palette className="w-4 h-4" />
+              New Theme
+            </button>
+            <button
+              onClick={randomizePattern}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border"
+              style={{
+                backgroundColor: tokens.colors.background.secondary,
+                borderColor: tokens.colors.border.card,
+                color: tokens.colors.text.primary,
+              }}
+            >
+              <RefreshCw className="w-4 h-4" />
+              New Pattern
+            </button>
+            <button
+              onClick={handleDownload}
+              disabled={isExporting}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: `linear-gradient(135deg, ${tokens.brand.sunset} 0%, #e85d10 100%)`,
+                color: '#fff',
+                boxShadow: `0 4px 14px ${tokens.brand.sunset}40`,
+              }}
+            >
+              {isExporting ? (
+                <>Exporting...</>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Save Card
+                </>
+              )}
+            </button>
+          </div>
+          
+          <p 
+            className="text-xs text-center mt-3 pt-3 border-t"
+            style={{ 
+              color: tokens.colors.text.secondary,
+              borderColor: tokens.colors.border.card,
+            }}
           >
-            <RefreshCw className="w-4 h-4" />
-            Randomize All
-          </Button>
-          <Button
-            onClick={randomizeTheme}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <Palette className="w-4 h-4" />
-            New Theme
-          </Button>
-          <Button
-            onClick={randomizePattern}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            New Pattern
-          </Button>
-          <Button
-            onClick={handleDownload}
-            disabled={isExporting}
-            className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-          >
-            {isExporting ? (
-              <>Exporting...</>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                Save Card
-              </>
-            )}
-          </Button>
+            Theme: <span className="font-semibold" style={{ color: tokens.colors.text.primary }}>{theme.name}</span> • Pattern: <span className="font-semibold capitalize" style={{ color: tokens.colors.text.primary }}>{currentPattern}</span>
+          </p>
         </div>
 
-        <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-          Theme: <span className="font-medium">{theme.name}</span> • Pattern: <span className="font-medium capitalize">{currentPattern}</span>
-        </p>
+        {/* Installation Instructions */}
+        <div 
+          className="rounded-xl p-5 border"
+          style={{
+            backgroundColor: tokens.colors.background.card,
+            borderColor: tokens.colors.border.card,
+          }}
+        >
+          <h3 
+            className="text-xs font-bold mb-4 uppercase tracking-wider"
+            style={{ color: tokens.colors.text.primary }}
+          >
+            Installation Instructions
+          </h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-start gap-3">
+              <span 
+                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                style={{ 
+                  backgroundColor: `${tokens.brand.sunset}20`,
+                  color: tokens.brand.sunset 
+                }}
+              >
+                1
+              </span>
+              <div>
+                <p 
+                  className="font-medium text-xs"
+                  style={{ color: tokens.colors.text.primary }}
+                >
+                  Download the script below
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span 
+                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                style={{ 
+                  backgroundColor: `${tokens.brand.sunset}20`,
+                  color: tokens.brand.sunset 
+                }}
+              >
+                2
+              </span>
+              <div>
+                <p 
+                  className="font-medium text-xs"
+                  style={{ color: tokens.colors.text.primary }}
+                >
+                  Make it executable
+                </p>
+                <code 
+                  className="font-mono text-[10px] px-2 py-1 rounded mt-1 inline-block"
+                  style={{ 
+                    backgroundColor: tokens.colors.background.secondary,
+                    color: tokens.colors.text.secondary 
+                  }}
+                >
+                  chmod +x setup-macos.sh
+                </code>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span 
+                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                style={{ 
+                  backgroundColor: `${tokens.brand.sunset}20`,
+                  color: tokens.brand.sunset 
+                }}
+              >
+                3
+              </span>
+              <div>
+                <p 
+                  className="font-medium text-xs"
+                  style={{ color: tokens.colors.text.primary }}
+                >
+                  Run it
+                </p>
+                <code 
+                  className="font-mono text-[10px] px-2 py-1 rounded mt-1 inline-block"
+                  style={{ 
+                    backgroundColor: tokens.colors.background.secondary,
+                    color: tokens.colors.text.secondary 
+                  }}
+                >
+                  ./setup-macos.sh
+                </code>
+              </div>
+            </div>
+          </div>
+        </div>
       </motion.div>
     </div>
 
