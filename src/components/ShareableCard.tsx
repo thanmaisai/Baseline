@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Tool } from '@/types/tools';
-import { motion } from 'framer-motion';
-import { Download, RefreshCw, Palette } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Download, RefreshCw, Palette, X, Check } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
 import { Button } from './ui/button';
@@ -12,6 +12,14 @@ export type CardPattern = 'wave' | 'dots' | 'grid' | 'gradient' | 'minimal' | 'c
 interface ShareableCardProps {
   selectedTools: Tool[];
   onDownload?: () => void;
+}
+
+interface ToolSelectionModalProps {
+  tools: Tool[];
+  selectedToolIds: string[];
+  onToggle: (toolId: string) => void;
+  onConfirm: () => void;
+  maxSelection: number;
 }
 
 const themes = {
@@ -233,6 +241,9 @@ const patterns = {
 };
 
 export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps) => {
+  const MAX_DISPLAY_TOOLS = 24;
+  const needsSelection = selectedTools.length > MAX_DISPLAY_TOOLS;
+
   // Randomly select theme and pattern on mount
   const getRandomTheme = (): CardTheme => {
     const themeKeys = Object.keys(themes) as CardTheme[];
@@ -247,6 +258,11 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
   const [currentTheme, setCurrentTheme] = useState<CardTheme>(() => getRandomTheme());
   const [currentPattern, setCurrentPattern] = useState<CardPattern>(() => getRandomPattern());
   const [isExporting, setIsExporting] = useState(false);
+  const [showToolSelector, setShowToolSelector] = useState(false);
+  const [selectedToolsForCard, setSelectedToolsForCard] = useState<string[]>(() => {
+    // Initially select first 24 tools if more than 24
+    return selectedTools.slice(0, MAX_DISPLAY_TOOLS).map(t => t.id);
+  });
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Get current date dynamically
@@ -271,8 +287,36 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     .sort(([, a], [, b]) => b.length - a.length)
     .slice(0, 3);
 
-  // Get all tool names for the pills - show all tools
-  const toolNames = selectedTools.map(t => t.name);
+  // Get tools to display on card
+  const displayTools = needsSelection
+    ? selectedTools.filter(t => selectedToolsForCard.includes(t.id))
+    : selectedTools;
+  
+  const toolNames = displayTools.map(t => t.name);
+  const remainingCount = selectedTools.length - displayTools.length;
+
+  const toggleToolSelection = (toolId: string) => {
+    setSelectedToolsForCard(prev => {
+      if (prev.includes(toolId)) {
+        return prev.filter(id => id !== toolId);
+      } else if (prev.length < MAX_DISPLAY_TOOLS) {
+        return [...prev, toolId];
+      }
+      return prev;
+    });
+  };
+
+  // Calculate dynamic font size based on number of tools
+  const getToolPillFontSize = () => {
+    return '10px'; // Fixed size since we're limiting to 24
+  };
+
+  const getToolPillPadding = () => {
+    return 'px-2.5 py-1.5'; // Fixed padding since we're limiting to 24
+  };
+
+  const toolPillFontSize = getToolPillFontSize();
+  const toolPillPadding = getToolPillPadding();
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -280,9 +324,15 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     setIsExporting(true);
 
     try {
-      // Temporarily reset any transforms
+      // Temporarily reset any transforms and ensure clean state
       const originalTransform = cardRef.current.style.transform;
+      const originalBoxShadow = cardRef.current.style.boxShadow;
+      
       cardRef.current.style.transform = 'none';
+      cardRef.current.style.boxShadow = 'none';
+
+      // Wait a bit for styles to settle
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       const canvas = await html2canvas(cardRef.current, {
         scale: 3,
@@ -290,15 +340,21 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
         useCORS: true,
         logging: false,
         allowTaint: true,
-        windowWidth: 400,
-        windowHeight: 640,
+        windowWidth: 480,
+        windowHeight: 720,
+        width: 480,
+        height: 720,
+        imageTimeout: 0,
+        removeContainer: true,
       });
 
+      // Restore original styles
       cardRef.current.style.transform = originalTransform;
+      cardRef.current.style.boxShadow = originalBoxShadow;
 
       const link = document.createElement('a');
       link.download = `dev-stack-${currentTheme}-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
 
       confetti({
@@ -340,16 +396,16 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-6">
-      {/* Card Preview */}
+    <div className="w-full flex gap-8 items-start justify-center px-4">
+      {/* Card Preview - Left Side */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="relative flex-shrink-0"
       >
         <div
           ref={cardRef}
-          className="relative w-[480px] h-[750px] rounded-3xl overflow-hidden shadow-2xl"
+          className="relative w-[480px] h-[720px] rounded-3xl overflow-hidden shadow-2xl"
           style={{
             backgroundColor: theme.cardBg,
             border: `1px solid ${theme.border}`,
@@ -358,7 +414,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
           {/* Pattern Background */}
           {currentPattern !== 'minimal' && (
             <div
-              className="absolute top-0 left-0 w-full h-[280px] pointer-events-none"
+              className="absolute top-0 left-0 w-full h-[300px] pointer-events-none"
               dangerouslySetInnerHTML={{ __html: patternSvg }}
             />
           )}
@@ -366,13 +422,13 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col p-8">
             {/* Top Section */}
-            <div className="mt-[24%]">
+            <div className="mt-[24%] flex-shrink-0">
               <div
-                className="w-12 h-1.5 rounded-full mb-4"
+                className="w-10 h-1 rounded-full mb-3"
                 style={{ backgroundColor: theme.accent }}
               />
               <h2
-                className="text-[3.5rem] font-black tracking-tighter leading-[0.8] mb-3"
+                className="text-[3rem] font-black tracking-tighter leading-[0.8] mb-2.5"
                 style={{ 
                   color: theme.text,
                   textShadow: `0 2px 20px ${theme.accent}40`
@@ -382,9 +438,9 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                 <br />
                 STACK
               </h2>
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-2.5 mb-3">
                 <span
-                  className="text-[11px] font-mono font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-lg border-2"
+                  className="text-[10px] font-mono font-bold tracking-[0.15em] uppercase px-2.5 py-1 rounded-lg border-2"
                   style={{
                     color: theme.accent,
                     backgroundColor: theme.accentLight,
@@ -393,54 +449,70 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                 >
                   {selectedTools.length} TOOLS
                 </span>
-                <span className="h-px w-6" style={{ backgroundColor: theme.border }} />
-                <span className="text-[11px] font-mono font-semibold" style={{ color: theme.textMuted }}>
+                <span className="h-px w-5" style={{ backgroundColor: theme.border }} />
+                <span className="text-[10px] font-mono font-semibold" style={{ color: theme.textMuted }}>
                   {currentDate}
                 </span>
               </div>
             </div>
 
-            {/* Tool Pills Section - Much more space for all tools */}
-            <div className="flex-1 mt-4 mb-4 overflow-hidden">
-              <div className="flex flex-wrap gap-2 max-h-[310px] overflow-y-auto no-scrollbar content-start">
+            {/* Tool Pills Section - Fixed height with scroll */}
+            <div className="flex-shrink-0 mb-4" style={{ height: '260px' }}>
+              <div className="h-full flex flex-wrap gap-2 overflow-y-auto no-scrollbar content-start">
                 {toolNames.map((name, idx) => (
                   <span
                     key={idx}
-                    className="text-[10px] font-mono font-medium px-2.5 py-1.5 rounded-md transition-all cursor-default select-none backdrop-blur-sm"
+                    className={`font-mono font-medium rounded-md transition-all cursor-default select-none backdrop-blur-sm flex-shrink-0 ${toolPillPadding}`}
                     style={{
+                      fontSize: toolPillFontSize,
                       color: theme.text,
                       backgroundColor: theme.accentLight,
                       border: `1px solid ${theme.border}`,
+                      height: 'fit-content',
                     }}
                   >
                     {name}
                   </span>
                 ))}
+                {remainingCount > 0 && (
+                  <span
+                    className={`font-mono font-bold rounded-md transition-all cursor-default select-none backdrop-blur-sm flex-shrink-0 ${toolPillPadding}`}
+                    style={{
+                      fontSize: toolPillFontSize,
+                      color: theme.accent,
+                      backgroundColor: theme.accentLight,
+                      border: `2px solid ${theme.accent}`,
+                      height: 'fit-content',
+                    }}
+                  >
+                    +{remainingCount} more
+                  </span>
+                )}
               </div>
             </div>
 
             {/* Stats Row - Minimal inline design */}
             <div 
-              className="mb-4 pb-4 border-b"
+              className="flex-shrink-0 mb-4 pb-3 border-b"
               style={{
                 borderColor: theme.border,
               }}
             >
-              <div className="text-[8px] font-mono tracking-widest uppercase mb-2" style={{ color: theme.textMuted }}>
+              <div className="text-[7px] font-mono tracking-widest uppercase mb-1.5" style={{ color: theme.textMuted }}>
                 TOP CATEGORIES
               </div>
-              <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-3 flex-wrap">
                 {topCategories.map(([category, tools]) => (
                   <div key={category} className="flex items-center gap-1.5">
                     <div
-                      className="w-1.5 h-1.5 rounded-full"
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: theme.accent }}
                     />
-                    <span className="text-[11px] font-medium capitalize" style={{ color: theme.text }}>
+                    <span className="text-[10px] font-medium capitalize whitespace-nowrap" style={{ color: theme.text }}>
                       {category}
                     </span>
                     <span 
-                      className="text-[10px] font-mono font-bold"
+                      className="text-[9px] font-mono font-bold whitespace-nowrap"
                       style={{ 
                         color: theme.accent,
                       }}
@@ -453,13 +525,13 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
             </div>
 
             {/* Footer - QR Code and Branding */}
-            <div className="flex items-end justify-between pt-2">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-xl shadow-lg">
+            <div className="flex-shrink-0 flex items-center justify-between mt-auto pt-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-white rounded-xl shadow-lg flex-shrink-0">
                   <img
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://mac-baseline.vercel.app/&color=222222"
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://mac-baseline.vercel.app/&color=222222"
                     alt="Scan to visit"
-                    className="w-12 h-12"
+                    style={{ display: 'block', width: '52px', height: '52px' }}
                   />
                 </div>
                 <div className="flex flex-col gap-0.5">
@@ -473,9 +545,9 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               </div>
               
               {/* Branding */}
-              <div className="text-right leading-none">
+              <div className="text-right leading-none flex-shrink-0">
                 <span
-                  className="block text-[8px] font-bold tracking-widest uppercase mb-1"
+                  className="block text-[8px] font-bold tracking-widest uppercase mb-1.5"
                   style={{ color: theme.textMuted }}
                 >
                   POWERED BY
@@ -494,8 +566,36 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
         </div>
       </motion.div>
 
-      {/* Controls */}
-      <div className="flex flex-col items-center gap-4 w-full max-w-md">
+      {/* Controls - Right Side */}
+      <motion.div 
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="flex flex-col gap-4 w-full max-w-sm flex-shrink-0"
+      >
+        {/* Tool Selection Notice */}
+        {needsSelection && (
+          <div className="w-full p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                  {selectedToolsForCard.length} of {MAX_DISPLAY_TOOLS} tools selected
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  You have {selectedTools.length} tools. Choose your top {MAX_DISPLAY_TOOLS} to display on the card.
+                </p>
+              </div>
+              <Button
+                onClick={() => setShowToolSelector(true)}
+                size="sm"
+                variant="outline"
+                className="flex-shrink-0"
+              >
+                Select Tools
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="flex items-center gap-3 flex-wrap justify-center">
           <Button
@@ -544,7 +644,118 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
           Theme: <span className="font-medium">{theme.name}</span> • Pattern: <span className="font-medium capitalize">{currentPattern}</span>
         </p>
-      </div>
+      </motion.div>
+
+      {/* Tool Selection Modal */}
+      <AnimatePresence>
+        {showToolSelector && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              onClick={() => setShowToolSelector(false)}
+            />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[80vh] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl z-50 flex flex-col"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    Select Tools for Card
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Choose {MAX_DISPLAY_TOOLS} tools to display ({selectedToolsForCard.length}/{MAX_DISPLAY_TOOLS} selected)
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowToolSelector(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                </button>
+              </div>
+
+              {/* Tool Grid */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {selectedTools.map((tool) => {
+                    const isSelected = selectedToolsForCard.includes(tool.id);
+                    const canSelect = selectedToolsForCard.length < MAX_DISPLAY_TOOLS;
+
+                    return (
+                      <button
+                        key={tool.id}
+                        onClick={() => toggleToolSelection(tool.id)}
+                        disabled={!isSelected && !canSelect}
+                        className={`
+                          relative p-4 rounded-lg border-2 transition-all text-left
+                          ${isSelected 
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                            : canSelect 
+                              ? 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' 
+                              : 'border-gray-100 dark:border-gray-800 opacity-50 cursor-not-allowed'
+                          }
+                        `}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className={`
+                            flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center
+                            ${isSelected 
+                              ? 'border-blue-500 bg-blue-500' 
+                              : 'border-gray-300 dark:border-gray-600'
+                            }
+                          `}>
+                            {isSelected && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-medium truncate ${
+                              isSelected 
+                                ? 'text-blue-900 dark:text-blue-100' 
+                                : 'text-gray-900 dark:text-white'
+                            }`}>
+                              {tool.name}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                              {tool.category}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {selectedToolsForCard.length < MAX_DISPLAY_TOOLS && (
+                    <>Select {MAX_DISPLAY_TOOLS - selectedToolsForCard.length} more tools</>
+                  )}
+                  {selectedToolsForCard.length === MAX_DISPLAY_TOOLS && (
+                    <>All {MAX_DISPLAY_TOOLS} tools selected</>
+                  )}
+                </p>
+                <Button
+                  onClick={() => setShowToolSelector(false)}
+                  disabled={selectedToolsForCard.length === 0}
+                >
+                  Done
+                </Button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar {
