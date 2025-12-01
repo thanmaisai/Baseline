@@ -8,6 +8,7 @@ import { ToolCard } from '@/components/ToolCard';
 import { PageLayout } from '@/components/PageLayout';
 import { NotionBreadcrumb } from '@/components/NotionBreadcrumb';
 import { FloatingFooter } from '@/components/FloatingFooter';
+import { ShareableCard } from '@/components/ShareableCard';
 import { usePersistedSelection } from '@/hooks/usePersistedSelection';
 import { useBrewPackages } from '@/hooks/useBrewPackages';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -718,56 +719,70 @@ const Configurator = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="max-w-2xl mx-auto py-12"
+                className="max-w-4xl mx-auto py-12"
               >
                 {/* Header */}
-                <div className="text-center mb-12">
-                  <h2 className="text-5xl font-black text-[hsl(var(--foreground))] mb-3">
-                    {selection.tools.length} {selection.tools.length === 1 ? 'Tool' : 'Tools'}
+                <div className="text-center mb-8">
+                  <h2 className="text-4xl font-black text-[hsl(var(--foreground))] mb-2">
+                    Share Your Dev Stack
                   </h2>
-                  <p className="text-base text-[hsl(var(--muted-foreground))] font-medium">Ready to install on your Mac</p>
+                  <p className="text-base text-[hsl(var(--muted-foreground))] font-medium">
+                    {selection.tools.length} {selection.tools.length === 1 ? 'tool' : 'tools'} selected • Create a shareable card
+                  </p>
                 </div>
                 
-                {/* Tools Grid */}
-                <div className="flex flex-wrap gap-2.5 justify-center mb-16">
-                  {Array.from(selection.tools).map(tool => (
-                    <span
-                      key={tool.id}
-                      className="px-4 py-2 rounded-lg bg-[hsl(var(--card))] border border-[hsl(var(--border))] text-sm font-medium text-[hsl(var(--foreground))] hover:border-[hsl(var(--primary))] transition-colors"
-                    >
-                      {tool.name}
-                    </span>
-                  ))}
-                </div>
+                {/* Shareable Card */}
+                {selection.tools.length > 0 ? (
+                  <ShareableCard 
+                    selectedTools={selection.tools} 
+                    onDownload={() => {
+                      toast.success('Card saved!', {
+                        description: 'Share your dev stack on social media',
+                      });
+                    }}
+                  />
+                ) : (
+                  <div className="text-center py-16">
+                    <p className="text-[hsl(var(--muted-foreground))] text-lg mb-4">
+                      No tools selected yet
+                    </p>
+                    <Button onClick={handleBack} variant="outline">
+                      Go back and select tools
+                    </Button>
+                  </div>
+                )}
 
+                {/* Quick Instructions */}
                 {selection.tools.length > 0 && (
-                  <>
-                    {/* Commands Section */}
-                    <div className="space-y-6 mb-12">
-                      <div>
-                        <p className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-2">Make executable</p>
-                        <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg p-4">
-                          <code className="font-mono text-sm text-[hsl(var(--foreground))]">chmod +x setup-macos.sh</code>
+                  <div className="mt-12 max-w-2xl mx-auto">
+                    <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl p-6">
+                      <h3 className="text-sm font-bold text-[hsl(var(--foreground))] mb-4 uppercase tracking-wider">
+                        Installation Instructions
+                      </h3>
+                      <div className="space-y-3 text-sm text-[hsl(var(--muted-foreground))]">
+                        <div className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[hsl(var(--primary))]/10 text-[hsl(var(--primary))] flex items-center justify-center text-xs font-bold">1</span>
+                          <div>
+                            <p className="font-medium text-[hsl(var(--foreground))]">Download the script using the button below</p>
+                          </div>
                         </div>
-                      </div>
-
-                      <div>
-                        <p className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-2">Run script</p>
-                        <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg p-4">
-                          <code className="font-mono text-sm text-[hsl(var(--foreground))]">./setup-macos.sh</code>
+                        <div className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[hsl(var(--primary))]/10 text-[hsl(var(--primary))] flex items-center justify-center text-xs font-bold">2</span>
+                          <div>
+                            <p className="font-medium text-[hsl(var(--foreground))]">Make it executable</p>
+                            <code className="font-mono text-xs bg-[hsl(var(--muted))] px-2 py-1 rounded mt-1 inline-block">chmod +x setup-macos.sh</code>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[hsl(var(--primary))]/10 text-[hsl(var(--primary))] flex items-center justify-center text-xs font-bold">3</span>
+                          <div>
+                            <p className="font-medium text-[hsl(var(--foreground))]">Run it</p>
+                            <code className="font-mono text-xs bg-[hsl(var(--muted))] px-2 py-1 rounded mt-1 inline-block">./setup-macos.sh</code>
+                          </div>
                         </div>
                       </div>
                     </div>
-
-                    {/* Download Button */}
-                    <button
-                      onClick={handleDownloadScript}
-                      className="w-full h-14 bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl"
-                    >
-                      <Download className="h-5 w-5" />
-                      Download Setup Script
-                    </button>
-                  </>
+                  </div>
                 )}
               </motion.div>
             ) : null}

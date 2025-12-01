@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Stack - Ultimate Dark</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'Inter', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            sand: '#FAF3E1',   // Light Text
+                            dunes: '#F5E7C6',  // Muted Text
+                            sunset: '#FF6D1F', // Accent/Orange
+                            ink: '#222222',    // Background/Card
+                        },
+                        border: {
+                            card: 'rgba(235, 222, 201, 0.4)', // The specific border color requested
+                        }
+                    },
+                    boxShadow: {
+                        'neon': '0 0 60px -15px rgba(255, 109, 31, 0.3), 0 0 20px -5px rgba(255, 109, 31, 0.1)',
+                        'card-border': '0 0 0 1px rgba(235, 222, 201, 0.4)',
+                    },
+                    backgroundImage: {
+                        'gradient-sunset': 'linear-gradient(135deg, #FF6D1F 0%, #AF3C43 50%, #222222 100%)',
+                        'noise': "url('https://grainy-gradients.vercel.app/noise.svg')",
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'fadeIn': 'fadeIn 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #222222; /* Brand Ink */
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 109, 31, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(245, 231, 198, 0.05), transparent 25%);
+        }
+        
+        .arc-wave-smooth {
+             clip-path: path("M0,0 L400,0 L400,240 C350,240 320,160 270,160 C220,160 200,260 140,260 C80,260 60,180 0,180 Z");
+        }
+
+        .tilt-card {
+            transition: transform 0.1s ease-out;
+            transform-style: preserve-3d;
+        }
+        
+        .texture {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+        }
+
+        /* Scrollbar hiding for the pills area if it overflows */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 font-sans text-brand-sand antialiased overflow-hidden selection:bg-brand-sunset selection:text-brand-ink">
+    
+    <!-- Main Container -->
+    <main class="w-full max-w-5xl z-10 flex flex-col items-center justify-center min-h-[85vh] gap-10">
+        
+        <!-- THE CARD WRAPPER -->
+        <div class="tilt-container perspective-[1200px] group opacity-0 animate-fadeIn">
+            
+            <!-- THE CARD ITSELF -->
+            <div id="shareCard" class="tilt-card relative w-[340px] md:w-[380px] h-[640px] bg-brand-ink rounded-[24px] shadow-neon border border-border-card flex flex-col overflow-hidden">
+                
+                <!-- 1. Top Graphic (The Wave) -->
+                <!-- Adjusted gradient to match the Sunset/Dark theme -->
+                <div class="absolute top-0 left-0 w-full h-[50%] bg-gradient-sunset arc-wave-smooth scale-[1.05] origin-top z-0">
+                    <!-- Internal Noise/Texture -->
+                    <div class="absolute inset-0 texture mix-blend-overlay opacity-60"></div>
+                    <!-- Shine effect -->
+                    <div class="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-40"></div>
+                </div>
+
+                <!-- 2. Content Area -->
+                <div class="relative z-10 h-full flex flex-col justify-end p-7 pb-8">
+                    
+                    <!-- Main Typography -->
+                    <!-- Pushed down slightly more to accommodate the dramatic wave -->
+                    <div class="mt-[45%] mb-5 relative">
+                        <!-- Decorative line -->
+                        <div class="w-8 h-1 bg-brand-sunset mb-4 rounded-full"></div>
+                        
+                        <h2 class="text-[3.25rem] font-bold text-brand-sand tracking-tighter leading-[0.85] mb-2 drop-shadow-lg">
+                            MY DEV<br>STACK
+                        </h2>
+                        <div class="flex items-center gap-3">
+                            <span class="font-mono text-[10px] font-bold text-brand-sunset tracking-[0.2em] uppercase bg-brand-sunset/10 px-2 py-1 rounded border border-brand-sunset/20">
+                                Ultimate Edition
+                            </span>
+                            <span class="h-px w-8 bg-brand-card-inner opacity-30"></span>
+                            <span class="font-mono text-[10px] text-brand-dunes/60">2024</span>
+                        </div>
+                    </div>
+
+                    <!-- Tech Stack Grid -->
+                    <div class="mb-auto">
+                         <div class="flex flex-wrap gap-2 content-start">
+                            <!-- Pills adapted for Dark Mode: 
+                                 Bg: Transparent/Very low opacity 
+                                 Border: Consistent with theme borders
+                                 Text: Dunes color for readability
+                            -->
+                            <script>
+                                const techs = [
+                                    "TypeScript", "React", "Next.js", "Tailwind", "Node.js", 
+                                    "Bun", "PostgreSQL", "Prisma", "Docker", "AWS", 
+                                    "Vercel", "Git", "Figma", "Rust", "Go", 
+                                    "Python", "GraphQL", "Redis", "tRPC", "Zod",
+                                    "Turborepo", "Vite", "Jest", "Cypress"
+                                ];
+                                // Generating pills dynamically to keep code clean, but you can hardcode them
+                                document.write(techs.map(t => `
+                                    <span class="text-[10px] font-mono font-medium border border-[rgba(235,222,201,0.25)] px-2 py-1 rounded-[6px] text-brand-dunes bg-brand-sand/5 hover:border-brand-sunset hover:text-brand-sunset hover:bg-brand-sunset/10 transition-colors cursor-default select-none">${t}</span>
+                                `).join(''));
+                            </script>
+                         </div>
+                    </div>
+
+                    <!-- 3. Footer -->
+                    <div class="flex items-end justify-between pt-6 border-t border-[rgba(235,222,201,0.15)] mt-2">
+                        
+                        <!-- Left: QR Code -->
+                        <!-- Boxed in brand-sand (off-white) to ensure contrast/scannability against dark bg -->
+                        <div class="flex items-center gap-3">
+                            <div class="p-1.5 bg-brand-sand rounded-lg shadow-lg">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://mac-baseline.vercel.app/&color=222222" 
+                                     alt="Scan" 
+                                     class="w-10 h-10 mix-blend-multiply opacity-90">
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <span class="text-[8px] font-mono text-brand-dunes/50 uppercase tracking-wider">Scan for</span>
+                                <span class="text-[10px] font-bold text-brand-sand">Portfolio</span>
+                            </div>
+                        </div>
+
+                        <!-- Right: Branding -->
+                        <div class="text-right leading-none">
+                            <span class="block text-[8px] font-bold tracking-widest text-brand-dunes/40 uppercase mb-1">POWERED BY</span>
+                            <div class="flex items-baseline justify-end gap-0.5">
+                                <span class="font-sans text-xl font-black text-brand-sand tracking-tight">Baseline</span>
+                                <span class="text-2xl text-brand-sunset">.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="flex items-center gap-4 opacity-0 animate-[fadeIn_0.8s_ease-out_0.4s_forwards]">
+            
+            <!-- Primary Action -->
+            <button onclick="downloadCard()" class="group relative flex items-center gap-2 px-8 py-3.5 bg-brand-sunset text-brand-ink rounded-full shadow-[0_0_20px_rgba(255,109,31,0.4)] hover:shadow-[0_0_30px_rgba(255,109,31,0.6)] hover:-translate-y-0.5 transition-all duration-300">
+                <i class="ph-bold ph-camera text-lg group-hover:scale-110 transition-transform"></i>
+                <span class="text-sm font-bold font-sans">Save Card</span>
+                <!-- Inner shine -->
+                <div class="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            
+            <!-- Divider -->
+            <div class="w-px h-8 bg-brand-border-card opacity-30"></div>
+            
+            <!-- Secondary Actions -->
+            <button class="p-3.5 bg-brand-ink border border-border-card text-brand-dunes hover:text-brand-sunset hover:border-brand-sunset rounded-full hover:shadow-[0_0_15px_rgba(255,109,31,0.2)] hover:-translate-y-0.5 transition-all duration-300">
+                <i class="ph-fill ph-twitter-logo text-xl"></i>
+            </button>
+            <button class="p-3.5 bg-brand-ink border border-border-card text-brand-dunes hover:text-brand-sunset hover:border-brand-sunset rounded-full hover:shadow-[0_0_15px_rgba(255,109,31,0.2)] hover:-translate-y-0.5 transition-all duration-300">
+                <i class="ph-fill ph-linkedin-logo text-xl"></i>
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        // 3D Tilt Logic
+        const card = document.getElementById('shareCard');
+        const container = document.querySelector('.tilt-container');
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Slightly stronger tilt for dramatic effect in dark mode
+            const rotateX = ((y - centerY) / centerY) * -6; 
+            const rotateY = ((x - centerX) / centerX) * 6;
+
+            // Added contrast to the scale for pop
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            
+            // Dynamic Shine/Reflection effect based on mouse position
+            // (Optional sophisticated touch)
+        });
+
+        container.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+        });
+
+        function downloadCard() {
+            // Confetti using Brand colors
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.7 },
+                colors: ['#FF6D1F', '#FAF3E1', '#F5E7C6'] // Sunset, Sand, Dunes
+            });
+
+            const cardElement = document.getElementById('shareCard');
+            
+            // Temporarily reset transform for clean capture
+            const currentTransform = cardElement.style.transform;
+            cardElement.style.transform = 'scale(1)'; 
+            
+            html2canvas(cardElement, {
+                scale: 3, 
+                backgroundColor: null, 
+                useCORS: true,
+                logging: false,
+                allowTaint: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'my-dev-stack-dark.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // Restore transform state
+                cardElement.style.transform = currentTransform;
+            });
+        }
+    </script>
+</body>
+</html>
