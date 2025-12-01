@@ -19,6 +19,8 @@ import { generateSetupScript } from '@/utils/scriptGenerator';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { themeTokens } from '@/theme/tokens';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const steps = [
   { id: 'templates', name: 'Templates', subtitle: 'Choose Your Starting Point' },
@@ -75,6 +77,7 @@ const templates = [
 
 const Configurator = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [currentStep, setCurrentStep] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 250); // 250ms debounce for snappy feel
@@ -82,6 +85,13 @@ const Configurator = () => {
   const [liveLog, setLiveLog] = useState('loading homebrew packages...');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { selection, setSelection, clearSelection } = usePersistedSelection();
+
+  // Get theme-aware border colors
+  const isDark = theme === 'dark';
+  const borderColors = {
+    card: themeTokens.colors[isDark ? 'dark' : 'light'].border.card,
+    cardInner: themeTokens.colors[isDark ? 'dark' : 'light'].border.cardInner,
+  };
 
   // Fetch real-time Homebrew data
   const {
@@ -518,14 +528,30 @@ const Configurator = () => {
   return (
     <PageLayout>
       {/* Header */}
-      <header className={`flex-shrink-0 px-6 ${currentCategory === 'review' ? 'py-3' : 'py-6'} border-b border-gray-50 dark:border-[#262626] flex flex-col justify-center`}>
-        <div className="flex flex-col gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-1.5">{steps[currentStep].name}</h1>
-            <p className="text-gray-500 dark:text-gray-400 font-light text-sm">{steps[currentStep].subtitle}</p>
+      <header 
+        className="flex-shrink-0 px-6 md:px-10 py-8 border-b flex flex-col justify-center"
+        style={{ borderColor: borderColors.cardInner }}
+      >
+        <div className="flex items-end justify-between">
+          <div className="space-y-2">
+            <div 
+              className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/60 dark:bg-[var(--brand-ink)]/60 text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1.5 rounded-full border text-[var(--brand-ink)] dark:text-[var(--brand-sand)]"
+              style={{ borderColor: borderColors.cardInner }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-sunset)]" />
+              {currentCategory === 'review' ? 'Review Your Stack' : steps[currentStep].name}
+            </div>
+            <h1 className="text-3xl md:text-4xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)] tracking-tight">
+              {currentCategory === 'review' ? 'Finalize & Export' : 'Configure Your Setup'}
+            </h1>
+            <p className="text-[var(--brand-ink)]/60 dark:text-[var(--brand-sand)]/60 text-sm md:text-base max-w-2xl">
+              {currentCategory === 'review' 
+                ? 'Review your selected tools and download your personalized setup script.' 
+                : steps[currentStep].subtitle}
+            </p>
           </div>
-          {/* Breadcrumbs/Timeline */}
-          <div className="w-full flex justify-end">
+          {/* Breadcrumbs */}
+          <div className="hidden lg:block">
             <NotionBreadcrumb
               steps={steps}
               currentIndex={currentStep}
@@ -539,34 +565,79 @@ const Configurator = () => {
 
         {/* Search Bar */}
         {currentCategory !== 'review' && currentCategory !== 'templates' && (
-          <div className="mt-4 relative">
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (e.target.value) {
-                  updateLog(`searching for "${e.target.value}"`);
-                }
-              }}
-              placeholder="Search all tools..."
-              className="w-full max-w-md bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#262626] rounded-lg py-2.5 pl-3.5 pr-10 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
+          <div className="mt-6 relative group">
+            <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                 style={{ 
+                   background: `linear-gradient(135deg, ${themeTokens.colors.brand.sunset}15, ${themeTokens.colors.brand.sunset}25)`,
+                   filter: 'blur(20px)',
+                   zIndex: -1
+                 }}
             />
-            {searchQuery !== debouncedSearchQuery ? (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />
+            <div className="relative">
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value) {
+                    updateLog(`searching for "${e.target.value}"`);
+                  }
+                }}
+                placeholder="Search all tools..."
+                className="w-full px-5 py-3.5 pl-12 rounded-xl border-2 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:shadow-lg"
+                style={{
+                  backgroundColor: isDark ? themeTokens.colors.dark.background.card : themeTokens.colors.light.background.card,
+                  borderColor: isDark ? themeTokens.colors.dark.border.card : themeTokens.colors.light.border.card,
+                  color: isDark ? themeTokens.colors.dark.text.primary : themeTokens.colors.light.text.primary,
+                  outline: 'none',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = themeTokens.colors.brand.sunset;
+                  e.currentTarget.style.boxShadow = `0 0 0 3px ${themeTokens.colors.brand.sunset}20`;
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = isDark ? themeTokens.colors.dark.border.card : themeTokens.colors.light.border.card;
+                  e.currentTarget.style.boxShadow = '';
+                }}
+              />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg
+                  className="h-5 w-5 transition-colors duration-200"
+                  style={{ 
+                    color: searchQuery 
+                      ? themeTokens.colors.brand.sunset 
+                      : (isDark ? themeTokens.colors.dark.text.secondary : themeTokens.colors.light.text.secondary)
+                  }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
-            ) : (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <span className="text-[10px] text-gray-400 font-mono">⌘F</span>
-              </div>
-            )}
-            {debouncedSearchQuery && (
-              <div className="absolute right-12 top-1/2 -translate-y-1/2 text-[10px] text-gray-400">
-                {filteredTools.length} {filteredTools.length === 1 ? 'result' : 'results'}
-              </div>
-            )}
+              {searchQuery !== debouncedSearchQuery ? (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <Loader2 className="h-4 w-4 animate-spin" style={{ color: themeTokens.colors.brand.sunset }} />
+                </div>
+              ) : searchQuery ? (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  style={{ color: isDark ? themeTokens.colors.dark.text.secondary : themeTokens.colors.light.text.secondary }}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              ) : (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md" 
+                     style={{ 
+                       backgroundColor: isDark ? themeTokens.colors.dark.background.secondary : themeTokens.colors.light.background.secondary,
+                       color: isDark ? themeTokens.colors.dark.text.secondary : themeTokens.colors.light.text.secondary
+                     }}>
+                  <span className="text-[10px] font-mono font-semibold">⌘F</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </header>

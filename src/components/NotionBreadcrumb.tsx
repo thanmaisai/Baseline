@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
+import { themeTokens } from '../theme/tokens';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface Step {
   id: string;
@@ -22,6 +24,10 @@ export const NotionBreadcrumb = ({ steps, currentIndex, onStepClick }: NotionBre
   const [scrollTop, setScrollTop] = useState(0);
   const isSnapping = useRef(false);
   const snapTimeout = useRef<NodeJS.Timeout | null>(null);
+  const { theme } = useTheme();
+
+  // Theme-aware colors
+  const colors = theme === 'dark' ? themeTokens.colors.dark : themeTokens.colors.light;
 
   // Helper to get visible breadcrumb slice
   const getVisibleSteps = () => {
@@ -139,28 +145,44 @@ export const NotionBreadcrumb = ({ steps, currentIndex, onStepClick }: NotionBre
       onMouseLeave={() => setIsHovering(false)}
     >
       {/* --- Collapsed Breadcrumb View (The "Bar") --- */}
-      <div className={`
-        flex items-center gap-1.5 px-3 py-1.5 rounded bg-transparent hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-colors duration-200 cursor-pointer select-none
-        ${isHovering ? 'opacity-0' : 'opacity-100'}
-      `}>
+      <div 
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors duration-200 cursor-pointer select-none"
+        style={{
+          backgroundColor: isHovering ? (theme === 'dark' ? '#1A1A1A' : colors.background.hover) : 'transparent',
+          opacity: isHovering ? 0 : 1
+        }}
+      >
         {visible.prev && (
-          <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-            <span className="text-[13px] line-through decoration-gray-400 dark:decoration-gray-600 truncate max-w-[80px]">
+          <div className="flex items-center gap-1" style={{ color: colors.text.tertiary }}>
+            <span 
+              className="text-[13px] line-through truncate max-w-[80px]"
+              style={{ textDecorationColor: theme === 'dark' ? '#404040' : colors.border.cardInner }}
+            >
               {visible.prev.name}
             </span>
-            <span className="text-[10px] text-gray-400 dark:text-gray-600">/</span>
+            <span className="text-[10px]" style={{ color: theme === 'dark' ? '#404040' : colors.text.tertiary }}>
+              /
+            </span>
           </div>
         )}
 
         <div className="flex items-center gap-1.5">
-          <span className="text-[13px] font-medium text-gray-900 dark:text-white underline decoration-dotted decoration-gray-400 dark:decoration-gray-600 underline-offset-4">
+          <span 
+            className="text-[13px] font-medium underline decoration-dotted underline-offset-4"
+            style={{ 
+              color: colors.text.primary,
+              textDecorationColor: theme === 'dark' ? '#404040' : colors.border.cardInner
+            }}
+          >
             {visible.current.name}
           </span>
         </div>
 
         {visible.next && (
-          <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-            <span className="text-[10px] text-gray-400 dark:text-gray-600">/</span>
+          <div className="flex items-center gap-1" style={{ color: colors.text.tertiary }}>
+            <span className="text-[10px]" style={{ color: theme === 'dark' ? '#404040' : colors.text.tertiary }}>
+              /
+            </span>
             <span className="text-[13px] truncate max-w-[80px]">
               {visible.next.name}
             </span>
@@ -171,33 +193,55 @@ export const NotionBreadcrumb = ({ steps, currentIndex, onStepClick }: NotionBre
       {/* --- Expanded Hover Dropdown (The "Tumbler") --- */}
       <div 
         ref={dropdownRef}
-        className={`
-          absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[280px] bg-white dark:bg-[#111111] rounded-xl shadow-2xl border border-gray-200 dark:border-[#262626] overflow-hidden transition-all duration-300 origin-top
-          ${isHovering ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 pointer-events-none translate-y-[-10px]'}
-        `}
+        className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[280px] rounded-xl shadow-2xl overflow-hidden transition-all duration-300 origin-top"
         style={{ 
           height: `${ITEM_HEIGHT * VISIBLE_ITEMS}px`,
-          maxHeight: 'calc(100vh - 200px)', // Prevent going off screen
-          maxWidth: 'calc(100vw - 40px)', // Prevent going off screen horizontally
+          maxHeight: 'calc(100vh - 200px)',
+          maxWidth: 'calc(100vw - 40px)',
+          backgroundColor: colors.background.card,
+          borderColor: colors.border.card,
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          opacity: isHovering ? 1 : 0,
+          transform: isHovering ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0.95) translateY(-10px)',
+          pointerEvents: isHovering ? 'auto' : 'none'
         }}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
         {/* Selection Highlight (The "Pill" in the background) */}
         <div 
-          className="absolute left-4 right-4 bg-gray-100 dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-gray-800 pointer-events-none z-0"
+          className="absolute left-4 right-4 rounded-lg pointer-events-none z-0"
           style={{ 
             top: '50%', 
             height: `${ITEM_HEIGHT}px`,
-            marginTop: `-${ITEM_HEIGHT / 2}px` 
+            marginTop: `-${ITEM_HEIGHT / 2}px`,
+            backgroundColor: theme === 'dark' ? '#1A1A1A' : colors.background.hover,
+            borderColor: theme === 'dark' ? '#262626' : colors.border.cardInner,
+            borderWidth: '1px',
+            borderStyle: 'solid'
           }}
         />
 
         {/* Top Gradient Fade */}
-        <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-white dark:from-[#111111] to-transparent z-10 pointer-events-none" />
+        <div 
+          className="absolute top-0 left-0 right-0 h-12 z-10 pointer-events-none"
+          style={{
+            background: theme === 'dark' 
+              ? 'linear-gradient(to bottom, #222222, transparent)' 
+              : 'linear-gradient(to bottom, #F5E7C6, transparent)'
+          }}
+        />
         
         {/* Bottom Gradient Fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-[#111111] to-transparent z-10 pointer-events-none" />
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-12 z-10 pointer-events-none"
+          style={{
+            background: theme === 'dark' 
+              ? 'linear-gradient(to top, #222222, transparent)' 
+              : 'linear-gradient(to top, #F5E7C6, transparent)'
+          }}
+        />
 
         {/* Scrollable List */}
         <div 
@@ -234,17 +278,24 @@ export const NotionBreadcrumb = ({ steps, currentIndex, onStepClick }: NotionBre
                 }}
               >
                 <div className="w-full px-8 flex items-center justify-between relative">
-                  <span className={`
-                    text-[14px] font-medium truncate flex-1 text-center transition-colors duration-300
-                    ${isCenter ? 'text-gray-900 dark:text-gray-100 scale-105' : 'text-gray-500 dark:text-gray-400'}
-                    ${isCompleted && !isCenter ? 'line-through opacity-50' : ''}
-                  `}>
+                  <span 
+                    className="text-[14px] font-medium truncate flex-1 text-center transition-colors duration-300"
+                    style={{
+                      color: isCenter ? colors.text.primary : colors.text.tertiary,
+                      transform: isCenter ? 'scale(1.05)' : 'scale(1)',
+                      textDecoration: (isCompleted && !isCenter) ? 'line-through' : 'none',
+                      opacity: (isCompleted && !isCenter) ? 0.5 : 1
+                    }}
+                  >
                     {step.name}
                   </span>
                   
                   {/* Subtle checkmark for completed items if not center */}
                   {isCompleted && !isCenter && (
-                    <Check className="w-3 h-3 text-gray-400 dark:text-gray-600 absolute right-6" />
+                    <Check 
+                      className="w-3 h-3 absolute right-6" 
+                      style={{ color: theme === 'dark' ? '#404040' : colors.text.tertiary }}
+                    />
                   )}
                 </div>
               </div>
