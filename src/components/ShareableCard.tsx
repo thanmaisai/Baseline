@@ -5,6 +5,7 @@ import { Download, RefreshCw, Palette, X, Check } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
 import { Button } from './ui/button';
+import { useThemeTokens } from '@/theme/useThemeTokens';
 
 export type CardTheme = 'dark' | 'sunset' | 'ocean' | 'forest' | 'light' | 'neon' | 'midnight' | 'rose' | 'cyber';
 export type CardPattern = 'wave' | 'dots' | 'grid' | 'gradient' | 'minimal' | 'circles' | 'hexagon' | 'diagonal' | 'zigzag';
@@ -243,6 +244,7 @@ const patterns = {
 export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps) => {
   const MAX_DISPLAY_TOOLS = 24;
   const needsSelection = selectedTools.length > MAX_DISPLAY_TOOLS;
+  const tokens = useThemeTokens();
 
   // Randomly select theme and pattern on mount
   const getRandomTheme = (): CardTheme => {
@@ -396,7 +398,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
   };
 
   return (
-    <div className="w-full flex gap-8 items-start justify-center px-4">
+    <div className="w-full min-h-screen flex gap-8 items-center justify-center px-4 py-8">
       {/* Card Preview - Left Side */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -574,13 +576,25 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
       >
         {/* Tool Selection Notice */}
         {needsSelection && (
-          <div className="w-full p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div 
+            className="w-full p-4 rounded-lg border"
+            style={{
+              backgroundColor: tokens.colors.background.card,
+              borderColor: tokens.colors.border.card,
+            }}
+          >
             <div className="flex items-start gap-3">
               <div className="flex-1">
-                <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                <p 
+                  className="text-sm font-medium mb-1"
+                  style={{ color: tokens.colors.text.primary }}
+                >
                   {selectedToolsForCard.length} of {MAX_DISPLAY_TOOLS} tools selected
                 </p>
-                <p className="text-xs text-blue-700 dark:text-blue-300">
+                <p 
+                  className="text-xs"
+                  style={{ color: tokens.colors.text.secondary }}
+                >
                   You have {selectedTools.length} tools. Choose your top {MAX_DISPLAY_TOOLS} to display on the card.
                 </p>
               </div>
@@ -655,7 +669,8 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              className="fixed inset-0 z-[999]"
+              style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}
               onClick={() => setShowToolSelector(false)}
             />
 
@@ -664,23 +679,45 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[80vh] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl z-50 flex flex-col"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[80vh] rounded-2xl shadow-2xl z-[101] flex flex-col overflow-hidden"
+              style={{ backgroundColor: tokens.colors.background.primary }}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div 
+                className="flex items-center justify-between p-6 border-b"
+                style={{ borderColor: tokens.colors.border.card }}
+              >
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  <h3 
+                    className="text-lg font-bold"
+                    style={{ color: tokens.colors.text.primary }}
+                  >
                     Select Tools for Card
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <p 
+                    className="text-sm mt-1"
+                    style={{ color: tokens.colors.text.secondary }}
+                  >
                     Choose {MAX_DISPLAY_TOOLS} tools to display ({selectedToolsForCard.length}/{MAX_DISPLAY_TOOLS} selected)
                   </p>
                 </div>
                 <button
                   onClick={() => setShowToolSelector(false)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  className="p-2 rounded-lg transition-all hover:scale-105"
+                  style={{ 
+                    color: tokens.colors.text.secondary,
+                    backgroundColor: 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = tokens.colors.background.hover;
+                    e.currentTarget.style.color = tokens.colors.text.primary;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = tokens.colors.text.secondary;
+                  }}
                 >
-                  <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
@@ -696,35 +733,35 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                         key={tool.id}
                         onClick={() => toggleToolSelection(tool.id)}
                         disabled={!isSelected && !canSelect}
-                        className={`
-                          relative p-4 rounded-lg border-2 transition-all text-left
-                          ${isSelected 
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
-                            : canSelect 
-                              ? 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' 
-                              : 'border-gray-100 dark:border-gray-800 opacity-50 cursor-not-allowed'
-                          }
-                        `}
+                        className="relative p-4 rounded-lg border-2 transition-all text-left hover:scale-[1.02] active:scale-[0.98]"
+                        style={{
+                          borderColor: isSelected ? tokens.brand.sunset : tokens.colors.border.card,
+                          backgroundColor: isSelected ? `${tokens.brand.sunset}20` : tokens.colors.background.card,
+                          opacity: !isSelected && !canSelect ? 0.4 : 1,
+                          cursor: !isSelected && !canSelect ? 'not-allowed' : 'pointer'
+                        }}
                       >
                         <div className="flex items-start gap-2">
-                          <div className={`
-                            flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center
-                            ${isSelected 
-                              ? 'border-blue-500 bg-blue-500' 
-                              : 'border-gray-300 dark:border-gray-600'
-                            }
-                          `}>
+                          <div 
+                            className="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center"
+                            style={{
+                              borderColor: isSelected ? tokens.brand.sunset : tokens.colors.border.default,
+                              backgroundColor: isSelected ? tokens.brand.sunset : 'transparent'
+                            }}
+                          >
                             {isSelected && <Check className="w-3 h-3 text-white" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-medium truncate ${
-                              isSelected 
-                                ? 'text-blue-900 dark:text-blue-100' 
-                                : 'text-gray-900 dark:text-white'
-                            }`}>
+                            <p 
+                              className="text-sm font-medium truncate"
+                              style={{ color: tokens.colors.text.primary }}
+                            >
                               {tool.name}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                            <p 
+                              className="text-xs truncate mt-0.5"
+                              style={{ color: tokens.colors.text.secondary }}
+                            >
                               {tool.category}
                             </p>
                           </div>
@@ -736,8 +773,14 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+              <div 
+                className="flex items-center justify-between p-6 border-t"
+                style={{ borderColor: tokens.colors.border.card }}
+              >
+                <p 
+                  className="text-sm"
+                  style={{ color: tokens.colors.text.secondary }}
+                >
                   {selectedToolsForCard.length < MAX_DISPLAY_TOOLS && (
                     <>Select {MAX_DISPLAY_TOOLS - selectedToolsForCard.length} more tools</>
                   )}
