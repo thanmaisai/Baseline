@@ -328,7 +328,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     setIsExporting(true);
 
     try {
-      // Create a wrapper with a nice themed background
+      // Create a completely standalone export container
       const exportWrapper = document.createElement('div');
       exportWrapper.style.cssText = `
         position: fixed;
@@ -340,7 +340,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 50%, ${theme.bg} 100%);
-        padding: 40px;
+        padding: 60px;
         box-sizing: border-box;
       `;
       
@@ -355,9 +355,9 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
       `;
       exportWrapper.appendChild(patternOverlay);
       
-      // Clone the card
-      const cardClone = cardRef.current.cloneNode(true) as HTMLElement;
-      cardClone.style.cssText = `
+      // Create a fresh card element (not cloning) for better rendering
+      const cardElement = document.createElement('div');
+      cardElement.style.cssText = `
         width: 400px;
         height: 600px;
         border-radius: 16px;
@@ -367,10 +367,357 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         position: relative;
         z-index: 1;
-        transform: none;
+        flex-shrink: 0;
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      `;
+      
+      // Add pattern background
+      if (currentPattern !== 'minimal') {
+        const patternDiv = document.createElement('div');
+        patternDiv.style.cssText = `
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 250px;
+          pointer-events: none;
+        `;
+        patternDiv.innerHTML = patternSvg;
+        cardElement.appendChild(patternDiv);
+      }
+      
+      // Create content container
+      const contentDiv = document.createElement('div');
+      contentDiv.style.cssText = `
+        position: relative;
+        z-index: 10;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 28px;
+        box-sizing: border-box;
+      `;
+      
+      // Top section with title
+      const topSection = document.createElement('div');
+      topSection.style.cssText = `margin-top: 20%; flex-shrink: 0;`;
+      
+      // Accent bar
+      const accentBar = document.createElement('div');
+      accentBar.style.cssText = `
+        width: 36px;
+        height: 4px;
+        border-radius: 9999px;
+        margin-bottom: 10px;
+        background-color: ${theme.accent};
+      `;
+      topSection.appendChild(accentBar);
+      
+      // Title
+      const title = document.createElement('h2');
+      title.style.cssText = `
+        font-size: 40px;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+        line-height: 0.85;
+        margin-bottom: 10px;
+        color: ${theme.text};
+        text-shadow: 0 2px 20px ${theme.accent}40;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      `;
+      title.innerHTML = 'MY DEV<br/>STACK';
+      topSection.appendChild(title);
+      
+      // Badge row
+      const badgeRow = document.createElement('div');
+      badgeRow.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+      `;
+      
+      const badge = document.createElement('span');
+      badge.style.cssText = `
+        font-size: 9px;
+        font-family: ui-monospace, SFMono-Regular, monospace;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        padding: 2px 10px;
+        border-radius: 6px;
+        border: 2px solid ${theme.accent};
+        color: ${theme.accent};
+        background-color: ${theme.accentLight};
+      `;
+      badge.textContent = `${selectedTools.length} TOOLS`;
+      badgeRow.appendChild(badge);
+      
+      const separator = document.createElement('span');
+      separator.style.cssText = `
+        height: 1px;
+        width: 20px;
+        background-color: ${theme.border};
+      `;
+      badgeRow.appendChild(separator);
+      
+      const dateSpan = document.createElement('span');
+      dateSpan.style.cssText = `
+        font-size: 9px;
+        font-family: ui-monospace, SFMono-Regular, monospace;
+        font-weight: 600;
+        color: ${theme.textMuted};
+      `;
+      dateSpan.textContent = currentDate;
+      badgeRow.appendChild(dateSpan);
+      
+      topSection.appendChild(badgeRow);
+      contentDiv.appendChild(topSection);
+      
+      // Tool pills section
+      const toolsSection = document.createElement('div');
+      toolsSection.style.cssText = `
+        flex-shrink: 0;
+        margin-bottom: 16px;
+        height: 210px;
+        overflow: hidden;
+      `;
+      
+      const toolsContainer = document.createElement('div');
+      toolsContainer.style.cssText = `
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-content: flex-start;
+      `;
+      
+      toolNames.forEach(name => {
+        const pill = document.createElement('span');
+        pill.style.cssText = `
+          font-family: ui-monospace, SFMono-Regular, monospace;
+          font-size: 9px;
+          font-weight: 500;
+          padding: 4px 10px;
+          border-radius: 6px;
+          color: ${theme.text};
+          background-color: ${theme.accentLight};
+          border: 1px solid ${theme.border};
+          white-space: nowrap;
+        `;
+        pill.textContent = name;
+        toolsContainer.appendChild(pill);
+      });
+      
+      if (remainingCount > 0) {
+        const morePill = document.createElement('span');
+        morePill.style.cssText = `
+          font-family: ui-monospace, SFMono-Regular, monospace;
+          font-size: 9px;
+          font-weight: 700;
+          padding: 4px 10px;
+          border-radius: 6px;
+          color: ${theme.accent};
+          background-color: ${theme.accentLight};
+          border: 2px solid ${theme.accent};
+          white-space: nowrap;
+        `;
+        morePill.textContent = `+${remainingCount} more`;
+        toolsContainer.appendChild(morePill);
+      }
+      
+      toolsSection.appendChild(toolsContainer);
+      contentDiv.appendChild(toolsSection);
+      
+      // Categories section
+      const categoriesSection = document.createElement('div');
+      categoriesSection.style.cssText = `
+        flex-shrink: 0;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid ${theme.border};
+      `;
+      
+      const categoriesLabel = document.createElement('div');
+      categoriesLabel.style.cssText = `
+        font-size: 7px;
+        font-family: ui-monospace, SFMono-Regular, monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        color: ${theme.textMuted};
+      `;
+      categoriesLabel.textContent = 'TOP CATEGORIES';
+      categoriesSection.appendChild(categoriesLabel);
+      
+      const categoriesRow = document.createElement('div');
+      categoriesRow.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      `;
+      
+      topCategories.forEach(([category, tools]) => {
+        const catItem = document.createElement('div');
+        catItem.style.cssText = `
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        `;
+        
+        const dot = document.createElement('div');
+        dot.style.cssText = `
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background-color: ${theme.accent};
+          flex-shrink: 0;
+        `;
+        catItem.appendChild(dot);
+        
+        const catName = document.createElement('span');
+        catName.style.cssText = `
+          font-size: 9px;
+          font-weight: 500;
+          text-transform: capitalize;
+          color: ${theme.text};
+        `;
+        catName.textContent = category;
+        catItem.appendChild(catName);
+        
+        const catCount = document.createElement('span');
+        catCount.style.cssText = `
+          font-size: 8px;
+          font-family: ui-monospace, SFMono-Regular, monospace;
+          font-weight: 700;
+          color: ${theme.accent};
+        `;
+        catCount.textContent = String(tools.length);
+        catItem.appendChild(catCount);
+        
+        categoriesRow.appendChild(catItem);
+      });
+      
+      categoriesSection.appendChild(categoriesRow);
+      contentDiv.appendChild(categoriesSection);
+      
+      // Footer
+      const footer = document.createElement('div');
+      footer.style.cssText = `
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: auto;
+        padding-top: 12px;
+      `;
+      
+      // QR section
+      const qrSection = document.createElement('div');
+      qrSection.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      `;
+      
+      const qrWrapper = document.createElement('div');
+      qrWrapper.style.cssText = `
+        padding: 6px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         flex-shrink: 0;
       `;
-      exportWrapper.appendChild(cardClone);
+      
+      const qrImg = document.createElement('img');
+      qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://mac-baseline.vercel.app/&color=222222';
+      qrImg.style.cssText = `
+        display: block;
+        width: 42px;
+        height: 42px;
+      `;
+      qrWrapper.appendChild(qrImg);
+      qrSection.appendChild(qrWrapper);
+      
+      const qrText = document.createElement('div');
+      qrText.style.cssText = `display: flex; flex-direction: column; gap: 0;`;
+      
+      const scanLabel = document.createElement('span');
+      scanLabel.style.cssText = `
+        font-size: 7px;
+        font-family: ui-monospace, SFMono-Regular, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: ${theme.textMuted};
+      `;
+      scanLabel.textContent = 'SCAN TO VISIT';
+      qrText.appendChild(scanLabel);
+      
+      const siteName = document.createElement('span');
+      siteName.style.cssText = `
+        font-size: 10px;
+        font-weight: 700;
+        color: ${theme.text};
+      `;
+      siteName.textContent = 'mac-baseline';
+      qrText.appendChild(siteName);
+      
+      qrSection.appendChild(qrText);
+      footer.appendChild(qrSection);
+      
+      // Branding
+      const branding = document.createElement('div');
+      branding.style.cssText = `
+        text-align: right;
+        flex-shrink: 0;
+      `;
+      
+      const poweredBy = document.createElement('span');
+      poweredBy.style.cssText = `
+        display: block;
+        font-size: 7px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        color: ${theme.textMuted};
+      `;
+      poweredBy.textContent = 'POWERED BY';
+      branding.appendChild(poweredBy);
+      
+      const brandName = document.createElement('div');
+      brandName.style.cssText = `
+        display: flex;
+        align-items: baseline;
+        justify-content: flex-end;
+        gap: 2px;
+      `;
+      
+      const baseline = document.createElement('span');
+      baseline.style.cssText = `
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: -0.025em;
+        color: ${theme.text};
+      `;
+      baseline.textContent = 'Baseline';
+      brandName.appendChild(baseline);
+      
+      const dot = document.createElement('span');
+      dot.style.cssText = `
+        font-size: 22px;
+        color: ${theme.accent};
+      `;
+      dot.textContent = '.';
+      brandName.appendChild(dot);
+      
+      branding.appendChild(brandName);
+      footer.appendChild(branding);
+      
+      contentDiv.appendChild(footer);
+      cardElement.appendChild(contentDiv);
+      exportWrapper.appendChild(cardElement);
       
       // Add branding watermark at bottom
       const watermark = document.createElement('div');
@@ -392,8 +739,8 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
       
       document.body.appendChild(exportWrapper);
       
-      // Wait for styles to settle
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Wait for image to load and styles to settle
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       const canvas = await html2canvas(exportWrapper, {
         scale: 3,
@@ -403,7 +750,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
         allowTaint: true,
         width: 520,
         height: 720,
-        imageTimeout: 0,
+        imageTimeout: 5000,
         removeContainer: false,
       });
 
