@@ -456,23 +456,164 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     }
   };
 
-  const shareToTwitter = () => {
-    const text = `Check out my dev stack! ${selectedTools.length} essential tools for macOS development 🚀\n\nBuilt with @baseline_dev`;
-    const url = 'https://mac-baseline.vercel.app';
-    window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
-      '_blank',
-      'noopener,noreferrer'
-    );
+  // Helper to generate image blob for sharing
+  const generateImageBlob = async (): Promise<Blob | null> => {
+    if (!cardRef.current) return null;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: -9999px;
+      width: 520px;
+      height: 720px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 50%, ${theme.bg} 100%);
+      padding: 60px;
+      box-sizing: border-box;
+      z-index: -1;
+    `;
+    
+    const glow = document.createElement('div');
+    glow.style.cssText = `
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, ${theme.accent}20 0%, transparent 50%), 
+                  radial-gradient(circle at 80% 80%, ${theme.gradientTo}20 0%, transparent 50%);
+      pointer-events: none;
+    `;
+    wrapper.appendChild(glow);
+    
+    const cardClone = cardRef.current.cloneNode(true) as HTMLElement;
+    cardClone.style.transform = 'none';
+    cardClone.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.5)';
+    wrapper.appendChild(cardClone);
+    
+    const watermark = document.createElement('div');
+    watermark.style.cssText = `
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-weight: 500;
+      color: ${theme.textMuted};
+      opacity: 0.6;
+      letter-spacing: 0.5px;
+      font-family: system-ui, -apple-system, sans-serif;
+      white-space: nowrap;
+    `;
+    watermark.textContent = 'mac-baseline.vercel.app';
+    wrapper.appendChild(watermark);
+    
+    document.body.appendChild(wrapper);
+    wrapper.offsetHeight;
+    await new Promise(r => setTimeout(r, 50));
+    
+    wrapper.style.left = '0';
+    wrapper.style.zIndex = '-9999';
+    wrapper.style.pointerEvents = 'none';
+    await new Promise(r => setTimeout(r, 10));
+    
+    try {
+      const dataUrl = await toPng(wrapper, {
+        quality: 1,
+        pixelRatio: 3,
+        cacheBust: true,
+        width: 520,
+        height: 720,
+      });
+      
+      document.body.removeChild(wrapper);
+      
+      // Convert data URL to Blob
+      const response = await fetch(dataUrl);
+      return await response.blob();
+    } catch (error) {
+      document.body.removeChild(wrapper);
+      console.error('Failed to generate image:', error);
+      return null;
+    }
   };
 
-  const shareToLinkedIn = () => {
-    const url = 'https://mac-baseline.vercel.app';
-    window.open(
-      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
-      '_blank',
-      'noopener,noreferrer'
-    );
+  const copyImageToClipboard = async (): Promise<boolean> => {
+    try {
+      const blob = await generateImageBlob();
+      if (!blob) return false;
+      
+      // Copy image to clipboard
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      return true;
+    } catch (error) {
+      console.error('Failed to copy image:', error);
+      return false;
+    }
+  };
+
+  const shareToTwitter = async () => {
+    setIsExporting(true);
+    
+    try {
+      // Copy image to clipboard first
+      const copied = await copyImageToClipboard();
+      
+      // Open Twitter compose
+      const text = `Check out my dev stack! ${selectedTools.length} essential tools for macOS development 🚀`;
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+        '_blank',
+        'noopener,noreferrer'
+      );
+      
+      // Show toast notification
+      if (copied) {
+        alert('✅ Image copied to clipboard!\n\nPaste it (Cmd+V / Ctrl+V) into your tweet.');
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+      const text = `Check out my dev stack! ${selectedTools.length} essential tools for macOS development 🚀`;
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+        '_blank',
+        'noopener,noreferrer'
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const shareToLinkedIn = async () => {
+    setIsExporting(true);
+    
+    try {
+      // Copy image to clipboard first
+      const copied = await copyImageToClipboard();
+      
+      // Open LinkedIn - direct to post creation
+      window.open(
+        'https://www.linkedin.com/feed/?shareActive=true',
+        '_blank',
+        'noopener,noreferrer'
+      );
+      
+      // Show toast notification
+      if (copied) {
+        alert('✅ Image copied to clipboard!\n\nPaste it (Cmd+V / Ctrl+V) into your LinkedIn post.');
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+      window.open(
+        'https://www.linkedin.com/feed/?shareActive=true',
+        '_blank',
+        'noopener,noreferrer'
+      );
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const randomizePattern = () => {
