@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Tool } from '@/types/tools';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, RefreshCw, Palette, X, Share2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 import { Button } from './ui/button';
 import { CardContainer, CardBody } from './ui/3d-card';
@@ -136,111 +136,140 @@ const themes = {
   },
 };
 
+// Helper to format category names (e.g., "PackageManagers" -> "Package-Managers")
+const formatCategoryName = (name: string): string => {
+  return name
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2');
+};
+
+// Generate unique ID for each render to prevent SVG ID conflicts
+const generatePatternId = () => Math.random().toString(36).substring(2, 8);
+
 const patterns = {
-  wave: (theme: typeof themes.dark) => `
-    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 480 300">
+  wave: (theme: typeof themes.dark) => {
+    const id = generatePatternId();
+    return `
+    <svg width="400" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" viewBox="0 0 400 250">
       <defs>
-        <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.6" />
-          <stop offset="100%" style="stop-color:${theme.gradientTo};stop-opacity:0.8" />
+        <linearGradient id="waveGrad${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${theme.gradientFrom}" stop-opacity="0.6" />
+          <stop offset="100%" stop-color="${theme.gradientTo}" stop-opacity="0.8" />
         </linearGradient>
       </defs>
-      <path d="M0,0 L480,0 L480,240 C420,240 384,160 324,160 C264,160 240,260 168,260 C96,260 72,180 0,180 Z" fill="url(#waveGrad)"/>
+      <path d="M0,0 L400,0 L400,200 C350,200 320,133 270,133 C220,133 200,217 140,217 C80,217 60,150 0,150 Z" fill="url(#waveGrad${id})"/>
     </svg>
-  `,
-  dots: (theme: typeof themes.dark) => `
-    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
+  `;
+  },
+  dots: (theme: typeof themes.dark) => {
+    const id = generatePatternId();
+    return `
+    <svg width="400" height="250" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+        <pattern id="dots${id}" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
           <circle cx="20" cy="20" r="2" fill="${theme.accent}" opacity="0.3"/>
         </pattern>
       </defs>
-      <rect width="480" height="300" fill="url(#dots)"/>
-      <rect width="480" height="300" fill="url(#dots)" transform="translate(20, 20)"/>
+      <rect width="400" height="250" fill="url(#dots${id})"/>
     </svg>
-  `,
-  grid: (theme: typeof themes.dark) => `
-    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
+  `;
+  },
+  grid: (theme: typeof themes.dark) => {
+    const id = generatePatternId();
+    return `
+    <svg width="400" height="250" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+        <pattern id="grid${id}" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
           <path d="M 40 0 L 0 0 0 40" fill="none" stroke="${theme.accent}" stroke-width="1" opacity="0.2"/>
         </pattern>
       </defs>
-      <rect width="480" height="300" fill="url(#grid)"/>
+      <rect width="400" height="250" fill="url(#grid${id})"/>
     </svg>
-  `,
-  gradient: (theme: typeof themes.dark) => `
-    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
+  `;
+  },
+  gradient: (theme: typeof themes.dark) => {
+    const id = generatePatternId();
+    return `
+    <svg width="400" height="250" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.4" />
-          <stop offset="100%" style="stop-color:${theme.gradientTo};stop-opacity:0.6" />
+        <linearGradient id="grad${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${theme.gradientFrom}" stop-opacity="0.4" />
+          <stop offset="100%" stop-color="${theme.gradientTo}" stop-opacity="0.6" />
         </linearGradient>
-        <radialGradient id="radial">
-          <stop offset="0%" style="stop-color:${theme.accent};stop-opacity:0.3" />
-          <stop offset="100%" style="stop-color:transparent;stop-opacity:0" />
+        <radialGradient id="radial${id}">
+          <stop offset="0%" stop-color="${theme.accent}" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="${theme.accent}" stop-opacity="0" />
         </radialGradient>
       </defs>
-      <rect width="480" height="300" fill="url(#grad)"/>
-      <ellipse cx="120" cy="80" rx="120" ry="120" fill="url(#radial)"/>
-      <ellipse cx="384" cy="220" rx="100" ry="100" fill="url(#radial)"/>
+      <rect width="400" height="250" fill="url(#grad${id})"/>
+      <ellipse cx="100" cy="67" rx="100" ry="100" fill="url(#radial${id})"/>
+      <ellipse cx="320" cy="183" rx="83" ry="83" fill="url(#radial${id})"/>
     </svg>
-  `,
+  `;
+  },
   minimal: () => ``,
-  circles: (theme: typeof themes.dark) => `
-    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
+  circles: (theme: typeof themes.dark) => {
+    const id = generatePatternId();
+    return `
+    <svg width="400" height="250" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="circleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.2" />
-          <stop offset="100%" style="stop-color:${theme.gradientTo};stop-opacity:0.4" />
+        <linearGradient id="circleGrad${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${theme.gradientFrom}" stop-opacity="0.2" />
+          <stop offset="100%" stop-color="${theme.gradientTo}" stop-opacity="0.4" />
         </linearGradient>
       </defs>
-      <circle cx="96" cy="80" r="100" fill="url(#circleGrad)"/>
-      <circle cx="384" cy="160" r="120" fill="url(#circleGrad)"/>
-      <circle cx="240" cy="250" r="90" fill="url(#circleGrad)"/>
+      <circle cx="80" cy="67" r="83" fill="url(#circleGrad${id})"/>
+      <circle cx="320" cy="133" r="100" fill="url(#circleGrad${id})"/>
+      <circle cx="200" cy="208" r="75" fill="url(#circleGrad${id})"/>
     </svg>
-  `,
-  hexagon: (theme: typeof themes.dark) => `
-    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
+  `;
+  },
+  hexagon: (theme: typeof themes.dark) => {
+    const id = generatePatternId();
+    return `
+    <svg width="400" height="250" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <pattern id="hexagon" x="0" y="0" width="50" height="43.3" patternUnits="userSpaceOnUse">
+        <pattern id="hexagon${id}" x="0" y="0" width="50" height="43.3" patternUnits="userSpaceOnUse">
           <path d="M25 0 L50 12.5 L50 37.5 L25 50 L0 37.5 L0 12.5 Z" 
                 fill="none" stroke="${theme.accent}" stroke-width="1" opacity="0.25"/>
         </pattern>
       </defs>
-      <rect width="480" height="300" fill="url(#hexagon)"/>
+      <rect width="400" height="250" fill="url(#hexagon${id})"/>
     </svg>
-  `,
-  diagonal: (theme: typeof themes.dark) => `
-    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
+  `;
+  },
+  diagonal: (theme: typeof themes.dark) => {
+    const id = generatePatternId();
+    return `
+    <svg width="400" height="250" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="diagGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.5" />
-          <stop offset="50%" style="stop-color:${theme.gradientTo};stop-opacity:0.3" />
-          <stop offset="100%" style="stop-color:${theme.gradientFrom};stop-opacity:0.5" />
-        </linearGradient>
-        <pattern id="diagLines" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <line x1="0" y1="0" x2="0" y2="30" stroke="${theme.accent}" stroke-width="2" opacity="0.2"/>
-        </pattern>
-      </defs>
-      <rect width="480" height="300" fill="url(#diagGrad)"/>
-      <rect width="480" height="300" fill="url(#diagLines)"/>
-    </svg>
-  `,
-  zigzag: (theme: typeof themes.dark) => `
-    <svg width="480" height="300" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="zigzagGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${theme.gradientFrom};stop-opacity:0.6" />
-          <stop offset="100%" style="stop-color:${theme.gradientTo};stop-opacity:0.7" />
+        <linearGradient id="diagGrad${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${theme.gradientFrom}" stop-opacity="0.5" />
+          <stop offset="50%" stop-color="${theme.gradientTo}" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="${theme.gradientFrom}" stop-opacity="0.5" />
         </linearGradient>
       </defs>
-      <path d="M0,0 L480,0 L480,120 L420,140 L360,120 L300,140 L240,120 L180,140 L120,120 L60,140 L0,120 Z" 
-            fill="url(#zigzagGrad)"/>
-      <path d="M0,180 L60,160 L120,180 L180,160 L240,180 L300,160 L360,180 L420,160 L480,180 L480,300 L0,300 Z" 
-            fill="url(#zigzagGrad)" opacity="0.5"/>
+      <rect width="400" height="250" fill="url(#diagGrad${id})"/>
     </svg>
-  `,
+  `;
+  },
+  zigzag: (theme: typeof themes.dark) => {
+    const id = generatePatternId();
+    return `
+    <svg width="400" height="250" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="zigzagGrad${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${theme.gradientFrom}" stop-opacity="0.6" />
+          <stop offset="100%" stop-color="${theme.gradientTo}" stop-opacity="0.7" />
+        </linearGradient>
+      </defs>
+      <path d="M0,0 L400,0 L400,100 L350,117 L300,100 L250,117 L200,100 L150,117 L100,100 L50,117 L0,100 Z" 
+            fill="url(#zigzagGrad${id})"/>
+      <path d="M0,150 L50,133 L100,150 L150,133 L200,150 L250,133 L300,150 L350,133 L400,150 L400,250 L0,250 Z" 
+            fill="url(#zigzagGrad${id})" opacity="0.5"/>
+    </svg>
+  `;
+  },
 };
 
 export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps) => {
@@ -328,438 +357,15 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     setIsExporting(true);
 
     try {
-      // Create a completely standalone export container
-      const exportWrapper = document.createElement('div');
-      exportWrapper.style.cssText = `
-        position: fixed;
-        top: -9999px;
-        left: -9999px;
-        width: 520px;
-        height: 720px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 50%, ${theme.bg} 100%);
-        padding: 60px;
-        box-sizing: border-box;
-      `;
-      
-      // Add subtle pattern overlay
-      const patternOverlay = document.createElement('div');
-      patternOverlay.style.cssText = `
-        position: absolute;
-        inset: 0;
-        background-image: radial-gradient(circle at 20% 20%, ${theme.accent}15 0%, transparent 50%),
-                          radial-gradient(circle at 80% 80%, ${theme.gradientTo}15 0%, transparent 50%);
-        pointer-events: none;
-      `;
-      exportWrapper.appendChild(patternOverlay);
-      
-      // Create a fresh card element (not cloning) for better rendering
-      const cardElement = document.createElement('div');
-      cardElement.style.cssText = `
-        width: 400px;
-        height: 600px;
-        border-radius: 16px;
-        overflow: hidden;
-        background-color: ${theme.cardBg};
-        border: 1px solid ${theme.border};
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        position: relative;
-        z-index: 1;
-        flex-shrink: 0;
-        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-      `;
-      
-      // Add pattern background
-      if (currentPattern !== 'minimal') {
-        const patternDiv = document.createElement('div');
-        patternDiv.style.cssText = `
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 250px;
-          pointer-events: none;
-        `;
-        patternDiv.innerHTML = patternSvg;
-        cardElement.appendChild(patternDiv);
-      }
-      
-      // Create content container
-      const contentDiv = document.createElement('div');
-      contentDiv.style.cssText = `
-        position: relative;
-        z-index: 10;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        padding: 28px;
-        box-sizing: border-box;
-      `;
-      
-      // Top section with title
-      const topSection = document.createElement('div');
-      topSection.style.cssText = `margin-top: 20%; flex-shrink: 0;`;
-      
-      // Accent bar
-      const accentBar = document.createElement('div');
-      accentBar.style.cssText = `
-        width: 36px;
-        height: 4px;
-        border-radius: 9999px;
-        margin-bottom: 10px;
-        background-color: ${theme.accent};
-      `;
-      topSection.appendChild(accentBar);
-      
-      // Title
-      const title = document.createElement('h2');
-      title.style.cssText = `
-        font-size: 40px;
-        font-weight: 900;
-        letter-spacing: -0.05em;
-        line-height: 0.85;
-        margin-bottom: 10px;
-        color: ${theme.text};
-        text-shadow: 0 2px 20px ${theme.accent}40;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      `;
-      title.innerHTML = 'MY DEV<br/>STACK';
-      topSection.appendChild(title);
-      
-      // Badge row
-      const badgeRow = document.createElement('div');
-      badgeRow.style.cssText = `
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-      `;
-      
-      const badge = document.createElement('span');
-      badge.style.cssText = `
-        font-size: 9px;
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        font-weight: 700;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        padding: 2px 10px;
-        border-radius: 6px;
-        border: 2px solid ${theme.accent};
-        color: ${theme.accent};
-        background-color: ${theme.accentLight};
-      `;
-      badge.textContent = `${selectedTools.length} TOOLS`;
-      badgeRow.appendChild(badge);
-      
-      const separator = document.createElement('span');
-      separator.style.cssText = `
-        height: 1px;
-        width: 20px;
-        background-color: ${theme.border};
-      `;
-      badgeRow.appendChild(separator);
-      
-      const dateSpan = document.createElement('span');
-      dateSpan.style.cssText = `
-        font-size: 9px;
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        font-weight: 600;
-        color: ${theme.textMuted};
-      `;
-      dateSpan.textContent = currentDate;
-      badgeRow.appendChild(dateSpan);
-      
-      topSection.appendChild(badgeRow);
-      contentDiv.appendChild(topSection);
-      
-      // Tool pills section
-      const toolsSection = document.createElement('div');
-      toolsSection.style.cssText = `
-        flex-shrink: 0;
-        margin-bottom: 16px;
-        height: 210px;
-        overflow: hidden;
-      `;
-      
-      const toolsContainer = document.createElement('div');
-      toolsContainer.style.cssText = `
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        align-content: flex-start;
-      `;
-      
-      toolNames.forEach(name => {
-        const pill = document.createElement('span');
-        pill.style.cssText = `
-          font-family: ui-monospace, SFMono-Regular, monospace;
-          font-size: 9px;
-          font-weight: 500;
-          padding: 4px 10px;
-          border-radius: 6px;
-          color: ${theme.text};
-          background-color: ${theme.accentLight};
-          border: 1px solid ${theme.border};
-          white-space: nowrap;
-        `;
-        pill.textContent = name;
-        toolsContainer.appendChild(pill);
+      const dataUrl = await toPng(cardRef.current, {
+        quality: 1,
+        pixelRatio: 3,
+        cacheBust: true,
       });
-      
-      if (remainingCount > 0) {
-        const morePill = document.createElement('span');
-        morePill.style.cssText = `
-          font-family: ui-monospace, SFMono-Regular, monospace;
-          font-size: 9px;
-          font-weight: 700;
-          padding: 4px 10px;
-          border-radius: 6px;
-          color: ${theme.accent};
-          background-color: ${theme.accentLight};
-          border: 2px solid ${theme.accent};
-          white-space: nowrap;
-        `;
-        morePill.textContent = `+${remainingCount} more`;
-        toolsContainer.appendChild(morePill);
-      }
-      
-      toolsSection.appendChild(toolsContainer);
-      contentDiv.appendChild(toolsSection);
-      
-      // Categories section
-      const categoriesSection = document.createElement('div');
-      categoriesSection.style.cssText = `
-        flex-shrink: 0;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid ${theme.border};
-      `;
-      
-      const categoriesLabel = document.createElement('div');
-      categoriesLabel.style.cssText = `
-        font-size: 7px;
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        margin-bottom: 6px;
-        color: ${theme.textMuted};
-      `;
-      categoriesLabel.textContent = 'TOP CATEGORIES';
-      categoriesSection.appendChild(categoriesLabel);
-      
-      const categoriesRow = document.createElement('div');
-      categoriesRow.style.cssText = `
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      `;
-      
-      topCategories.forEach(([category, tools]) => {
-        const catItem = document.createElement('div');
-        catItem.style.cssText = `
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        `;
-        
-        const dot = document.createElement('div');
-        dot.style.cssText = `
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background-color: ${theme.accent};
-          flex-shrink: 0;
-        `;
-        catItem.appendChild(dot);
-        
-        const catName = document.createElement('span');
-        catName.style.cssText = `
-          font-size: 9px;
-          font-weight: 500;
-          text-transform: capitalize;
-          color: ${theme.text};
-        `;
-        catName.textContent = category;
-        catItem.appendChild(catName);
-        
-        const catCount = document.createElement('span');
-        catCount.style.cssText = `
-          font-size: 8px;
-          font-family: ui-monospace, SFMono-Regular, monospace;
-          font-weight: 700;
-          color: ${theme.accent};
-        `;
-        catCount.textContent = String(tools.length);
-        catItem.appendChild(catCount);
-        
-        categoriesRow.appendChild(catItem);
-      });
-      
-      categoriesSection.appendChild(categoriesRow);
-      contentDiv.appendChild(categoriesSection);
-      
-      // Footer
-      const footer = document.createElement('div');
-      footer.style.cssText = `
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: auto;
-        padding-top: 12px;
-      `;
-      
-      // QR section
-      const qrSection = document.createElement('div');
-      qrSection.style.cssText = `
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      `;
-      
-      const qrWrapper = document.createElement('div');
-      qrWrapper.style.cssText = `
-        padding: 6px;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        flex-shrink: 0;
-      `;
-      
-      const qrImg = document.createElement('img');
-      qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://mac-baseline.vercel.app/&color=222222';
-      qrImg.style.cssText = `
-        display: block;
-        width: 42px;
-        height: 42px;
-      `;
-      qrWrapper.appendChild(qrImg);
-      qrSection.appendChild(qrWrapper);
-      
-      const qrText = document.createElement('div');
-      qrText.style.cssText = `display: flex; flex-direction: column; gap: 0;`;
-      
-      const scanLabel = document.createElement('span');
-      scanLabel.style.cssText = `
-        font-size: 7px;
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: ${theme.textMuted};
-      `;
-      scanLabel.textContent = 'SCAN TO VISIT';
-      qrText.appendChild(scanLabel);
-      
-      const siteName = document.createElement('span');
-      siteName.style.cssText = `
-        font-size: 10px;
-        font-weight: 700;
-        color: ${theme.text};
-      `;
-      siteName.textContent = 'mac-baseline';
-      qrText.appendChild(siteName);
-      
-      qrSection.appendChild(qrText);
-      footer.appendChild(qrSection);
-      
-      // Branding
-      const branding = document.createElement('div');
-      branding.style.cssText = `
-        text-align: right;
-        flex-shrink: 0;
-      `;
-      
-      const poweredBy = document.createElement('span');
-      poweredBy.style.cssText = `
-        display: block;
-        font-size: 7px;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-        color: ${theme.textMuted};
-      `;
-      poweredBy.textContent = 'POWERED BY';
-      branding.appendChild(poweredBy);
-      
-      const brandName = document.createElement('div');
-      brandName.style.cssText = `
-        display: flex;
-        align-items: baseline;
-        justify-content: flex-end;
-        gap: 2px;
-      `;
-      
-      const baseline = document.createElement('span');
-      baseline.style.cssText = `
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 18px;
-        font-weight: 900;
-        letter-spacing: -0.025em;
-        color: ${theme.text};
-      `;
-      baseline.textContent = 'Baseline';
-      brandName.appendChild(baseline);
-      
-      const dot = document.createElement('span');
-      dot.style.cssText = `
-        font-size: 22px;
-        color: ${theme.accent};
-      `;
-      dot.textContent = '.';
-      brandName.appendChild(dot);
-      
-      branding.appendChild(brandName);
-      footer.appendChild(branding);
-      
-      contentDiv.appendChild(footer);
-      cardElement.appendChild(contentDiv);
-      exportWrapper.appendChild(cardElement);
-      
-      // Add branding watermark at bottom
-      const watermark = document.createElement('div');
-      watermark.style.cssText = `
-        position: absolute;
-        bottom: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-family: system-ui, -apple-system, sans-serif;
-        font-size: 10px;
-        font-weight: 500;
-        color: ${theme.textMuted};
-        opacity: 0.6;
-        z-index: 2;
-        letter-spacing: 0.5px;
-      `;
-      watermark.textContent = 'mac-baseline.vercel.app';
-      exportWrapper.appendChild(watermark);
-      
-      document.body.appendChild(exportWrapper);
-      
-      // Wait for image to load and styles to settle
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const canvas = await html2canvas(exportWrapper, {
-        scale: 3,
-        backgroundColor: null,
-        useCORS: true,
-        logging: false,
-        allowTaint: true,
-        width: 520,
-        height: 720,
-        imageTimeout: 5000,
-        removeContainer: false,
-      });
-
-      // Clean up
-      document.body.removeChild(exportWrapper);
 
       const link = document.createElement('a');
       link.download = `dev-stack-${currentTheme}-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
+      link.href = dataUrl;
       link.click();
 
       confetti({
@@ -841,6 +447,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               {/* Pattern Background */}
               {currentPattern !== 'minimal' && (
                 <div
+                  data-pattern="true"
                   className="absolute top-0 left-0 w-full h-[250px] pointer-events-none"
                   dangerouslySetInnerHTML={{ __html: patternSvg }}
                 />
@@ -936,7 +543,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                       style={{ backgroundColor: theme.accent }}
                     />
                     <span className="text-[9px] font-medium capitalize whitespace-nowrap" style={{ color: theme.text }}>
-                      {category}
+                      {formatCategoryName(category)}
                     </span>
                     <span 
                       className="text-[8px] font-mono font-bold whitespace-nowrap"
