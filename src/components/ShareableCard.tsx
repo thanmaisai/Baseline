@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Tool } from '@/types/tools';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, RefreshCw, Palette, X, Share2 } from 'lucide-react';
+import { Download, RefreshCw, Palette, X, Share2, Check, Clipboard } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 import { Button } from './ui/button';
 import { CardContainer, CardBody } from './ui/3d-card';
 import { useThemeTokens } from '@/theme/useThemeTokens';
+import { toast } from 'sonner';
 
 export type CardTheme = 'dark' | 'sunset' | 'ocean' | 'forest' | 'light' | 'neon' | 'midnight' | 'rose' | 'cyber';
 export type CardPattern = 'wave' | 'dots' | 'grid' | 'gradient' | 'minimal' | 'circles' | 'hexagon' | 'diagonal' | 'zigzag';
@@ -292,6 +293,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
   const [currentPattern, setCurrentPattern] = useState<CardPattern>(() => getRandomPattern());
   const [isExporting, setIsExporting] = useState(false);
   const [showToolSelector, setShowToolSelector] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState<{ platform: 'twitter' | 'linkedin', seconds: number, url: string, caption: string } | null>(null);
   const [selectedToolsForCard, setSelectedToolsForCard] = useState<string[]>(() => {
     // Initially select first 24 tools if more than 24
     return selectedTools.slice(0, MAX_DISPLAY_TOOLS).map(t => t.id);
@@ -554,34 +556,63 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     }
   };
 
+  // Engaging post messages for different platforms
+  const getTwitterMessage = () => {
+    const messages = [
+      `🔥 Just discovered the perfect dev setup!\n\n${selectedTools.length} essential tools that make my Mac a coding beast.\n\nCheck out mac-baseline - install your entire dev environment with ONE command! 🚀\n\nhttps://mac-baseline.vercel.app`,
+      `Hey devs! 👋\n\nHere's my current tech stack - ${selectedTools.length} tools that I can't live without.\n\nFound this sick site called mac-baseline that lets you set up your Mac in minutes!\n\n🔗 https://mac-baseline.vercel.app`,
+      `My dev toolkit just leveled up! 💻✨\n\n${selectedTools.length} carefully curated tools for maximum productivity.\n\nPro tip: Use mac-baseline to install everything with a single script!\n\nhttps://mac-baseline.vercel.app`,
+    ];
+    return messages[Math.floor(Math.random() * messages.length)];
+  };
+
+  const getLinkedInMessage = () => {
+    const messages = [
+      `Hey connections! 👋\n\nExcited to share my current tech stack - ${selectedTools.length} essential tools that power my development workflow.\n\nIf you're setting up a new Mac or want to streamline your dev environment, check out mac-baseline! It's a game-changer that lets you install your entire setup with a single command.\n\n#developer #productivity #macOS #devtools #coding`,
+      `🚀 Just organized my dev toolkit!\n\nAs developers, our tools define our productivity. Here are the ${selectedTools.length} apps I use daily.\n\nPro tip: I found this amazing tool called mac-baseline that generates a custom install script for your entire Mac setup. No more spending hours configuring a new machine!\n\n#programming #devlife #macos #productivity`,
+      `New Mac? Here's the secret sauce! 🍎💻\n\nSharing my curated list of ${selectedTools.length} dev tools that make my workflow seamless.\n\nThe best part? I used mac-baseline to generate a one-click install script. Setting up a new Mac has never been easier!\n\n#developer #techstack #productivity`,
+    ];
+    return messages[Math.floor(Math.random() * messages.length)];
+  };
+
   const shareToTwitter = async () => {
     setIsExporting(true);
     
     try {
-      // Copy image to clipboard first
-      const copied = await copyImageToClipboard();
+      const tweetText = getTwitterMessage();
       
-      // Open Twitter compose
-      const text = `Check out my dev stack! ${selectedTools.length} essential tools for macOS development 🚀`;
-      window.open(
-        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
-        '_blank',
-        'noopener,noreferrer'
-      );
+      // Directly copy image to clipboard
+      const imageCopied = await copyImageToClipboard();
       
-      // Show toast notification
-      if (copied) {
-        alert('✅ Image copied to clipboard!\n\nPaste it (Cmd+V / Ctrl+V) into your tweet.');
+      if (!imageCopied) {
+        toast.error("Failed to copy image", { description: "Please try again" });
+        setIsExporting(false);
+        return;
       }
+      
+      // Twitter supports text via URL parameter
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+      
+      // Start countdown with caption
+      setRedirectCountdown({ platform: 'twitter', seconds: 3, url: twitterUrl, caption: tweetText });
+      
+      // Countdown timer
+      let count = 3;
+      const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          setRedirectCountdown(prev => prev ? { ...prev, seconds: count } : null);
+        } else {
+          clearInterval(interval);
+          setRedirectCountdown(null);
+          window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+          setIsExporting(false);
+        }
+      }, 1000);
     } catch (error) {
       console.error('Share failed:', error);
-      const text = `Check out my dev stack! ${selectedTools.length} essential tools for macOS development 🚀`;
-      window.open(
-        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
-        '_blank',
-        'noopener,noreferrer'
-      );
-    } finally {
+      const fallbackText = getTwitterMessage();
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(fallbackText)}`, '_blank', 'noopener,noreferrer');
       setIsExporting(false);
     }
   };
@@ -590,28 +621,40 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
     setIsExporting(true);
     
     try {
-      // Copy image to clipboard first
-      const copied = await copyImageToClipboard();
+      const linkedInText = getLinkedInMessage();
       
-      // Open LinkedIn - direct to post creation
-      window.open(
-        'https://www.linkedin.com/feed/?shareActive=true',
-        '_blank',
-        'noopener,noreferrer'
-      );
+      // Directly copy image to clipboard
+      const imageCopied = await copyImageToClipboard();
       
-      // Show toast notification
-      if (copied) {
-        alert('✅ Image copied to clipboard!\n\nPaste it (Cmd+V / Ctrl+V) into your LinkedIn post.');
+      if (!imageCopied) {
+        toast.error("Failed to copy image", { description: "Please try again" });
+        setIsExporting(false);
+        return;
       }
+      
+      // LinkedIn supports pre-filled text via the text parameter
+      const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(linkedInText)}`;
+      
+      // Start countdown with caption
+      setRedirectCountdown({ platform: 'linkedin', seconds: 3, url: linkedInUrl, caption: linkedInText });
+      
+      // Countdown timer
+      let count = 3;
+      const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          setRedirectCountdown(prev => prev ? { ...prev, seconds: count } : null);
+        } else {
+          clearInterval(interval);
+          setRedirectCountdown(null);
+          window.open(linkedInUrl, '_blank', 'noopener,noreferrer');
+          setIsExporting(false);
+        }
+      }, 1000);
     } catch (error) {
       console.error('Share failed:', error);
-      window.open(
-        'https://www.linkedin.com/feed/?shareActive=true',
-        '_blank',
-        'noopener,noreferrer'
-      );
-    } finally {
+      const fallbackText = getLinkedInMessage();
+      window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(fallbackText)}`, '_blank', 'noopener,noreferrer');
       setIsExporting(false);
     }
   };
@@ -974,7 +1017,8 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
           <div className="flex gap-2">
             <button
               onClick={shareToTwitter}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              disabled={isExporting}
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: '#000000',
                 color: '#ffffff',
@@ -984,11 +1028,12 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
               </svg>
-              Post on X
+              {isExporting ? 'Preparing...' : 'Post on X'}
             </button>
             <button
               onClick={shareToLinkedIn}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              disabled={isExporting}
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: '#0A66C2',
                 color: '#ffffff',
@@ -997,7 +1042,7 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
               </svg>
-              Share
+              {isExporting ? 'Preparing...' : 'Share'}
             </button>
           </div>
         </div>
@@ -1174,6 +1219,152 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
                 </div>
               </motion.div>
             </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* Redirect Countdown Modal */}
+      {createPortal(
+        <AnimatePresence>
+          {redirectCountdown && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[1000] flex items-center justify-center backdrop-blur-sm"
+              style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+                className="p-6 rounded-2xl max-w-md w-full mx-4 relative overflow-hidden"
+                style={{ 
+                  backgroundColor: tokens.colors.background.card,
+                  border: `1px solid ${tokens.colors.border.card}`,
+                }}
+              >
+                {/* Header with icon and countdown */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{ 
+                        backgroundColor: redirectCountdown.platform === 'twitter' ? '#1DA1F2' : '#0A66C2',
+                      }}
+                    >
+                      {redirectCountdown.platform === 'twitter' ? (
+                        <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: tokens.colors.text.primary }}>
+                        Share to {redirectCountdown.platform === 'twitter' ? 'X (Twitter)' : 'LinkedIn'}
+                      </p>
+                      <p className="text-xs" style={{ color: tokens.colors.text.secondary }}>
+                        Opening in {redirectCountdown.seconds}s...
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setRedirectCountdown(null);
+                      setIsExporting(false);
+                    }}
+                    className="p-1.5 rounded-md transition-colors hover:bg-black/10"
+                    style={{ color: tokens.colors.text.secondary }}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Success message */}
+                <div 
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg mb-4"
+                  style={{ backgroundColor: '#10b98120' }}
+                >
+                  <Check className="w-4 h-4 text-emerald-500" />
+                  <p className="text-sm font-medium text-emerald-500">
+                    Image copied to clipboard!
+                  </p>
+                </div>
+
+                {/* Instructions */}
+                <div 
+                  className="text-xs px-3 py-2 rounded-lg mb-4"
+                  style={{ 
+                    backgroundColor: tokens.colors.background.primary,
+                    color: tokens.colors.text.secondary 
+                  }}
+                >
+                  {redirectCountdown.platform === 'linkedin' ? (
+                    <>
+                      <span className="block mb-2">Caption is pre-filled. Paste the image first!</span>
+                      <span className="block text-[10px] opacity-70">Then add this link in the comments:</span>
+                    </>
+                  ) : (
+                    `Caption is pre-filled. You'll be redirected in ${redirectCountdown.seconds} seconds...`
+                  )}
+                </div>
+
+                {/* URL Copy Section - LinkedIn only */}
+                {redirectCountdown.platform === 'linkedin' && (
+                  <div 
+                    className="p-3 rounded-lg mb-4 border"
+                    style={{ 
+                      backgroundColor: tokens.colors.background.secondary,
+                      borderColor: tokens.colors.border.card
+                    }}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <code 
+                        className="text-xs flex-1 text-left"
+                        style={{ color: '#0A66C2' }}
+                      >
+                        https://mac-baseline.vercel.app
+                      </code>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText('https://mac-baseline.vercel.app');
+                          toast.success('URL copied to clipboard!');
+                        }}
+                        className="px-3 py-1 text-[10px] rounded transition-all hover:opacity-80"
+                        style={{ 
+                          backgroundColor: '#0A66C2',
+                          color: '#fff'
+                        }}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action button */}
+                <button
+                  onClick={() => {
+                    setRedirectCountdown(null);
+                    setIsExporting(false);
+                    window.open(redirectCountdown.url, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                  style={{ 
+                    backgroundColor: redirectCountdown.platform === 'twitter' ? '#1DA1F2' : '#0A66C2',
+                    color: '#fff'
+                  }}
+                >
+                  Open {redirectCountdown.platform === 'twitter' ? 'X (Twitter)' : 'LinkedIn'} Now
+                </button>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>,
         document.body
