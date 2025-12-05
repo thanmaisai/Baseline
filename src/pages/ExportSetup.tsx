@@ -9,6 +9,7 @@ import { PageLayout } from '@/components/PageLayout';
 import { toast } from 'sonner';
 import { themeTokens } from '@/theme/tokens';
 import { useTheme } from '@/contexts/ThemeContext';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const ExportSetup = () => {
   const navigate = useNavigate();
@@ -298,15 +299,23 @@ const ExportSetup = () => {
         className="flex-shrink-0 px-6 md:px-10 py-8 border-b flex flex-col justify-center"
         style={{ borderColor: borderColors.cardInner }}
       >
-        <div className="flex items-end justify-between">
-          <div className="space-y-2">
-            <div 
-              className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/60 dark:bg-[var(--brand-ink)]/60 text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1.5 rounded-full border text-[var(--brand-ink)] dark:text-[var(--brand-sand)]"
-              style={{ borderColor: borderColors.cardInner }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-sunset)]" />
-              Clone your Mac
-            </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="flex items-end justify-between"
+          >
+            <div className="space-y-2">
+              <div 
+                className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/60 dark:bg-[var(--brand-ink)]/60 text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1.5 rounded-full border text-[var(--brand-ink)] dark:text-[var(--brand-sand)]"
+                style={{ borderColor: borderColors.cardInner }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-sunset)]" />
+                Clone your Mac
+              </div>
             <h1 className="text-3xl md:text-4xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)] tracking-tight">
               Export & Replicate
             </h1>
@@ -353,8 +362,9 @@ const ExportSetup = () => {
                 Generate
               </button>
             </div>
-          </div>
-        </header>
+          </motion.div>
+        </AnimatePresence>
+      </header>
 
       {/* Scrollable Content Area */}
       <div className="flex-grow overflow-y-auto px-6 md:px-10 py-12 flex flex-col justify-center">
@@ -740,20 +750,30 @@ const ExportSetup = () => {
       </div>
 
       {/* Floating Footer Navigation Bar */}
-      <FloatingFooter
-        statusLabel={footerStatus.label}
-        statusText={footerStatus.text}
-        showBackButton={true}
-        backButtonText={currentStep === 1 ? 'Back to Home' : 'Back'}
-        onBack={handleBack}
-        primaryButtonText={getPrimaryButtonText()}
-        primaryButtonIcon={getPrimaryButtonIcon()}
-        onPrimaryAction={handleNext}
-        primaryButtonDisabled={(currentStep === 2 || currentStep === 3) && !scanData.trim()}
-        primaryShortcut={currentStep === 3 ? 'Enter' : undefined}
-        showThemeToggle={true}
-        showKeyboardShortcuts={true}
-      />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`footer-${currentStep}`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+        >
+          <FloatingFooter
+            statusLabel={footerStatus.label}
+            statusText={footerStatus.text}
+            showBackButton={true}
+            backButtonText={currentStep === 1 ? 'Back to Home' : 'Back'}
+            onBack={handleBack}
+            primaryButtonText={getPrimaryButtonText()}
+            primaryButtonIcon={getPrimaryButtonIcon()}
+            onPrimaryAction={handleNext}
+            primaryButtonDisabled={(currentStep === 2 || currentStep === 3) && !scanData.trim()}
+            primaryShortcut={currentStep === 3 ? 'Enter' : undefined}
+            showThemeToggle={true}
+            showKeyboardShortcuts={true}
+          />
+        </motion.div>
+      </AnimatePresence>
     </PageLayout>
   );
 };

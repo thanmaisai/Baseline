@@ -540,16 +540,24 @@ const Configurator = () => {
         className="flex-shrink-0 px-6 md:px-10 py-8 border-b flex flex-col justify-center"
         style={{ borderColor: borderColors.cardInner }}
       >
-        <div className="flex items-end justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div 
-                className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/60 dark:bg-[var(--brand-ink)]/60 text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1.5 rounded-full border text-[var(--brand-ink)] dark:text-[var(--brand-sand)]"
-                style={{ borderColor: borderColors.cardInner }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-sunset)]" />
-                {currentCategory === 'review' ? 'Review Your Stack' : steps[currentStep].name}
-              </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="flex items-end justify-between"
+          >
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/60 dark:bg-[var(--brand-ink)]/60 text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1.5 rounded-full border text-[var(--brand-ink)] dark:text-[var(--brand-sand)]"
+                  style={{ borderColor: borderColors.cardInner }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-sunset)]" />
+                  {currentCategory === 'review' ? 'Review Your Stack' : steps[currentStep].name}
+                </div>
               {/* Live Tool Counter */}
               {selection.tools.length > 0 && (
                 <motion.div
@@ -570,19 +578,20 @@ const Configurator = () => {
                 ? 'Review your selected tools and download your personalized setup script.' 
                 : steps[currentStep].subtitle}
             </p>
-          </div>
-          {/* Breadcrumbs */}
-          <div className="hidden lg:block">
-            <NotionBreadcrumb
-              steps={steps}
-              currentIndex={currentStep}
-              onStepClick={(index) => {
-                setCurrentStep(index);
-                updateLog(`jumped to ${steps[index].name.toLowerCase()}`);
-              }}
-            />
-          </div>
-        </div>
+            </div>
+            {/* Breadcrumbs */}
+            <div className="hidden lg:block">
+              <NotionBreadcrumb
+                steps={steps}
+                currentIndex={currentStep}
+                onStepClick={(index) => {
+                  setCurrentStep(index);
+                  updateLog(`jumped to ${steps[index].name.toLowerCase()}`);
+                }}
+              />
+            </div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Search Bar */}
         {currentCategory !== 'review' && currentCategory !== 'templates' && (
@@ -862,28 +871,38 @@ const Configurator = () => {
       </div>
 
       {/* Floating Footer Navigation Bar */}
-      <FloatingFooter
-        statusLabel={footerStatus.label}
-        statusText={footerStatus.text}
-        showBackButton={true}
-        backButtonText={currentCategory === 'templates' ? 'Back to Home' : 'Back'}
-        onBack={handleBack}
-        primaryButtonText={getPrimaryButtonText()}
-        primaryButtonIcon={getPrimaryButtonIcon()}
-        onPrimaryAction={currentStep < steps.length - 1 ? handleNext : handleDownloadScript}
-        primaryShortcut={currentStep === steps.length - 1 ? 'Enter' : undefined}
-        showThemeToggle={true}
-        showKeyboardShortcuts={true}
-        isLastStep={currentStep === steps.length - 1}
-        onJumpToFinalize={() => {
-          // Navigate to review step (last step)
-          setCurrentStep(steps.length - 1);
-          // Scroll to top of page after navigation
-          setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }, 150);
-        }}
-      />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`footer-${currentStep}`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+        >
+          <FloatingFooter
+            statusLabel={footerStatus.label}
+            statusText={footerStatus.text}
+            showBackButton={true}
+            backButtonText={currentCategory === 'templates' ? 'Back to Home' : 'Back'}
+            onBack={handleBack}
+            primaryButtonText={getPrimaryButtonText()}
+            primaryButtonIcon={getPrimaryButtonIcon()}
+            onPrimaryAction={currentStep < steps.length - 1 ? handleNext : handleDownloadScript}
+            primaryShortcut={currentStep === steps.length - 1 ? 'Enter' : undefined}
+            showThemeToggle={true}
+            showKeyboardShortcuts={true}
+            isLastStep={currentStep === steps.length - 1}
+            onJumpToFinalize={() => {
+              // Navigate to review step (last step)
+              setCurrentStep(steps.length - 1);
+              // Scroll to top of page after navigation
+              setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }, 150);
+            }}
+          />
+        </motion.div>
+      </AnimatePresence>
     </PageLayout>
   );
 };
