@@ -90,19 +90,53 @@ const ExportSetup = () => {
         return;
       }
       
+      // Try to parse JSON first to check if it's valid JSON
+      try {
+        JSON.parse(content);
+      } catch (error) {
+        toast.error('Invalid JSON file', {
+          description: 'The uploaded file is not a valid JSON format. Please upload a baseline-snapshot.json file.',
+          style: {
+            background: '#ef4444',
+            color: '#ffffff',
+            border: '1px solid #dc2626'
+          }
+        });
+        setScanData('');
+        setFileName('');
+        setParsedData(null);
+        return;
+      }
+      
+      // Now validate if it's a valid Baseline snapshot
+      const parsed = parseBaselineJSON(content);
+      if (!parsed) {
+        toast.error('Invalid Baseline snapshot', {
+          description: 'This JSON file is not a valid baseline-snapshot.json. Please run the scan script first.',
+          style: {
+            background: '#ef4444',
+            color: '#ffffff',
+            border: '1px solid #dc2626'
+          }
+        });
+        setScanData('');
+        setFileName('');
+        setParsedData(null);
+        return;
+      }
+      
+      // Valid baseline snapshot
       setScanData(content);
       setFileName(file.name);
+      setParsedData(parsed);
       
-      const parsed = parseBaselineJSON(content);
-      if (parsed) {
-        setParsedData(parsed);
-        toast.success('Snapshot loaded!', {
-          description: `Found ${parsed.package_managers.homebrew?.formulae.length || 0} packages and ${parsed.applications.length} apps`
-        });
-      } else {
-        setParsedData(null);
-        toast.success('File uploaded!');
-      }
+      const packageCount = parsed.package_managers.homebrew?.formulae.length || 0;
+      const caskCount = parsed.package_managers.homebrew?.casks.length || 0;
+      const appCount = parsed.applications.length || 0;
+      
+      toast.success('✓ Valid Baseline snapshot loaded!', {
+        description: `Found ${packageCount} packages, ${caskCount} casks, and ${appCount} apps from ${parsed.meta.hostname}`
+      });
     };
     
     reader.readAsText(file);
@@ -125,6 +159,20 @@ const ExportSetup = () => {
       return;
     }
     
+    // Validate the data before generating
+    const parsed = parseBaselineJSON(scanData);
+    if (!parsed) {
+      toast.error('Invalid snapshot data', {
+        description: 'The uploaded file is not a valid baseline-snapshot.json. Please upload a valid file.',
+        style: {
+          background: '#ef4444',
+          color: '#ffffff',
+          border: '1px solid #dc2626'
+        }
+      });
+      return;
+    }
+    
     try {
       const setupScript = generateSetupFromScan(scanData);
       
@@ -142,19 +190,43 @@ const ExportSetup = () => {
         description: 'Run baseline-setup.sh on your new Mac'
       });
     } catch (error) {
+      console.error('Script generation error:', error);
       toast.error('Failed to generate script', {
-        description: 'Please check the console for details'
+        description: 'An error occurred while generating the setup script. Please try again.'
       });
     }
   }, [scanData]);
 
   const handleNext = useCallback(() => {
+    // Validate before moving from step 2 to step 3
+    if (currentStep === 2) {
+      if (!scanData.trim()) {
+        toast.error('No file uploaded', {
+          description: 'Please upload a baseline-snapshot.json file first'
+        });
+        return;
+      }
+      
+      const parsed = parseBaselineJSON(scanData);
+      if (!parsed) {
+        toast.error('Invalid Baseline snapshot', {
+          description: 'The uploaded file is not valid. Please upload a proper baseline-snapshot.json file.',
+          style: {
+            background: '#ef4444',
+            color: '#ffffff',
+            border: '1px solid #dc2626'
+          }
+        });
+        return;
+      }
+    }
+    
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
       handleGenerateScript();
     }
-  }, [currentStep, handleGenerateScript]);
+  }, [currentStep, scanData, handleGenerateScript]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

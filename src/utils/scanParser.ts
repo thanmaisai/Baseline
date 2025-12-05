@@ -54,9 +54,62 @@ interface BaselineSnapshot {
   };
 }
 
+const isValidBaselineSnapshot = (data: any): data is BaselineSnapshot => {
+  // Check if data is an object
+  if (!data || typeof data !== 'object') {
+    return false;
+  }
+
+  // Check for required top-level structure
+  if (!data.meta || typeof data.meta !== 'object') {
+    return false;
+  }
+
+  // Check meta fields
+  if (!data.meta.hostname || !data.meta.os_version || !data.meta.arch) {
+    return false;
+  }
+
+  // Check for package_managers object
+  if (!data.package_managers || typeof data.package_managers !== 'object') {
+    return false;
+  }
+
+  // Check for applications array
+  if (!Array.isArray(data.applications)) {
+    return false;
+  }
+
+  // Check for development object
+  if (!data.development || typeof data.development !== 'object') {
+    return false;
+  }
+
+  // Check for terminal object
+  if (!data.terminal || typeof data.terminal !== 'object') {
+    return false;
+  }
+
+  // Check for languages object
+  if (!data.languages || typeof data.languages !== 'object') {
+    return false;
+  }
+
+  // All essential structure checks passed
+  return true;
+};
+
 export const parseBaselineJSON = (jsonString: string): BaselineSnapshot | null => {
   try {
-    return JSON.parse(jsonString) as BaselineSnapshot;
+    const parsed = JSON.parse(jsonString);
+    
+    // Validate the structure
+    if (!isValidBaselineSnapshot(parsed)) {
+      console.error('Invalid Baseline snapshot structure');
+      return null;
+    }
+    
+    return parsed as BaselineSnapshot;
   } catch (error) {
     console.error('Failed to parse JSON:', error);
     return null;

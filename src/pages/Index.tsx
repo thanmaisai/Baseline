@@ -10,44 +10,63 @@ import { themeTokens } from '@/theme/tokens';
 import { useTheme } from '@/contexts/ThemeContext';
 
 const heroStats = [
-  { label: 'Minutes to onboard', value: '5', detail: 'Average runtime' },
-  { label: 'Tools remembered', value: '24', detail: 'Curated templates' },
-  { label: 'Macs standardized', value: '2.4K', detail: 'Engineering teams' },
+  { label: 'Reduced effort', value: 'Hours', detail: 'saved' },
+  { label: 'Wide range', value: '200+', detail: 'tools available' },
+  { label: 'One command', value: 'Single', detail: 'script install' },
 ];
 
 const journeys = [
   {
     id: 'configure',
-    title: 'Design a brand-new Mac',
-    description: 'Pick your stack visually, toggle tooling, and Baseline generates a single install script.',
+    title: 'Design a new setup',
+    description: 'Browse tools visually, select what you need, and generate a single installation script.',
     icon: Layers,
-    action: { label: 'Configure Setup', route: '/configure' },
-    steps: ['Choose a template or start blank', 'Select packages, apps, and dotfiles', 'Download `baseline-setup.sh`'],
+    action: { label: 'Start Configuring', route: '/configure' },
+    steps: ['Browse and select tools from categories', 'Review your selections and customize', 'Generate and download setup script'],
   },
   {
     id: 'export',
-    title: 'Clone your existing Mac',
-    description: 'Scan any Mac, extract packages + apps, and get a repeatable install recipe.',
+    title: 'Clone your current Mac',
+    description: 'Scan your existing Mac, capture all tools and configurations, then recreate it anywhere.',
     icon: Upload,
-    action: { label: 'Export Snapshot', route: '/export-setup' },
-    steps: ['Download the scanner', 'Upload the baseline snapshot', 'Generate `baseline-setup.sh`'],
+    action: { label: 'Export Current Mac', route: '/export-setup' },
+    steps: ['Download and run the scan script', 'Upload generated configuration file', 'Get reproduction script for new Mac'],
   },
 ];
 
 const featureHighlights = [
-  { icon: Sparkles, title: 'Visual automation', copy: 'Every toggle updates your script instantly—no YAML spelunking.' },
-  { icon: Wand2, title: 'Opinionated defaults', copy: 'Hand-curated templates keep new hires aligned with your tooling.' },
-  { icon: ShieldCheck, title: 'Safe + auditable', copy: 'Generated scripts are readable, versionable, and open source.' },
+  { icon: Sparkles, title: 'Team onboarding', copy: 'New hire? Share your team\'s setup script and get them productive on day one.' },
+  { icon: Wand2, title: 'Mac migration', copy: 'Moving to a new MacBook? Export your current setup and restore it quickly using Homebrew.' },
+  { icon: Clock, title: 'Visual interface', copy: 'Browse and select tools through an intuitive GUI instead of writing config files.' },
+];
+
+const useCases = [
+  { 
+    icon: Sparkles, 
+    title: 'Safe and transparent', 
+    copy: 'All scripts are readable and run locally. No hidden data transmission.',
+    span: 'lg:col-span-1'
+  },
+  { 
+    icon: Wand2, 
+    title: 'One-click install', 
+    copy: 'Generate a single script that installs everything you need automatically.',
+    span: 'lg:col-span-1'
+  },
+  { 
+    icon: ShieldCheck, 
+    title: 'Automated installation', 
+    copy: 'Everything installed with a single command. No manual steps required.',
+    span: 'lg:col-span-2 lg:row-span-1'
+  },
 ];
 
 const terminalDemo = [
-  { text: 'baseline init --template full-stack', type: 'command' as const, delay: 300 },
-  { text: 'Preparing your Baseline workspace…', type: 'info' as const, delay: 800 },
-  { text: '• installing homebrew + taps', type: 'output' as const, delay: 300 },
-  { text: '• syncing dotfiles + fonts', type: 'output' as const, delay: 300 },
-  { text: '• installing vscode, arc, figma, postman', type: 'output' as const, delay: 300 },
-  { text: '• configuring nodesource / volta', type: 'output' as const, delay: 300 },
-  { text: '✨ Baseline complete. Five minutes. Zero surprises.', type: 'success' as const, delay: 800 },
+  { text: './baseline-setup.sh', type: 'command' as const, delay: 300 },
+  { text: 'ℹ Installing selected packages via Homebrew...', type: 'info' as const, delay: 800 },
+  { text: '✓ node, python, docker installed', type: 'success' as const, delay: 300 },
+  { text: '✓ vscode, arc, figma configured', type: 'success' as const, delay: 300 },
+  { text: '✓ Setup complete in minimal time', type: 'success' as const, delay: 300 },
 ];
 
 const Index = () => {
@@ -94,17 +113,16 @@ const Index = () => {
                 style={{ borderColor: borderColors.cardInner }}
               >
                 <span className="w-2 h-2 rounded-full bg-[var(--brand-sunset)]" />
-                Baseline / Mac Ops
+                Baseline / Automated Setup
               </div>
               <div>
-                <p className="text-sm uppercase tracking-[0.4em] text-muted-foreground mb-4">Bring every Mac to the same Baseline.</p>
+                <p className="text-sm uppercase tracking-[0.4em] text-muted-foreground mb-4">Set up your Mac quickly, not over hours</p>
                 <h1 className="text-4xl md:text-6xl font-semibold leading-tight text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
-                  A visual, opinionated studio for macOS environments.
+                  Automate your entire Mac setup with a visual tool
                 </h1>
               </div>
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl">
-                Baseline takes the tribal knowledge of your team—tools, taps, fonts, secrets—and turns it into a beautiful, trusted setup experience.
-                The layout you&apos;re inside right now is the same canvas we use for every journey: configure something new or export what already works.
+                Generate Homebrew-based installation scripts for all your tools and configurations. Whether you're setting up a new Mac or migrating from an existing one, we've got you covered.
               </p>
               <div className="flex flex-wrap gap-4">
               <Button
@@ -113,7 +131,7 @@ const Index = () => {
                   className="h-12 px-8 bg-[var(--brand-sunset)] text-[var(--brand-ink)] hover:bg-[var(--brand-sunset)]/90"
                   aria-keyshortcuts="Meta+1"
               >
-                  Design a Setup
+                  Start Configuring
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
               <Button
@@ -123,7 +141,7 @@ const Index = () => {
                   className="h-12 px-8 border-[var(--brand-ink)]/40 bg-[var(--brand-sand)]/60 hover:bg-[var(--brand-dunes)]/80 text-[var(--brand-ink)]"
                   aria-keyshortcuts="Meta+2"
               >
-                Export Current Mac
+                Export My Mac
               </Button>
           </div>
               <div className="grid md:grid-cols-3 gap-6">
@@ -145,29 +163,29 @@ const Index = () => {
               className="rounded-[28px] border bg-[var(--brand-sand)]/85 dark:bg-[var(--brand-ink)]/80 p-6 flex flex-col justify-between"
               style={{ borderColor: borderColors.card }}
             >
-              <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <img src="/brand/baseline-mark.png" alt="Baseline" className="w-12 h-12 rounded-2xl" />
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Brand System</p>
-                    <p className="text-lg font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">Baseline Studio</p>
-                    </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-8">
+                  <img src="/brand/baseline-mark.png" alt="Baseline Logo" className="w-24 h-24 object-contain flex-shrink-0" />
+                  <div className="space-y-2">
+                    <p className="text-xs uppercase tracking-[0.5em] text-[var(--brand-sunset)] font-bold">Your workflow</p>
+                    <p className="text-3xl md:text-4xl font-bold text-[var(--brand-ink)] dark:text-[var(--brand-sand)] leading-tight">Two ways to start</p>
+                  </div>
                 </div>
                 <p className="text-base text-muted-foreground mb-6">
-                  Layout, floating footer, steady typography—the same UX flows through Configurator and Export. It keeps new hires oriented, whichever path they choose.
+                  Configure a new setup from scratch or export your existing Mac configuration. Both paths lead to the same automated installation experience.
                 </p>
                 <div className="space-y-3 text-sm font-mono text-[var(--brand-ink)]/80 dark:text-[var(--brand-sand)]/80">
-                  <p>⌘ → Continue to next step</p>
-                  <p>⌘ ← Navigate backwards</p>
-                  <p>⌘ F Search every tool</p>
+                  <p>⌘ → Start configuring</p>
+                  <p>⌘ ← Export your Mac</p>
+                  <p>⌘ F Search tools</p>
                 </div>
               </div>
               <div className="mt-8">
-                <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground mb-2">Trusted by</p>
-                <div className="flex gap-3">
-                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-[var(--brand-sand)]/80">Founders</span>
-                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-[var(--brand-sand)]/80">Platform teams</span>
-                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-[var(--brand-sand)]/80">Indie makers</span>
+                <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground mb-2">Perfect for</p>
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-[var(--brand-sand)]/80">New team members</span>
+                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-[var(--brand-sand)]/80">Mac migrations</span>
+                  <span className="text-sm font-semibold text-[var(--brand-ink)]/70 dark:text-[var(--brand-sand)]/80">Dev environment sync</span>
                     </div>
                       </div>
                       </div>
@@ -243,60 +261,104 @@ const Index = () => {
                     className="rounded-3xl border bg-[var(--brand-sand)]/80 dark:bg-[var(--brand-ink)]/70 p-6 flex gap-4"
                     style={{ borderColor: borderColors.card }}
                   >
-                    <span className="mt-1 h-12 w-12 rounded-2xl bg-[var(--brand-sunset)]/20 flex items-center justify-center">
+                    <span className="mt-1 h-12 w-12 rounded-2xl bg-[var(--brand-sunset)]/20 flex items-center justify-center flex-shrink-0">
                       <Icon className="w-6 h-6 text-[var(--brand-ink)] dark:text-[var(--brand-sand)]" />
                     </span>
                     <div>
-                      <h4 className="text-xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">{item.title}</h4>
+                      <h4 className="text-xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)] mb-2">{item.title}</h4>
                       <p className="text-muted-foreground">{item.copy}</p>
               </div>
             </div>
                 );
               })}
-              <div 
-                className="rounded-3xl border bg-[var(--brand-dunes)]/90 dark:bg-[var(--brand-ink)]/70 p-6"
-                style={{ borderColor: borderColors.card }}
-              >
-                <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-2">Promise</p>
-                <p className="text-2xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
-                  Five minutes of runway for every new hire. Same layout, same CTA, same confidence.
-                </p>
-              </div>
-        </div>
+            </div>
       </section>
 
+          {/* Bento Grid - Use Cases */}
+          <section>
+            <div className="mb-6">
+              <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground mb-2">Built for real workflows</p>
+              <h2 className="text-3xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
+                From onboarding new team members to migrating to a new Mac
+              </h2>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-6">
+              {useCases.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.title}
+                    className={`rounded-3xl border bg-[var(--brand-sand)]/80 dark:bg-[var(--brand-ink)]/70 p-8 flex flex-col gap-4 ${item.span}`}
+                    style={{ borderColor: borderColors.card }}
+                  >
+                    <span className="h-12 w-12 rounded-2xl bg-[var(--brand-sunset)]/20 flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-[var(--brand-ink)] dark:text-[var(--brand-sand)]" />
+                    </span>
+                    <div>
+                      <h4 className="text-xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)] mb-2">{item.title}</h4>
+                      <p className="text-muted-foreground">{item.copy}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
           <section 
-            className="rounded-[32px] border bg-[var(--brand-sand)]/85 dark:bg-[var(--brand-ink)]/80 p-8"
+            className="rounded-[32px] border bg-[var(--brand-sand)]/85 dark:bg-[var(--brand-ink)]/80 p-6 md:p-8"
             style={{ borderColor: borderColors.card }}
           >
-            <div className="flex flex-col lg:flex-row gap-8 items-start">
-              <div className="flex-1 space-y-4">
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
+              <div className="flex-1 space-y-3">
                 <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Playbook</p>
-                <h2 className="text-3xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
-                  “Baseline let us replace a 12 page Confluence doc with a single CTA. Every page in the product feels like this card—focused, confident, and reusable.”
-            </h2>
+                <h2 className="text-2xl md:text-3xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
+                  One script. One command. Zero friction. What used to take an entire day now happens while you grab coffee.
+                </h2>
               </div>
               <div 
-                className="w-full lg:w-64 rounded-3xl border bg-[var(--brand-sand)]/80 dark:bg-[var(--brand-ink)]/60 p-6 space-y-3"
+                className="w-full lg:w-64 rounded-2xl border bg-[var(--brand-sand)]/80 dark:bg-[var(--brand-ink)]/60 p-4 space-y-2.5"
                 style={{ borderColor: borderColors.card }}
               >
-                <div className="flex items-center gap-3">
-                  <Clock className="w-5 h-5 text-[var(--brand-ink)]" />
+                <div className="flex items-center gap-2.5">
+                  <Clock className="w-4 h-4 text-[var(--brand-ink)] flex-shrink-0" />
                   <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Before</p>
-                    <p className="text-lg font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">360 minutes</p>
-            </div>
-        </div>
-            <div className="flex items-center gap-3">
-                  <ShieldCheck className="w-5 h-5 text-[var(--brand-ink)]" />
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">After Baseline</p>
-                    <p className="text-lg font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">5 minutes</p>
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Traditional Setup</p>
+                    <p className="text-base font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">Full day or more</p>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">Consistent layout across Configure + Export flows makes onboarding unmistakable.</p>
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck className="w-4 h-4 text-[var(--brand-ink)] flex-shrink-0" />
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">With Baseline</p>
+                    <p className="text-base font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">Under an hour</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground pt-1">Automated Homebrew-based installation with zero manual configuration.</p>
+              </div>
             </div>
-            </div>
+          </section>
+
+          <section className="text-center py-8">
+            <p className="text-sm text-muted-foreground">
+              Developed by{' '}
+              <a 
+                href="https://thanmaisai.vercel.app/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[var(--brand-sunset)] hover:underline font-semibold"
+              >
+                thanmaisai
+              </a>
+              {' • '}
+              <a 
+                href="https://github.com/thanmaisai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[var(--brand-sunset)] hover:underline font-semibold"
+              >
+                GitHub
+              </a>
+            </p>
           </section>
         </div>
       </PageLayout>
@@ -306,11 +368,11 @@ const Index = () => {
         statusLabel=""
         statusText="Choose your journey"
         showBackButton={false}
-        primaryButtonText="Design a Setup"
+        primaryButtonText="Start Configuring"
         primaryButtonIcon={<Layers className="w-4 h-4" />}
         onPrimaryAction={() => navigate('/configure')}
         primaryShortcut="←"
-        secondaryButtonText="Export Current Mac"
+        secondaryButtonText="Export My Mac"
         secondaryButtonIcon={<Upload className="w-4 h-4" />}
         onSecondaryAction={() => navigate('/export-setup')}
         secondaryShortcut="→"
