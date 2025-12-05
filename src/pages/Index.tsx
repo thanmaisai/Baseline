@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { PageLayout } from '@/components/PageLayout';
 import { FloatingFooter } from '@/components/FloatingFooter';
 import { TerminalWindow } from '@/components/TerminalWindow';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { themeTokens } from '@/theme/tokens';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -72,12 +72,28 @@ const terminalDemo = [
 const Index = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const [isHovering, setIsHovering] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: '50%', y: '50%' });
+  const [isMouseActive, setIsMouseActive] = useState(false);
 
   // Get theme-aware border colors
   const isDark = theme === 'dark';
   const borderColors = {
     card: themeTokens.colors[isDark ? 'dark' : 'light'].border.card,
     cardInner: themeTokens.colors[isDark ? 'dark' : 'light'].border.cardInner,
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    setIsMouseActive(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMousePosition({ x: `${x}px`, y: `${y}px` });
+    setIsMouseActive(true);
   };
 
   useEffect(() => {
@@ -338,27 +354,47 @@ const Index = () => {
             </div>
           </section>
 
-          <section className="text-center py-8">
-            <p className="text-sm text-muted-foreground">
-              Developed by{' '}
-              <a 
-                href="https://thanmaisai.vercel.app/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[var(--brand-sunset)] hover:underline font-semibold"
+          <section className="text-center py-12 relative">
+            <motion.a
+              href="https://thanmaisai.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative inline-block"
+              onMouseMove={handleMouseMove}
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={handleMouseLeave}
+              style={{ 
+                cursor: 'none',
+              }}
+            >
+              {/* Bottom Layer - Orange text */}
+              <div
+                className="relative z-10 font-black text-4xl md:text-5xl tracking-tight select-none"
+                style={{
+                  color: 'var(--brand-sunset)',
+                }}
               >
-                thanmaisai
-              </a>
-              {' • '}
-              <a 
-                href="https://github.com/thanmaisai" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[var(--brand-sunset)] hover:underline font-semibold"
-              >
-                GitHub
-              </a>
-            </p>
+                Developed by thanmaisai
+              </div>
+
+              {/* Top Layer - Inverted with spotlight mask - Only on hover */}
+              {isHovering && (
+                <motion.div
+                  className="absolute inset-0 z-20 font-black text-4xl md:text-5xl tracking-tight select-none flex items-center justify-center"
+                  style={{
+                    color: 'var(--brand-ink)',
+                    backgroundColor: 'var(--brand-sunset)',
+                    clipPath: `circle(150px at ${mousePosition.x} ${mousePosition.y})`,
+                    transition: 'clip-path 0.05s ease-out',
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <span>Developed by thanmaisai</span>
+                </motion.div>
+              )}
+            </motion.a>
           </section>
         </div>
       </PageLayout>
