@@ -214,7 +214,7 @@ const Index = () => {
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                   <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                    Shortcut {journey.id === 'configure' ? '⌘ + 1' : '⌘ + 2'}
+                    Shortcut {journey.id === 'configure' ? '⌘ + →' : '⌘ + ←'}
                   </p>
                 </div>
               );
@@ -275,7 +275,6 @@ const Index = () => {
                 <h2 className="text-3xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)]">
                   “Baseline let us replace a 12 page Confluence doc with a single CTA. Every page in the product feels like this card—focused, confident, and reusable.”
             </h2>
-                <p className="text-sm text-muted-foreground">— Head of Developer Productivity, Series B fintech</p>
               </div>
               <div 
                 className="w-full lg:w-64 rounded-3xl border bg-[var(--brand-sand)]/80 dark:bg-[var(--brand-ink)]/60 p-6 space-y-3"
