@@ -154,7 +154,8 @@ const Index = () => {
                 onClick={() => navigate('/export-setup')}
                 size="lg"
                 variant="outline"
-                  className="h-12 px-8 border-[var(--brand-ink)]/40 bg-[var(--brand-sand)]/60 hover:bg-[var(--brand-dunes)]/80 text-[var(--brand-ink)]"
+                style={{ borderColor: borderColors.card }}
+                  className="h-12 px-8 border-2 bg-transparent hover:bg-[var(--brand-sand)]/30 dark:hover:bg-[var(--brand-sand)]/10 transition-all duration-200"
                   aria-keyshortcuts="Meta+2"
               >
                 Export My Mac

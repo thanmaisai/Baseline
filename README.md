@@ -100,9 +100,7 @@ Scan your current Mac's configuration and generate an exact replica script for y
 ### 📦 **Export Your Existing Mac**
 ```bash
 # Download and run the scanner
-curl -O https://baseline-mac.com/baseline-scan.sh
-chmod +x baseline-scan.sh
-./baseline-scan.sh
+curl -O https://baseline-mac.com/baseline-scan.sh && chmod +x baseline-scan.sh && ./baseline-scan.sh
 
 # Upload the generated baseline-snapshot.json
 # Baseline auto-generates your perfect setup script

@@ -399,7 +399,7 @@ const ExportSetup = () => {
                     className="mt-auto pt-4 border-t"
                     style={{ borderColor: borderColors.cardInner }}
                   >
-                    <p className="text-[10px] text-[var(--brand-ink)]/50 dark:text-[var(--brand-sand)]/50 mb-2 uppercase tracking-widest font-bold">Then run in terminal:</p>
+                    <p className="text-[10px] text-[var(--brand-ink)]/50 dark:text-[var(--brand-sand)]/50 mb-2 uppercase tracking-widest font-bold">Run this command:</p>
                     <div 
                       className="bg-[var(--brand-ink)]/5 dark:bg-[var(--brand-sand)]/5 rounded-xl px-4 py-3 relative cursor-pointer hover:bg-[var(--brand-ink)]/10 dark:hover:bg-[var(--brand-sand)]/10 transition-colors border"
                       style={{ borderColor: borderColors.cardInner }}
@@ -669,8 +669,7 @@ const ExportSetup = () => {
                         <span className="ml-2 text-xs text-[var(--brand-sand)] font-mono">baseline-setup.sh</span>
                       </div>
                       <div className="font-mono text-sm space-y-1.5">
-                        <div className="text-[var(--brand-sunset)]">$ chmod +x baseline-setup.sh</div>
-                        <div className="text-[var(--brand-sunset)]">$ ./baseline-setup.sh</div>
+                        <div className="text-[var(--brand-sunset)]">$ chmod +x baseline-setup.sh && ./baseline-setup.sh</div>
                         <div className="text-[var(--brand-sand)]/70"># Installing all your tools...</div>
                       </div>
                     </div>
@@ -727,8 +726,7 @@ const ExportSetup = () => {
                         <span className="ml-2 text-xs text-[var(--brand-sand)] font-mono">baseline-setup.sh</span>
                       </div>
                       <div className="font-mono text-sm space-y-1.5">
-                        <div className="text-[var(--brand-sunset)]">$ chmod +x baseline-setup.sh</div>
-                        <div className="text-[var(--brand-sunset)]">$ ./baseline-setup.sh</div>
+                        <div className="text-[var(--brand-sunset)]">$ chmod +x baseline-setup.sh && ./baseline-setup.sh</div>
                         <div className="text-[var(--brand-sand)]/70"># Installing all your tools...</div>
                       </div>
                     </div>

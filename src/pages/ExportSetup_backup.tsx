@@ -313,7 +313,7 @@ const ExportSetup = () => {
                     Download baseline-scanner.sh
                   </Button>
                   <div className="mt-auto pt-4 border-t border-[var(--brand-dunes)]/30 dark:border-[var(--brand-sand)]/10">
-                    <p className="text-[10px] text-[var(--brand-ink)]/50 dark:text-[var(--brand-sand)]/50 mb-2 uppercase tracking-widest font-bold">Then run in terminal:</p>
+                    <p className="text-[10px] text-[var(--brand-ink)]/50 dark:text-[var(--brand-sand)]/50 mb-2 uppercase tracking-widest font-bold">Run this command:</p>
                     <div 
                       className="bg-[var(--brand-ink)]/5 dark:bg-[var(--brand-sand)]/5 rounded-xl px-4 py-3 relative cursor-pointer hover:bg-[var(--brand-ink)]/10 dark:hover:bg-[var(--brand-sand)]/10 transition-colors border border-[var(--brand-dunes)]/20 dark:border-[var(--brand-sand)]/10"
                       onClick={handleCopyManualCommand}
@@ -598,8 +598,7 @@ const ExportSetup = () => {
                         <span className="ml-2 text-[11px] text-[var(--brand-sand)]/50 font-mono font-semibold">baseline-setup.sh</span>
                       </div>
                       <div className="font-mono text-sm text-[var(--brand-sunset)] space-y-1">
-                        <div>$ chmod +x baseline-setup.sh</div>
-                        <div>$ ./baseline-setup.sh</div>
+                        <div>$ chmod +x baseline-setup.sh && ./baseline-setup.sh</div>
                         <div className="text-[var(--brand-sand)]/40"># Installing all your tools...</div>
                       </div>
                     </div>
