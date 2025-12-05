@@ -1071,82 +1071,25 @@ export const ShareableCard = ({ selectedTools, onDownload }: ShareableCardProps)
             className="text-[10px] font-bold mb-3 uppercase tracking-wider"
             style={{ color: tokens.colors.text.primary }}
           >
-            Installation Instructions
+            Installation Command
           </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex items-start gap-2">
-              <span 
-                className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                style={{ 
-                  backgroundColor: `${tokens.brand.sunset}20`,
-                  color: tokens.brand.sunset 
-                }}
-              >
-                1
-              </span>
-              <p 
-                className="font-medium text-[11px]"
-                style={{ color: tokens.colors.text.primary }}
-              >
-                Download the script below
-              </p>
-            </div>
-            <div className="flex items-start gap-2">
-              <span 
-                className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                style={{ 
-                  backgroundColor: `${tokens.brand.sunset}20`,
-                  color: tokens.brand.sunset 
-                }}
-              >
-                2
-              </span>
-              <div>
-                <p 
-                  className="font-medium text-[11px]"
-                  style={{ color: tokens.colors.text.primary }}
-                >
-                  Make it executable
-                </p>
-                <code 
-                  className="font-mono text-[9px] px-1.5 py-0.5 rounded mt-0.5 inline-block"
-                  style={{ 
-                    backgroundColor: tokens.colors.background.secondary,
-                    color: tokens.colors.text.secondary 
-                  }}
-                >
-                  chmod +x setup-macos.sh
-                </code>
-              </div>
-            </div>
-            <div className="flex items-start gap-2">
-              <span 
-                className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                style={{ 
-                  backgroundColor: `${tokens.brand.sunset}20`,
-                  color: tokens.brand.sunset 
-                }}
-              >
-                3
-              </span>
-              <div>
-                <p 
-                  className="font-medium text-[11px]"
-                  style={{ color: tokens.colors.text.primary }}
-                >
-                  Run it
-                </p>
-                <code 
-                  className="font-mono text-[9px] px-1.5 py-0.5 rounded mt-0.5 inline-block"
-                  style={{ 
-                    backgroundColor: tokens.colors.background.secondary,
-                    color: tokens.colors.text.secondary 
-                  }}
-                >
-                  ./setup-macos.sh
-                </code>
-              </div>
-            </div>
+          <div className="space-y-2">
+            <p 
+              className="font-medium text-[11px] mb-2"
+              style={{ color: tokens.colors.text.secondary }}
+            >
+              Run this single command:
+            </p>
+            <code 
+              className="font-mono text-[10px] px-3 py-2 rounded block leading-relaxed"
+              style={{ 
+                backgroundColor: tokens.colors.background.secondary,
+                color: tokens.colors.text.primary,
+                wordBreak: 'break-all'
+              }}
+            >
+              chmod +x setup-macos.sh && ./setup-macos.sh
+            </code>
           </div>
         </div>
       </motion.div>

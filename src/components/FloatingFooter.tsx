@@ -1,8 +1,14 @@
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
-import { useThemeTokens } from '@/theme/useThemeTokens';
+import { useNavigate, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, ArrowLeft, Zap } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
+import { useThemeTokens } from "@/theme/useThemeTokens";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FloatingFooterProps {
   branding?: string;
@@ -23,26 +29,38 @@ interface FloatingFooterProps {
   secondaryShortcut?: string;
   showThemeToggle?: boolean;
   showKeyboardShortcuts?: boolean;
+  onJumpToFinalize?: () => void;
+  isLastStep?: boolean;
 }
 
-const Kbd = ({ children, variant = 'dark' }: { children: React.ReactNode; variant?: 'dark' | 'light' | 'orange' | 'theme' }) => {
-  const baseStyles = "inline-flex items-center justify-center text-[10px] font-mono rounded px-1.5 py-0.5 border";
+const Kbd = ({
+  children,
+  variant = "dark",
+}: {
+  children: React.ReactNode;
+  variant?: "dark" | "light" | "orange" | "theme";
+}) => {
+  const baseStyles =
+    "inline-flex items-center justify-center text-[10px] font-mono rounded px-1.5 py-0.5 border";
   const variants = {
     dark: "text-[var(--brand-sand)] border-[var(--brand-sand)] bg-[var(--brand-ink)]/60",
     light: "text-white border-[var(--brand-ink)] bg-[var(--brand-ink)]/70",
     orange: "text-[var(--brand-ink)] border-[var(--brand-ink)] bg-transparent",
-    theme: "text-[var(--brand-ink)] dark:text-[var(--brand-sand)] border-[var(--brand-ink)] dark:border-[var(--brand-sand)] bg-transparent",
+    theme:
+      "text-[var(--brand-ink)] dark:text-[var(--brand-sand)] border-[var(--brand-ink)] dark:border-[var(--brand-sand)] bg-transparent",
   };
 
-  return <span className={`${baseStyles} ${variants[variant]}`}>{children}</span>;
+  return (
+    <span className={`${baseStyles} ${variants[variant]}`}>{children}</span>
+  );
 };
 
 export const FloatingFooter = ({
-  branding = 'Baseline.',
+  branding = "Baseline.",
   statusLabel,
   statusText,
   showBackButton = true,
-  backButtonText = 'Back',
+  backButtonText = "Back",
   onBack,
   primaryButtonText,
   primaryButtonIcon,
@@ -56,9 +74,15 @@ export const FloatingFooter = ({
   secondaryShortcut,
   showThemeToggle = true,
   showKeyboardShortcuts = true,
+  onJumpToFinalize,
+  isLastStep = false,
 }: FloatingFooterProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { brand, colors, isDark } = useThemeTokens();
+
+  // Show jump to finalize button only on /configure page
+  const isConfiguratorPage = location.pathname === "/configure";
 
   const shellStyles = {
     backgroundColor: isDark ? colors.background.secondary : brand.ink,
@@ -72,16 +96,15 @@ export const FloatingFooter = ({
         className="rounded-2xl py-3 px-6 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] flex items-center justify-between gap-6 border ring-1 ring-white/10 w-auto whitespace-nowrap backdrop-blur-xl"
         style={shellStyles}
       >
-
         {/* Branding + Status Container */}
         <div className="flex items-center gap-6">
           {/* Branding (clickable) */}
           <div className="flex items-center gap-2">
             <button
               tabIndex={0}
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="text-lg font-bold tracking-tight hover:underline focus:outline-none rounded focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              style={{ WebkitTapHighlightColor: "transparent" }}
             >
               {branding}
             </button>
@@ -117,8 +140,10 @@ export const FloatingFooter = ({
               onClick={onBack}
               className="group relative flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all duration-200 hover:bg-[var(--brand-sand)]/10 dark:hover:bg-white/5"
               style={{
-                borderColor: isDark ? 'rgba(235, 222, 201, 0.3)' : 'rgba(235, 222, 201, 0.4)',
-                backgroundColor: 'transparent',
+                borderColor: isDark
+                  ? "rgba(235, 222, 201, 0.3)"
+                  : "rgba(235, 222, 201, 0.4)",
+                backgroundColor: "transparent",
               }}
               aria-keyshortcuts="Meta+ArrowLeft"
             >
@@ -142,17 +167,63 @@ export const FloatingFooter = ({
               color: brand.ink,
               border: `2px solid ${brand.ink}`,
             }}
-            aria-keyshortcuts={primaryShortcut ? `Meta+${primaryShortcut}` : "Meta+ArrowRight"}
+            aria-keyshortcuts={
+              primaryShortcut ? `Meta+${primaryShortcut}` : "Meta+ArrowRight"
+            }
           >
             {primaryButtonIcon}
             <span>{primaryButtonText}</span>
             {showKeyboardShortcuts && (
               <span className="flex items-center gap-0.5 ml-2">
                 <Kbd variant="orange">⌘</Kbd>
-                <Kbd variant="orange">{primaryShortcut === 'Enter' ? '↩' : (primaryShortcut || '→')}</Kbd>
+                <Kbd variant="orange">
+                  {primaryShortcut === "Enter" ? "↩" : primaryShortcut || "→"}
+                </Kbd>
               </span>
             )}
           </button>
+
+          {/* Jump to Finalize - After Primary Button (Desktop Only) */}
+          {isConfiguratorPage && onJumpToFinalize && !isLastStep && (
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onJumpToFinalize}
+                    className="h-9 w-9 rounded-lg border-2 transition-all duration-200 flex items-center justify-center hover:bg-[var(--brand-sunset)]/20 dark:hover:bg-[var(--brand-sunset)]/20 hover:border-[var(--brand-sunset)]"
+                    style={{
+                      color: brand.sunset,
+                      borderColor: `${brand.sunset}80`,
+                      backgroundColor: `${brand.sunset}10`,
+                    }}
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      height="20" 
+                      viewBox="0 -960 960 960" 
+                      width="20" 
+                      fill="currentColor"
+                    >
+                      <path d="M854-240 508-480l346-240zm-402 0L106-480l346-240zm-60-115v-250L211-480zm402 0v-250L613-480z" transform="rotate(180 480 -480)"/>
+                    </svg>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="text-xs font-semibold"
+                  style={{
+                    backgroundColor: isDark
+                      ? colors.background.secondary
+                      : brand.ink,
+                    color: isDark ? colors.text.primary : brand.sand,
+                    borderColor: isDark ? colors.border.default : brand.ink,
+                  }}
+                >
+                  Jump to Finalize
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
 
           {secondaryButtonText && onSecondaryAction && (
             <button
@@ -160,18 +231,22 @@ export const FloatingFooter = ({
               disabled={secondaryButtonDisabled}
               className="group relative font-semibold py-2.5 px-5 rounded-lg text-sm flex items-center gap-2 transition-all duration-200"
               style={{
-                backgroundColor: isDark ? 'transparent' : brand.sand,
+                backgroundColor: isDark ? "transparent" : brand.sand,
                 color: isDark ? brand.sand : brand.ink,
-                border: isDark ? `1px solid ${brand.dunes}` : `1px solid ${brand.ink}`,
+                border: isDark
+                  ? `1px solid ${brand.dunes}`
+                  : `1px solid ${brand.ink}`,
               }}
-              aria-keyshortcuts={secondaryShortcut ? `Meta+${secondaryShortcut}` : "Meta+Digit2"}
+              aria-keyshortcuts={
+                secondaryShortcut ? `Meta+${secondaryShortcut}` : "Meta+Digit2"
+              }
             >
               {secondaryButtonIcon}
               <span>{secondaryButtonText}</span>
               {showKeyboardShortcuts && (
                 <span className="flex items-center gap-0.5 ml-1">
                   <Kbd variant="theme">⌘</Kbd>
-                  <Kbd variant="theme">{secondaryShortcut || '2'}</Kbd>
+                  <Kbd variant="theme">{secondaryShortcut || "2"}</Kbd>
                 </span>
               )}
             </button>

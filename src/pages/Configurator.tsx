@@ -142,6 +142,14 @@ const Configurator = () => {
   };
 
   const handleDownloadScript = useCallback(() => {
+    // Prevent download if no tools are selected
+    if (selection.tools.length === 0) {
+      toast.error('No tools selected', {
+        description: 'Please select at least one tool before downloading the script.',
+      });
+      return;
+    }
+
     const script = generateSetupScript(selection);
     const blob = new Blob([script], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -534,12 +542,25 @@ const Configurator = () => {
       >
         <div className="flex items-end justify-between">
           <div className="space-y-2">
-            <div 
-              className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/60 dark:bg-[var(--brand-ink)]/60 text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1.5 rounded-full border text-[var(--brand-ink)] dark:text-[var(--brand-sand)]"
-              style={{ borderColor: borderColors.cardInner }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-sunset)]" />
-              {currentCategory === 'review' ? 'Review Your Stack' : steps[currentStep].name}
+            <div className="flex items-center gap-3">
+              <div 
+                className="inline-flex items-center gap-2 bg-[var(--brand-sand)]/60 dark:bg-[var(--brand-ink)]/60 text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1.5 rounded-full border text-[var(--brand-ink)] dark:text-[var(--brand-sand)]"
+                style={{ borderColor: borderColors.cardInner }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-sunset)]" />
+                {currentCategory === 'review' ? 'Review Your Stack' : steps[currentStep].name}
+              </div>
+              {/* Live Tool Counter */}
+              {selection.tools.length > 0 && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="inline-flex items-center gap-2 bg-[var(--brand-sunset)] text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1.5 rounded-full border-2 border-[var(--brand-ink)] text-[var(--brand-ink)] shadow-sm"
+                >
+                  <Check className="h-3 w-3" />
+                  <span>{selection.tools.length} {selection.tools.length === 1 ? 'Tool' : 'Tools'} Selected</span>
+                </motion.div>
+              )}
             </div>
             <h1 className="text-3xl md:text-4xl font-semibold text-[var(--brand-ink)] dark:text-[var(--brand-sand)] tracking-tight">
               {currentCategory === 'review' ? 'Finalize & Export' : 'Configure Your Setup'}
@@ -672,9 +693,10 @@ const Configurator = () => {
           {/* Templates Section - Only on Step 0 */}
           {currentCategory === 'templates' && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
               className="mb-8"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -717,9 +739,10 @@ const Configurator = () => {
             {currentCategory !== 'review' && currentCategory !== 'templates' ? (
               <motion.div
                 key={currentStep}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="relative"
               >
                 {filteredTools.length > 0 ? (
@@ -805,10 +828,12 @@ const Configurator = () => {
               </motion.div>
             ) : currentCategory === 'review' ? (
               <motion.div
+                id="finalize-section"
                 key="review"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
               >
                 {/* Shareable Card */}
                 {selection.tools.length > 0 ? (
@@ -849,6 +874,15 @@ const Configurator = () => {
         primaryShortcut={currentStep === steps.length - 1 ? 'Enter' : undefined}
         showThemeToggle={true}
         showKeyboardShortcuts={true}
+        isLastStep={currentStep === steps.length - 1}
+        onJumpToFinalize={() => {
+          // Navigate to review step (last step)
+          setCurrentStep(steps.length - 1);
+          // Scroll to top of page after navigation
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 150);
+        }}
       />
     </PageLayout>
   );
