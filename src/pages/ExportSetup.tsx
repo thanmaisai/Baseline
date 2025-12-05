@@ -10,6 +10,13 @@ import { toast } from 'sonner';
 import { themeTokens } from '@/theme/tokens';
 import { useTheme } from '@/contexts/ThemeContext';
 import { AnimatePresence, motion } from 'framer-motion';
+import { 
+  trackPageView, 
+  trackScanOperation, 
+  trackCopy, 
+  trackScriptDownload,
+  trackNavigation 
+} from '@/utils/analytics';
 
 const ExportSetup = () => {
   const navigate = useNavigate();
@@ -22,6 +29,11 @@ const ExportSetup = () => {
   const [parsedData, setParsedData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Track page view on mount
+  useEffect(() => {
+    trackPageView('/export-setup', 'Export Setup');
+  }, []);
+
   // Get theme-aware border colors
   const isDark = theme === 'dark';
   const borderColors = {
@@ -33,6 +45,7 @@ const ExportSetup = () => {
   const manualCommand = `chmod +x baseline-scanner.sh && ./baseline-scanner.sh`;
   
   const handleDownloadScript = () => {
+    trackScanOperation('download_script');
     const a = document.createElement('a');
     a.href = '/baseline-scan.sh';
     a.download = 'baseline-scanner.sh';
@@ -49,6 +62,7 @@ const ExportSetup = () => {
     try {
       await navigator.clipboard.writeText(curlCommand);
       setCopiedCommand(true);
+      trackCopy('curl_command', 'export_setup_curl');
       toast.success('Copied!');
       setTimeout(() => setCopiedCommand(false), 2000);
     } catch (err) {
@@ -61,6 +75,7 @@ const ExportSetup = () => {
     try {
       await navigator.clipboard.writeText(manualCommand);
       setCopiedManualCommand(true);
+      trackCopy('manual_command', 'export_setup_manual');
       toast.success('Copied!');
       setTimeout(() => setCopiedManualCommand(false), 2000);
     } catch (err) {
@@ -131,6 +146,9 @@ const ExportSetup = () => {
       setFileName(file.name);
       setParsedData(parsed);
       
+      // Track successful upload
+      trackScanOperation('upload_scan');
+      
       const packageCount = parsed.package_managers.homebrew?.formulae.length || 0;
       const caskCount = parsed.package_managers.homebrew?.casks.length || 0;
       const appCount = parsed.applications.length || 0;
@@ -148,6 +166,7 @@ const ExportSetup = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
+      trackNavigation('/export-setup', '/');
       navigate('/');
     }
   }, [currentStep, navigate]);
@@ -176,6 +195,11 @@ const ExportSetup = () => {
     
     try {
       const setupScript = generateSetupFromScan(scanData);
+      
+      // Track script generation and download
+      const toolCount = parsed.package_managers?.homebrew?.formulae?.length || 0;
+      trackScanOperation('generate_from_scan');
+      trackScriptDownload(toolCount, 'scan');
       
       const blob = new Blob([setupScript], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);

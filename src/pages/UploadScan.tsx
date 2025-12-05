@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,11 +10,17 @@ import confetti from 'canvas-confetti';
 import { PageHeader } from '@/components/PageHeader';
 import { BackButton } from '@/components/BackButton';
 import { PageTitle } from '@/components/PageTitle';
+import { trackPageView, trackScanOperation, trackScriptDownload } from '@/utils/analytics';
 
 const UploadScan = () => {
   const navigate = useNavigate();
   const [scanData, setScanData] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Track page view on mount
+  useEffect(() => {
+    trackPageView('/upload-scan', 'Upload Scan');
+  }, []);
 
   const handleGenerateScript = () => {
     if (!scanData.trim()) return;
@@ -23,6 +29,10 @@ const UploadScan = () => {
     
     // Generate the setup script from scan data
     const setupScript = generateSetupFromScan(scanData);
+    
+    // Track the generation
+    trackScanOperation('generate_from_scan');
+    trackScriptDownload(0, 'scan'); // We don't have tool count from paste
     
     // Download the script
     const blob = new Blob([setupScript], { type: 'text/plain' });

@@ -21,6 +21,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { themeTokens } from '@/theme/tokens';
 import { useTheme } from '@/contexts/ThemeContext';
+import {
+  trackToolSelection,
+  trackTemplateSelection,
+  trackScriptDownload,
+  trackSearch,
+  trackPageView,
+} from '@/utils/analytics';
 
 const steps = [
   { id: 'templates', name: 'Templates', subtitle: 'Choose Your Starting Point' },
@@ -92,6 +99,11 @@ const Configurator = () => {
     card: themeTokens.colors[isDark ? 'dark' : 'light'].border.card,
     cardInner: themeTokens.colors[isDark ? 'dark' : 'light'].border.cardInner,
   };
+
+  // Track page view on mount
+  useEffect(() => {
+    trackPageView('/configure', 'Configurator');
+  }, []);
 
   // Fetch real-time Homebrew data
   const {
@@ -168,6 +180,9 @@ const Configurator = () => {
       spread: 70,
       origin: { y: 0.6 },
     });
+
+    // Track script download
+    trackScriptDownload(selection.tools.length, 'configurator');
 
     toast.success('🎉 Setup script downloaded!', {
       description: 'Run it with: bash setup-macos.sh',
@@ -437,7 +452,8 @@ const Configurator = () => {
   }, [selection.tools]);
 
   const toggleTool = useCallback((tool: Tool) => {
-    if (isToolSelected(tool)) {
+    const wasSelected = isToolSelected(tool);
+    if (wasSelected) {
       setSelection(prev => ({
         ...prev,
         tools: prev.tools.filter(t => t.id !== tool.id),
@@ -450,6 +466,9 @@ const Configurator = () => {
       }));
       updateLog(`added ${tool.name.toLowerCase()}`);
     }
+    
+    // Track tool selection
+    trackToolSelection(tool.id, tool.name, !wasSelected);
   }, [isToolSelected, setSelection]);
 
   const applyTemplate = useCallback((templateId: string) => {
@@ -470,6 +489,10 @@ const Configurator = () => {
       tools: selectedTools,
     }));
     updateLog(`applied ${template.name.toLowerCase()} template`);
+    
+    // Track template selection
+    trackTemplateSelection(template.id, template.name);
+    
     toast.success(`${template.name} template applied!`, {
       description: `${selectedTools.length} tools pre-selected`,
     });

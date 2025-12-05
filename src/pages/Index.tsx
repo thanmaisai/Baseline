@@ -8,6 +8,7 @@ import { TerminalWindow } from '@/components/TerminalWindow';
 import { useEffect, useState } from 'react';
 import { themeTokens } from '@/theme/tokens';
 import { useTheme } from '@/contexts/ThemeContext';
+import { trackPageView, trackCTAClick, trackNavigation } from '@/utils/analytics';
 
 const heroStats = [
   { label: 'Reduced effort', value: 'Hours', detail: 'saved' },
@@ -97,14 +98,21 @@ const Index = () => {
   };
 
   useEffect(() => {
+    // Track page view on mount
+    trackPageView('/', 'Home');
+  }, []);
+
+  useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey)) return;
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
+        trackNavigation('/', '/configure');
         navigate('/configure');
       }
       if (event.key === 'ArrowRight') {
         event.preventDefault();
+        trackNavigation('/', '/export-setup');
         navigate('/export-setup');
       }
     };
@@ -112,6 +120,12 @@ const Index = () => {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [navigate]);
+
+  const handleNavigate = (route: string, ctaLabel: string) => {
+    trackCTAClick(ctaLabel, 'home_page');
+    trackNavigation('/', route);
+    navigate(route);
+  };
 
   return (
     <>
@@ -142,7 +156,7 @@ const Index = () => {
               </p>
               <div className="flex flex-wrap gap-4">
               <Button
-                onClick={() => navigate('/configure')}
+                onClick={() => handleNavigate('/configure', 'Start Configuring')}
                 size="lg"
                   className="h-12 px-8 bg-[var(--brand-sunset)] text-[var(--brand-ink)] hover:bg-[var(--brand-sunset)]/90"
                   aria-keyshortcuts="Meta+1"
@@ -151,7 +165,7 @@ const Index = () => {
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
               <Button
-                onClick={() => navigate('/export-setup')}
+                onClick={() => handleNavigate('/export-setup', 'Export My Mac')}
                 size="lg"
                 variant="outline"
                 style={{ borderColor: borderColors.card }}
@@ -241,7 +255,7 @@ const Index = () => {
                     ))}
                 </div>
                   <Button
-                    onClick={() => navigate(journey.action.route)}
+                    onClick={() => handleNavigate(journey.action.route, journey.action.label)}
                     className="mt-auto bg-[var(--brand-sunset)]/90 text-[var(--brand-ink)] hover:bg-[var(--brand-sunset)]"
                     aria-keyshortcuts={journey.id === 'configure' ? 'Meta+1' : 'Meta+2'}
                   >
@@ -407,11 +421,11 @@ const Index = () => {
         showBackButton={false}
         primaryButtonText="Start Configuring"
         primaryButtonIcon={<Layers className="w-4 h-4" />}
-        onPrimaryAction={() => navigate('/configure')}
+        onPrimaryAction={() => handleNavigate('/configure', 'Start Configuring Footer')}
         primaryShortcut="←"
         secondaryButtonText="Export My Mac"
         secondaryButtonIcon={<Upload className="w-4 h-4" />}
-        onSecondaryAction={() => navigate('/export-setup')}
+        onSecondaryAction={() => handleNavigate('/export-setup', 'Export My Mac Footer')}
         secondaryShortcut="→"
       />
     </>
