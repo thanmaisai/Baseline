@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { lazy, Suspense } from "react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { FeedbackForm } from "@/components/FeedbackForm";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -23,8 +24,8 @@ const pageVariants = {
 };
 
 const pageTransition = {
-  type: "tween",
-  ease: "anticipate",
+  type: "tween" as const,
+  ease: "anticipate" as const,
   duration: 0.4
 };
 
@@ -113,6 +114,7 @@ const AnimatedRoutes = () => {
         <Sonner position="top-center" />
         <BrowserRouter>
           <AnimatedRoutes />
+          <FeedbackForm />
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
